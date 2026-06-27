@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS needs_plan_regeneration boolean NOT NULL DEFAULT false;

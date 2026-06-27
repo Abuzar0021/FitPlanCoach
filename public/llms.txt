@@ -1,0 +1,20 @@
+# FitPlanCoach
+
+> Personalized meal plans, adaptive workouts, and progress tracking — tailored to your body, goals, schedule, and budget.
+
+FitPlanCoach is a subscription fitness coaching service. It generates personalized meal plans and workout schedules from a short onboarding profile (body metrics, activity level, goals, preferences, equipment, availability), then tracks weight, workouts, and adherence over time. Free tier available; paid tiers add weekly regeneration and advanced tracking. Payments accepted via PayPal (international) and QRIS (Indonesia), manually reviewed. 30-day money-back guarantee.
+
+## Pages
+
+- [Home](/): Product overview, how it works, testimonials, and pricing teaser.
+- [Features](/features): Full list of meal planning, workout, and tracking features.
+- [Pricing](/pricing): Free, Pro, Premium, and Elite tier pricing and perks.
+- [FAQ](/faq): Common questions about plans, billing, refunds, and data.
+- [About](/about): Mission, operator information, and approach.
+- [Contact](/contact): Support, privacy, and billing email channels.
+
+## Optional
+
+- [Terms of Service](/terms): Subscription terms and acceptable use.
+- [Privacy Notice](/privacy): What data we collect and how it is used.
+- [Refund Policy](/refunds): 30-day money-back guarantee details.
