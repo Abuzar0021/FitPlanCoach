@@ -10,6 +10,7 @@ import { updateProfileBasic } from "@/lib/engagement.functions";
 import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2, RefreshCcw, LifeBuoy, ShieldCheck, FileText, Info, Lightbulb } from "lucide-react";
 import { restorePurchases } from "@/lib/billing";
 import { APP_VERSION } from "@/lib/app-config";
+import { planLabel, isPro as isProPlan, type PlanContext } from "@/lib/access";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Profile — FitPlanCoach" }] }),
@@ -99,7 +100,9 @@ function Profile() {
 
   const filled = PROFILE_FIELDS.filter((k) => profile[k] != null && profile[k] !== "").length;
   const completion = Math.round((filled / PROFILE_FIELDS.length) * 100);
-  const planType = sub?.plan_type ?? "free";
+  const planCtx: PlanContext = (sub ?? { plan_type: "free" }) as PlanContext;
+  const pro = isProPlan(planCtx);
+  const planTier = planLabel(planCtx);
 
   return (
     <MobileShell>
@@ -140,8 +143,8 @@ function Profile() {
             <p className="text-lg font-semibold truncate">{profile.name ?? "Athlete"}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             <div className="mt-2 flex items-center gap-2">
-              <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${planType === "free" ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
-                {planType}
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${pro ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                {planTier}
               </span>
               {(profile.streak_current ?? 0) > 0 && (
                 <span className="text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1 text-orange-500">

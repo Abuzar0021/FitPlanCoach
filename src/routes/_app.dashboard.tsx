@@ -10,7 +10,8 @@ import {
   Beef, Flame, Sparkles, ChevronRight, Settings, Dumbbell, Utensils, TrendingDown, TrendingUp, Minus, Crown, Zap, Trophy,
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
-import { calorieTargets, entitlementsFor, type CalorieRules, DEFAULT_RULES } from "@/lib/fitness-engine";
+import { calorieTargets, type CalorieRules, DEFAULT_RULES } from "@/lib/fitness-engine";
+import { canGeneratePlan, type PlanContext, type PlanType } from "@/lib/access";
 import { generateFitnessPlan } from "@/lib/plan-generation.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -63,7 +64,7 @@ function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [sub, setSub] = useState<{ plan_type: string; plan_count_used: number; status?: string } | null>(null);
+  const [sub, setSub] = useState<{ plan_type: string; plan_count_used: number; status?: string; current_period_end?: string | null; billing_interval?: string | null } | null>(null);
   const [mealPlan, setMealPlan] = useState<MealPlanRow | null>(null);
   const [workoutDays, setWorkoutDays] = useState<WorkoutDay[] | null>(null);
   const [latestWeights, setLatestWeights] = useState<number[]>([]);
@@ -78,7 +79,7 @@ function Dashboard() {
     (async () => {
       const [{ data: p }, { data: s }, { data: mp }, { data: wp }, { data: settings }, { data: roles }, { data: weights }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("subscriptions").select("plan_type,plan_count_used,status").eq("user_id", user.id).maybeSingle(),
+        supabase.from("subscriptions").select("plan_type,plan_count_used,status,current_period_end,billing_interval").eq("user_id", user.id).maybeSingle(),
         supabase.from("meal_plans").select("calories_target,protein_target,meals").eq("user_id", user.id).eq("is_active", true).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("workout_plans").select("schedule").eq("user_id", user.id).eq("is_active", true).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("app_settings").select("key,value").in("key", ["calorie_rules","free_plan_limit"]),
@@ -159,7 +160,15 @@ function Dashboard() {
   };
   const targets = calorieTargets(stats, rules);
   const planType = sub?.plan_type ?? "free";
-  const ent = entitlementsFor(planType as any, sub?.plan_count_used ?? 0, freeLimit);
+  const planCtx: PlanContext = {
+    plan_type: planType as PlanType,
+    status: sub?.status ?? null,
+    current_period_end: sub?.current_period_end ?? null,
+    billing_interval: (sub?.billing_interval as PlanContext["billing_interval"]) ?? null,
+    plan_count_used: sub?.plan_count_used ?? 0,
+    free_plan_limit: freeLimit,
+  };
+  const canGenerate = canGeneratePlan(planCtx);
 
   // Today's consumption (sum from meal plan if exists)
   const consumedCals = mealPlan
@@ -271,7 +280,7 @@ function Dashboard() {
           <Button onClick={generate} disabled={busy} className="w-full mt-5 h-12 font-bold uppercase tracking-wider rounded-xl">
             {busy ? "Generating…" : mealPlan ? "Generate New Plan" : "Generate My First Plan"}
           </Button>
-          {!ent.canGeneratePlan && (
+          {!canGenerate && (
             <p className="text-[11px] text-warning mt-2 text-center">
               Free limit reached — <Link to="/subscription" className="underline font-semibold">upgrade</Link> for unlimited plans.
             </p>

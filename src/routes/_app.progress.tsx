@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
-import { PlanScreenSkeleton } from "@/components/app-ui";
+import { PlanScreenSkeleton, LockedFeature, ProBadge } from "@/components/app-ui";
+import { usePlan } from "@/hooks/use-plan";
 
 export const Route = createFileRoute("/_app/progress")({
   head: () => ({ meta: [{ title: "Progress — FitPlanCoach" }] }),
@@ -19,6 +20,7 @@ type Entry = { id: string; weight_kg: number; recorded_at: string };
 
 function Progress() {
   const { user } = useAuth();
+  const { has } = usePlan();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [weight, setWeight] = useState("");
   const [sessions, setSessions] = useState<Array<{ performed_on: string }>>([]);
@@ -115,35 +117,44 @@ function Progress() {
         </div>
       </div>
 
-      <h2 className="label-overline mb-2">Workouts · last 8 weeks</h2>
-      <div className="bg-card border border-border rounded-2xl p-4 h-48 mb-4">
-        {sessions.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-sm text-muted-foreground">No workouts logged yet</div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={(() => {
-              const weeks: Record<string, number> = {};
-              for (let i = 7; i >= 0; i--) {
-                const d = new Date(Date.now() - i * 7 * 86400000);
-                const k = `W${Math.ceil(((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7)}`;
-                weeks[k] = 0;
-              }
-              for (const s of sessions) {
-                const d = new Date(s.performed_on);
-                const k = `W${Math.ceil(((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7)}`;
-                if (k in weeks) weeks[k]++;
-              }
-              return Object.entries(weeks).map(([week, count]) => ({ week, count }));
-            })()}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="week" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
-              <Bar dataKey="count" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      <h2 className="label-overline mb-2 flex items-center gap-2">
+        Workouts · last 8 weeks {!has("advanced_analytics") && <ProBadge />}
+      </h2>
+      <LockedFeature
+        locked={!has("advanced_analytics")}
+        title="Advanced analytics"
+        description="See your weekly training volume and trends over time. Unlock with Pro."
+        className="mb-4"
+      >
+        <div className="bg-card border border-border rounded-2xl p-4 h-48">
+          {sessions.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">No workouts logged yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={(() => {
+                const weeks: Record<string, number> = {};
+                for (let i = 7; i >= 0; i--) {
+                  const d = new Date(Date.now() - i * 7 * 86400000);
+                  const k = `W${Math.ceil(((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7)}`;
+                  weeks[k] = 0;
+                }
+                for (const s of sessions) {
+                  const d = new Date(s.performed_on);
+                  const k = `W${Math.ceil(((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7)}`;
+                  if (k in weeks) weeks[k]++;
+                }
+                return Object.entries(weeks).map(([week, count]) => ({ week, count }));
+              })()}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+                <Bar dataKey="count" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </LockedFeature>
 
 
 

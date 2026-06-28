@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Crown, Lock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 /**
  * Premium empty state — every blank screen should teach what lives here and
@@ -78,6 +81,95 @@ export function PlanScreenSkeleton({ rows = 5 }: { rows?: number }) {
         {Array.from({ length: rows }).map((_, i) => (
           <Skeleton key={i} className="h-16 w-full rounded-2xl" />
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---- Membership gating. A single visual language for "this lives behind Pro",
+   driven entirely by `hasFeature` in src/lib/access.ts. Use these instead of
+   ad-hoc plan checks so every locked surface looks and behaves the same. */
+
+/** Small gradient "PRO" pill, e.g. next to a section heading a free user can't use. */
+export function ProBadge({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-[9px] font-bold uppercase tracking-widest align-middle ${className}`}
+    >
+      <Crown className="size-2.5" /> Pro
+    </span>
+  );
+}
+
+/** Full-width upgrade card. Use where a whole screen/section is Pro-only. */
+export function UpgradeCallout({
+  title = "Unlock with Pro",
+  description,
+  cta = "Go Pro",
+  className = "",
+}: {
+  title?: string;
+  description: string;
+  cta?: string;
+  className?: string;
+}) {
+  return (
+    <div className={`surface-card p-5 text-center relative overflow-hidden ${className}`}>
+      <div className="absolute -top-10 -right-10 size-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+      <div className="relative">
+        <div className="size-12 mx-auto mb-3 rounded-2xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center">
+          <Crown className="size-5 text-primary" />
+        </div>
+        <h3 className="font-display text-lg uppercase italic">{title}</h3>
+        <p className="text-sm text-muted-foreground mt-1 mb-4 max-w-xs mx-auto leading-relaxed">
+          {description}
+        </p>
+        <Link to="/subscription">
+          <Button className="font-bold uppercase tracking-wider h-11 px-6">{cta}</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Wraps a real feature. When `locked`, renders a blurred, non-interactive
+ * teaser of the content behind a glass overlay with an unlock CTA. When
+ * unlocked, renders the content untouched. `className` always applies to the
+ * outer wrapper so spacing stays identical in both states.
+ */
+export function LockedFeature({
+  locked,
+  title,
+  description,
+  className = "",
+  children,
+}: {
+  locked: boolean;
+  title: string;
+  description: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (!locked) return <div className={className}>{children}</div>;
+  return (
+    <div className={`relative rounded-2xl overflow-hidden ${className}`}>
+      <div className="pointer-events-none select-none blur-[3px] opacity-40" aria-hidden>
+        {children}
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 bg-background/40 backdrop-blur-[2px]">
+        <div className="size-11 rounded-2xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center mb-2">
+          <Lock className="size-4 text-primary" />
+        </div>
+        <p className="font-display uppercase italic text-base">{title}</p>
+        <p className="text-xs text-muted-foreground mt-1 mb-3 max-w-[16rem] leading-relaxed">
+          {description}
+        </p>
+        <Link to="/subscription">
+          <Button size="sm" className="font-bold uppercase tracking-wider h-9 px-4">
+            <Crown className="size-3.5 mr-1.5" /> Unlock with Pro
+          </Button>
+        </Link>
       </div>
     </div>
   );
