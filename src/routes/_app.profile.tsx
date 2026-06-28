@@ -11,6 +11,7 @@ import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Spark
 import { restorePurchases } from "@/lib/billing";
 import { APP_VERSION } from "@/lib/app-config";
 import { planLabel, isPro as isProPlan, type PlanContext } from "@/lib/access";
+import { flagFor, countryLabel } from "@/lib/countries";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Profile — FitPlanCoach" }] }),
@@ -149,6 +150,12 @@ function Profile() {
               {(profile.streak_current ?? 0) > 0 && (
                 <span className="text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1 text-orange-500">
                   <Flame className="size-3" /> {profile.streak_current}d
+                </span>
+              )}
+              {profile.country && (
+                <span className="text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1 text-muted-foreground">
+                  <span className="text-xs leading-none not-italic">{flagFor(profile.country)}</span>
+                  {countryLabel(profile.country)}
                 </span>
               )}
             </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/CountrySelect";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
@@ -52,7 +53,7 @@ function FoodsAdmin() {
       <h1 className="text-2xl font-bold">Foods <span className="text-sm text-muted-foreground font-normal">({foods.length})</span></h1>
       <form onSubmit={add} className="bg-card border border-border rounded-2xl p-4 grid grid-cols-2 md:grid-cols-7 gap-2 items-end">
         <div className="col-span-2"><label className="text-xs">Name</label><Input value={f.name} onChange={e=>setF({...f,name:e.target.value})} required /></div>
-        <div><label className="text-xs">Country</label><Input value={f.country} onChange={e=>setF({...f,country:e.target.value})} /></div>
+        <div><label className="text-xs">Country</label><CountrySelect value={f.country} onChange={country=>setF({...f,country})} /></div>
         <div><label className="text-xs">kcal/100g</label><Input inputMode="decimal" value={f.calories_per_100g} onChange={e=>setF({...f,calories_per_100g:e.target.value})} required /></div>
         <div><label className="text-xs">protein/100g</label><Input inputMode="decimal" value={f.protein_per_100g} onChange={e=>setF({...f,protein_per_100g:e.target.value})} required /></div>
         <div><label className="text-xs">Category</label>

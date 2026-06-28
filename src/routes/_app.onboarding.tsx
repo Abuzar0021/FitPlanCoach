@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { CountrySelect } from "@/components/CountrySelect";
 
 export const Route = createFileRoute("/_app/onboarding")({
   head: () => ({ meta: [{ title: "Welcome — FitPlanCoach" }] }),
@@ -104,10 +105,8 @@ function Onboarding() {
           <div className="space-y-1.5"><Label>Your name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="First name" autoFocus /></div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label>Age</Label><Input inputMode="numeric" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="e.g. 28" /></div>
-            <div className="space-y-1.5"><Label>Country</Label>
-              <select className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}>
-                {["global","USA","UK","India","Mexico","Japan","Nigeria"].map(c => <option key={c}>{c}</option>)}
-              </select>
+            <div className="space-y-1.5"><Label htmlFor="onboarding-country">Country</Label>
+              <CountrySelect id="onboarding-country" value={form.country} onChange={(country) => setForm({ ...form, country })} />
             </div>
           </div>
           <div className="space-y-2">
