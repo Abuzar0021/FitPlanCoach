@@ -5,6 +5,7 @@ const BASE_URL = "https://fitplancoach.com";
 
 const entries = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/download", changefreq: "weekly", priority: "0.9" },
   { path: "/features", changefreq: "monthly", priority: "0.8" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },

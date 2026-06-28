@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Logo } from "@/components/Logo";
+import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
+import { GooglePlayButton } from "@/components/GooglePlayButton";
+import { PhoneMockup } from "@/components/PhoneMockup";
+import { DashboardScreen } from "@/components/AppScreens";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Zap, Utensils, Dumbbell, LineChart, ChevronRight, Check, Target, Calendar, ShieldCheck, Lock, RefreshCcw, CreditCard, Star, Quote } from "lucide-react";
+import { Zap, Utensils, Dumbbell, LineChart, Check, Target, Calendar, ShieldCheck, Lock, RefreshCcw, CreditCard, Star, Quote, Smartphone, WifiOff, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +38,19 @@ export const Route = createFileRoute("/")({
           "@type": "WebSite",
           name: "FitPlanCoach",
           url: "https://fitplancoach.com/",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "FitPlanCoach",
+          operatingSystem: "Android",
+          applicationCategory: "HealthApplication",
+          description:
+            "Personalized meal plans, adaptive workouts, and progress tracking that adapt to your body, goals, schedule, and budget.",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }),
       },
     ],
@@ -73,17 +89,7 @@ const FAQ_TEASER = [
 function Landing() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between">
-          <Logo />
-          <nav className="flex items-center gap-4 text-sm">
-            <Link to="/features" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">Features</Link>
-            <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">Pricing</Link>
-            <Link to="/faq" className="text-muted-foreground hover:text-foreground transition hidden md:inline">FAQ</Link>
-            <Link to="/auth"><Button size="sm" className="font-bold uppercase tracking-wide">Sign in</Button></Link>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1">
         {/* Hero */}
@@ -104,17 +110,14 @@ function Landing() {
               schedule, and budget — then tracks every kg you move. No fads, no guarantees, just structure.
             </p>
             <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
+              <GooglePlayButton size="lg" />
               <Link to="/auth">
-                <Button size="lg" className="font-bold uppercase tracking-wider px-7 h-12 shadow-[var(--shadow-lime)]">
-                  Start free <ChevronRight className="ml-1 size-4" />
-                </Button>
-              </Link>
-              <Link to="/features">
-                <Button size="lg" variant="outline" className="font-bold uppercase tracking-wider px-7 h-12 border-border-strong">
-                  See features
+                <Button size="lg" variant="outline" className="font-bold uppercase tracking-wider px-7 h-14 border-border-strong">
+                  Start free on web
                 </Button>
               </Link>
             </div>
+            <p className="mt-4 text-xs text-muted-foreground">Free to start on Android — also works in any browser.</p>
             <div className="mt-10 flex items-center justify-center gap-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> No credit card</span>
               <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> Cancel anytime</span>
@@ -198,6 +201,43 @@ function Landing() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Get the app */}
+        <section className="border-t border-border bg-card/30">
+          <div className="mx-auto max-w-6xl px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
+            <div className="flex justify-center order-2 lg:order-1">
+              <PhoneMockup width={244}><DashboardScreen /></PhoneMockup>
+            </div>
+            <div className="order-1 lg:order-2">
+              <div className="text-xs font-bold uppercase tracking-widest text-primary">Get the app</div>
+              <h2 className="mt-3 text-3xl md:text-4xl font-display uppercase italic">Take FitPlanCoach with you</h2>
+              <p className="mt-3 text-muted-foreground">
+                The Android app puts your plan, workouts, and tracking one tap from your home screen —
+                and keeps your current plan available even when you're offline.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  { icon: WifiOff, text: "Your plan, workouts & shopping list work offline" },
+                  { icon: Bell, text: "Gentle, optional reminders to keep your streak" },
+                  { icon: Smartphone, text: "Fast, native-feeling, one-tap logging" },
+                ].map((b) => (
+                  <li key={b.text} className="flex items-center gap-3 text-sm">
+                    <span className="size-8 rounded-lg bg-primary/10 border border-primary/20 inline-flex items-center justify-center shrink-0">
+                      <b.icon className="size-4 text-primary" />
+                    </span>
+                    {b.text}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex items-center gap-4 flex-wrap">
+                <GooglePlayButton size="lg" />
+                <Link to="/download" className="text-sm text-primary hover:underline font-semibold">
+                  See everything in the app →
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -306,11 +346,12 @@ function Landing() {
         <section className="border-t border-border bg-card/30">
           <div className="mx-auto max-w-3xl px-6 py-20 text-center">
             <h2 className="text-3xl md:text-5xl font-display uppercase italic tracking-tight">Ready to move?</h2>
-            <p className="mt-4 text-muted-foreground">Create your free account in under a minute. No credit card. Cancel anytime.</p>
-            <div className="mt-7">
+            <p className="mt-4 text-muted-foreground">Download free and generate your first plan in minutes. No credit card. Cancel anytime.</p>
+            <div className="mt-7 flex items-center justify-center gap-3 flex-wrap">
+              <GooglePlayButton size="lg" />
               <Link to="/auth">
-                <Button size="lg" className="font-bold uppercase tracking-wider px-8 h-12 shadow-[var(--shadow-lime)]">
-                  Get started free
+                <Button size="lg" variant="outline" className="font-bold uppercase tracking-wider px-8 h-14 border-border-strong">
+                  Start free on web
                 </Button>
               </Link>
             </div>

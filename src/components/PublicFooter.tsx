@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GooglePlayButton } from "@/components/GooglePlayButton";
 
 export function PublicFooter() {
   return (
@@ -17,11 +18,16 @@ export function PublicFooter() {
             <div className="mt-3 text-xs">
               Support: <a href="mailto:support@fitplancoach.com" className="text-foreground hover:underline">support@fitplancoach.com</a>
             </div>
+
+            <div className="mt-5">
+              <GooglePlayButton size="md" />
+            </div>
           </div>
 
           <div>
             <div className="text-xs font-bold uppercase tracking-widest text-foreground mb-3">Product</div>
             <nav className="flex flex-col gap-2">
+              <Link to="/download" className="hover:text-foreground">Get the app</Link>
               <Link to="/features" className="hover:text-foreground">Features</Link>
               <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
               <Link to="/faq" className="hover:text-foreground">FAQ</Link>

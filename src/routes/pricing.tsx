@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
-import { Logo } from "@/components/Logo";
+import { PublicHeader } from "@/components/PublicHeader";
 import { Button } from "@/components/ui/button";
 import { Check, Zap } from "lucide-react";
 
@@ -55,12 +55,7 @@ const PRO_PERKS = [
 function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between">
-          <Link to="/"><Logo /></Link>
-          <Link to="/auth"><Button size="sm" className="font-bold uppercase tracking-wide">Sign in</Button></Link>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1 mx-auto max-w-5xl px-6 py-16 w-full">
         <div className="text-center max-w-2xl mx-auto">
