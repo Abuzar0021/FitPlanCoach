@@ -19,9 +19,9 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const channels = [
-    { icon: Mail, label: "General support", email: "support@fitplancoach.com", desc: "Account help, plan generation, app questions. We reply within 1–2 business days." },
-    { icon: ShieldCheck, label: "Privacy & data requests", email: "support@fitplancoach.com", desc: "Access, correction, deletion, or portability requests under GDPR/CCPA." },
-    { icon: CreditCard, label: "Billing & refunds", email: "support@fitplancoach.com", desc: "Billing is handled by PayPal / QRIS. Manage your subscription at your account billing page or email us." },
+    { icon: Mail, label: "General support", email: "abuzarelahi01@gmail.com", desc: "Account help, plan generation, app questions. We reply within 1–2 business days." },
+    { icon: ShieldCheck, label: "Privacy & data requests", email: "abuzarelahi01@gmail.com", desc: "Access, correction, deletion, or portability requests under GDPR/CCPA." },
+    { icon: CreditCard, label: "Billing & refunds", email: "abuzarelahi01@gmail.com", desc: "Pro is billed through Google Play. Manage or cancel in your Google Play subscriptions, or email us for help." },
   ];
 
   return (
@@ -54,7 +54,7 @@ function ContactPage() {
           <p className="text-sm text-muted-foreground mt-2">
             Update billing, cancel, or view payment history from your{" "}
             <Link to="/billing" className="underline text-foreground">billing page</Link> when signed in,
-            or email <a className="underline text-foreground" href="mailto:support@fitplancoach.com">support@fitplancoach.com</a> and we'll handle it for you.
+            or email <a className="underline text-foreground" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a> and we'll handle it for you.
           </p>
         </div>
 

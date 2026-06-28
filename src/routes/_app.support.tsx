@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useServerFn } from "@tanstack/react-start";
 import { createSupportTicket, replySupportTicket } from "@/lib/support.functions";
 import { toast } from "sonner";
-import { HelpCircle, Plus, Send, Mail } from "lucide-react";
+import { HelpCircle, Plus, Send, Mail, Zap } from "lucide-react";
+import { usePlan } from "@/hooks/use-plan";
+import { useSiteConfig } from "@/lib/site-config";
 
 export const Route = createFileRoute("/_app/support")({
   head: () => ({ meta: [{ title: "Support — FitPlanCoach" }] }),
@@ -48,6 +50,9 @@ const STATUS_COLORS: Record<string, string> = {
 function SupportPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { has } = usePlan();
+  const priority = has("priority_support");
+  const { config } = useSiteConfig();
   const createFn = useServerFn(createSupportTicket);
   const replyFn = useServerFn(replySupportTicket);
 
@@ -125,6 +130,18 @@ function SupportPage() {
         </Button>
       </div>
 
+      {priority && (
+        <div className="surface-card p-3 mb-4 flex items-center gap-3 animate-fade-in">
+          <div className="size-9 rounded-xl bg-primary/10 border border-primary/30 inline-flex items-center justify-center shrink-0">
+            <Zap className="size-4 text-primary" fill="currentColor" />
+          </div>
+          <div className="min-w-0">
+            <p className="label-overline text-primary">Priority support</p>
+            <p className="text-xs text-muted-foreground">Your tickets are answered first — usually within one business day.</p>
+          </div>
+        </div>
+      )}
+
       {/* New ticket form */}
       {creating && (
         <form onSubmit={submitNew} className="surface-card p-4 mb-4 space-y-3 animate-fade-in">
@@ -198,11 +215,11 @@ function SupportPage() {
               </div>
               <h3 className="font-display text-lg uppercase italic">No tickets yet</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-5">
-                Stuck on something? Open a ticket and we'll get back to you within 1–2 business days.
+                Stuck on something? Open a ticket and we'll get back to you within {priority ? "one business day" : "1–2 business days"}.
               </p>
               <Button onClick={() => setCreating(true)}><Plus className="size-4 mr-1.5" /> Open a ticket</Button>
               <p className="text-xs text-muted-foreground mt-4 inline-flex items-center gap-1.5">
-                <Mail className="size-3.5" /> Or email support@fitplancoach.com
+                <Mail className="size-3.5" /> Or email {config.support_email}
               </p>
             </div>
           ) : (

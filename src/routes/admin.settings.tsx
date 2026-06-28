@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import {
+  DEFAULT_SITE_CONFIG,
+  SOCIAL_PLATFORMS,
+  type SocialLinks,
+  type Announcement,
+} from "@/lib/site-config";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "Settings — Admin" }] }),
@@ -23,6 +29,9 @@ function SettingsAdmin() {
   const [enabled, setEnabled] = useState({ free: true, pro: true, premium: true, elite: true });
   const [rules, setRules] = useState<CalorieRules>({ tdee: { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725 }, goal_adjust: { lose_fat: -500, build_muscle: 300, maintain: 0 }, protein_per_kg: 2 });
   const [freeLimit, setFreeLimit] = useState(1);
+  const [supportEmail, setSupportEmail] = useState(DEFAULT_SITE_CONFIG.support_email);
+  const [social, setSocial] = useState<SocialLinks>(DEFAULT_SITE_CONFIG.social);
+  const [announcement, setAnnouncement] = useState<Announcement>(DEFAULT_SITE_CONFIG.announcement);
 
   useEffect(() => {
     supabase.from("app_settings").select("*").then(({ data }) => {
@@ -32,6 +41,9 @@ function SettingsAdmin() {
       if (get("plans_enabled")) setEnabled(get("plans_enabled") as any);
       if (get("calorie_rules")) setRules(get("calorie_rules") as any);
       if (get("free_plan_limit") != null) setFreeLimit(get("free_plan_limit") as number);
+      if (get("support_email")) setSupportEmail(get("support_email") as string);
+      if (get("social_links")) setSocial({ ...DEFAULT_SITE_CONFIG.social, ...(get("social_links") as any) });
+      if (get("announcement")) setAnnouncement({ ...DEFAULT_SITE_CONFIG.announcement, ...(get("announcement") as any) });
     });
   }, []);
 
@@ -42,6 +54,9 @@ function SettingsAdmin() {
       { key: "plans_enabled", value: enabled as any },
       { key: "calorie_rules", value: rules as any },
       { key: "free_plan_limit", value: freeLimit as any },
+      { key: "support_email", value: supportEmail.trim() as any },
+      { key: "social_links", value: social as any },
+      { key: "announcement", value: { ...announcement, text: announcement.text.trim(), href: announcement.href.trim() } as any },
     ];
     for (const r of rows) {
       const { error } = await supabase.from("app_settings").upsert(r);
@@ -57,6 +72,50 @@ function SettingsAdmin() {
       <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
         <h2 className="font-semibold">Branding</h2>
         <div className="space-y-1.5"><Label>App name</Label><Input value={appName} onChange={e=>setAppName(e.target.value)} /></div>
+      </section>
+
+      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <h2 className="font-semibold">Contact</h2>
+        <p className="text-xs text-muted-foreground">Shown in the footer, support center, and contact page across the site.</p>
+        <div className="space-y-1.5">
+          <Label>Support email</Label>
+          <Input type="email" value={supportEmail} onChange={e=>setSupportEmail(e.target.value)} placeholder="support@yourdomain.com" />
+        </div>
+      </section>
+
+      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <h2 className="font-semibold">Social links</h2>
+        <p className="text-xs text-muted-foreground">Paste full profile URLs. Empty fields are hidden.</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {SOCIAL_PLATFORMS.map(({ key, label }) => (
+            <div key={key} className="space-y-1.5">
+              <Label className="text-xs">{label}</Label>
+              <Input
+                type="url"
+                value={social[key]}
+                onChange={e=>setSocial({ ...social, [key]: e.target.value })}
+                placeholder="https://…"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <h2 className="font-semibold">Announcement bar</h2>
+        <p className="text-xs text-muted-foreground">A dismissible banner at the top of the marketing site. Leave disabled to hide it.</p>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={announcement.enabled} onChange={e=>setAnnouncement({ ...announcement, enabled: e.target.checked })} />
+          Show announcement bar
+        </label>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Message</Label>
+          <Input value={announcement.text} maxLength={140} onChange={e=>setAnnouncement({ ...announcement, text: e.target.value })} placeholder="New: weekly plan refresh is live 🎉" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Link (optional)</Label>
+          <Input type="url" value={announcement.href} onChange={e=>setAnnouncement({ ...announcement, href: e.target.value })} placeholder="https://… or /pricing" />
+        </div>
       </section>
 
       <section className="bg-card border border-border rounded-2xl p-5 space-y-3">

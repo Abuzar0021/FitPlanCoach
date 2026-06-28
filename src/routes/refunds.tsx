@@ -6,8 +6,12 @@ export const Route = createFileRoute("/refunds")({
   head: () => ({
     meta: [
       { title: "Refund Policy — FitPlanCoach" },
-      { name: "description", content: "30-day money-back guarantee for FitPlanCoach subscriptions. Refunds processed by our team." },
+      { name: "description", content: "How refunds work for FitPlanCoach Pro. Subscriptions are billed through Google Play, so refunds follow Google Play's refund policy." },
+      { property: "og:title", content: "Refund Policy — FitPlanCoach" },
+      { property: "og:description", content: "How refunds work for FitPlanCoach Pro, billed through Google Play." },
+      { property: "og:url", content: "https://fitplancoach.com/refunds" },
     ],
+    links: [{ rel: "canonical", href: "https://fitplancoach.com/refunds" }],
   }),
   component: Refunds,
 });
@@ -21,44 +25,44 @@ function Refunds() {
         <h1>Refund Policy</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 
-        <h2>30-day money-back guarantee</h2>
+        <h2>How refunds work</h2>
         <p>
-          We want you to be happy with FitPlanCoach. If you're not satisfied with your subscription,
-          you can request a full refund within <strong>30 days</strong> of your initial purchase or
-          renewal date.
+          FitPlanCoach Pro is purchased inside the Android app and billed through{" "}
+          <strong>Google Play</strong>. Because Google is the merchant of record, refunds are issued
+          by Google Play under its refund policy — we can't charge or refund your card directly.
         </p>
 
         <h2>How to request a refund</h2>
-        <p>
-          Payments for FitPlanCoach are processed by <strong>PayPal / QRIS</strong>, our Merchant of
-          Record. To request a refund:
-        </p>
         <ol>
           <li>
-            Visit your account billing page and
-            sign in with the email you used at checkout to manage your order and request a refund.
+            Open the Google Play Store, go to your subscriptions, select FitPlanCoach, and request a
+            refund — or visit{" "}
+            <a href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener noreferrer">
+              Google Play subscriptions
+            </a>
+            .
           </li>
           <li>
-            Or email our team at <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a> and
-            we'll help you process the refund through our team.
+            If you need a hand, email us at{" "}
+            <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a> and we'll help you
+            through it.
           </li>
         </ol>
         <p>
-          Approved refunds are returned to the original payment method, typically within 5–10
-          business days depending on your bank.
+          Approved refunds are returned to your Google Play payment method on Google's timeline,
+          usually within a few business days.
         </p>
 
         <h2>Cancelling a subscription</h2>
         <p>
-          You can cancel your subscription at any time from your account billing page or through
-          your account billing page. After cancellation, you keep access until the end of your current paid period
-          and are not billed again.
+          Cancel anytime from your subscriptions in Google Play. After cancellation you keep Pro
+          until the end of your current paid period, and you won't be billed again.
         </p>
 
         <h2>Questions</h2>
         <p>
           For anything related to refunds or billing, contact{" "}
-          <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>. See also our{" "}
+          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>. See also our{" "}
           <Link to="/terms">Terms of Service</Link>.
         </p>
       </main>

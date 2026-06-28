@@ -19,19 +19,19 @@ export const FAQS = [
   },
   {
     q: "What is included in a subscription?",
-    a: "Free includes one starter plan and basic tracking, yours to keep. Pro unlocks unlimited plan regeneration, a weekly meal and workout refresh, and full progress tracking — for $5/month or $50/year (two months free). Every paid plan is backed by a 30-day money-back guarantee.",
+    a: "Free includes one starter plan and basic tracking, yours to keep. Pro unlocks unlimited plan regeneration, a weekly meal and workout refresh, and full progress tracking — for $5/month or $50/year (two months free), purchased inside the Android app.",
   },
   {
     q: "How does billing work?",
-    a: "Subscriptions are billed through PayPal and QRIS, with each payment manually verified by our team. Prices are in USD and applicable taxes are calculated at checkout. Your plan renews automatically each billing period — monthly or annual — until you cancel.",
+    a: "Pro is purchased inside the Android app and billed securely through Google Play. Prices are in USD; Google adds any applicable taxes at checkout. Your plan renews automatically each period — monthly or annual — until you cancel in Google Play.",
   },
   {
     q: "How do I cancel?",
-    a: "You can cancel any time from your account billing page or directly at your account billing page. After cancellation you keep access until the end of the current paid period and are not billed again.",
+    a: "Cancel anytime from your subscriptions in Google Play. You keep Pro until the end of the current paid period and won't be billed again.",
   },
   {
     q: "Do you offer refunds?",
-    a: "Yes. We offer a 30-day money-back guarantee on subscription purchases. Refunds are processed by our team. See our Refund Policy for full details.",
+    a: "Pro is billed through Google Play, so refunds follow Google Play's refund policy — you can request one from your Google Play account. See our Refund Policy for details, and email us if you'd like a hand.",
   },
   {
     q: "Will FitPlanCoach guarantee weight loss or muscle gain?",
@@ -93,7 +93,7 @@ function FAQPage() {
         </Accordion>
 
         <div className="mt-12 surface-card p-6 text-sm text-muted-foreground">
-          Still have questions? Email <a className="text-foreground underline" href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>{" "}
+          Still have questions? Email <a className="text-foreground underline" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>{" "}
           or visit our <Link to="/contact" className="text-foreground underline">contact page</Link>.
         </div>
       </main>

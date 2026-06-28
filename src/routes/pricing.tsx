@@ -11,7 +11,7 @@ export const Route = createFileRoute("/pricing")({
       { title: "Pricing — FitPlanCoach" },
       { name: "description", content: "Start free. Upgrade to Pro for unlimited personalized plans, weekly regeneration, and advanced progress tracking. Cancel anytime." },
       { property: "og:title", content: "FitPlanCoach Pricing — Free, Pro Monthly, Pro Annual" },
-      { property: "og:description", content: "Pro from $5/mo. Cancel anytime. 30-day money-back guarantee." },
+      { property: "og:description", content: "Pro from $5/mo, billed securely through Google Play. Cancel anytime." },
       { property: "og:url", content: "https://fitplancoach.com/pricing" },
     ],
     links: [{ rel: "canonical", href: "https://fitplancoach.com/pricing" }],
@@ -49,7 +49,7 @@ const PRO_PERKS = [
   "Full progress charts & streaks",
   "Achievements & badges",
   "Priority support",
-  "30-day money-back guarantee",
+  "Cancel anytime in Google Play",
 ];
 
 function PricingPage() {
@@ -144,7 +144,7 @@ function PricingPage() {
         <div className="mt-12 surface-card p-6 text-center">
           <h3 className="font-display uppercase italic text-lg">Risk-free trial</h3>
           <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
-            Not satisfied within 30 days? Email <a href="mailto:support@fitplancoach.com" className="text-primary underline">support@fitplancoach.com</a> for a full refund — no questions, no forms.
+            Not satisfied within 30 days? Email <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a> for a full refund — no questions, no forms.
           </p>
         </div>
 

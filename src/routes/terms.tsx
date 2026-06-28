@@ -6,8 +6,12 @@ export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms of Service — FitPlanCoach" },
-      { name: "description", content: "Terms of Service for FitPlanCoach, operated by FitPlanCoach. Payments handled by PayPal / QRIS." },
+      { name: "description", content: "The terms that govern your use of FitPlanCoach. Subscriptions are purchased in the Android app and billed securely through Google Play." },
+      { property: "og:title", content: "Terms of Service — FitPlanCoach" },
+      { property: "og:description", content: "The terms that govern your use of FitPlanCoach." },
+      { property: "og:url", content: "https://fitplancoach.com/terms" },
     ],
+    links: [{ rel: "canonical", href: "https://fitplancoach.com/terms" }],
   }),
   component: Terms,
 });
@@ -60,18 +64,17 @@ function Terms() {
           to use the Service within your selected plan.
         </p>
 
-        <h2>5. Payments, subscriptions, and Merchant of Record</h2>
+        <h2>5. Payments and subscriptions</h2>
         <p>
-          Our order process is conducted by our online reseller <strong>PayPal / QRIS</strong>.
-          PayPal / QRIS is the Merchant of Record for all our orders. our team provides all customer
-          service inquiries and handles returns. Payment, billing, tax, cancellation, and refund
-          mechanics are governed by the{" "}
-          our terms.
+          FitPlanCoach Pro is purchased inside the Android app and billed securely through{" "}
+          <strong>Google Play</strong>. Google is the merchant of record and handles payment, taxes,
+          and invoicing. Billing, cancellation, and refunds are governed by Google Play's terms and
+          the Google Play refund policy, alongside these Terms.
         </p>
         <p>
           Subscriptions renew automatically each billing period until cancelled. You may cancel at
-          any time from your account billing page or via your account billing page; access continues until the end
-          of the current paid period.
+          any time from your subscriptions in Google Play; access continues until the end of the
+          current paid period.
         </p>
 
         <h2>6. Suspension and termination</h2>
@@ -106,8 +109,8 @@ function Terms() {
 
         <h2>10. Contact</h2>
         <p>
-          Questions about these Terms: <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>.
-          Billing questions: your account billing page.
+          Questions about these Terms: <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
+          For billing, manage your subscription in Google Play or email us.
         </p>
       </main>
 
