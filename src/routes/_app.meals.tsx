@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MobileShell } from "@/components/MobileShell";
 import { Button } from "@/components/ui/button";
+import { Utensils } from "lucide-react";
+import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
 
 export const Route = createFileRoute("/_app/meals")({
   head: () => ({
@@ -44,12 +46,19 @@ function Meals() {
       });
   }, [user]);
 
-  if (loading) return <MobileShell><div className="pt-20 text-center text-muted-foreground">Loading…</div></MobileShell>;
+  if (loading) return <MobileShell><PlanScreenSkeleton /></MobileShell>;
   if (!plan) return (
     <MobileShell>
-      <h1 className="text-2xl mb-2">Meal plan</h1>
-      <p className="text-sm text-muted-foreground mb-6">No plan yet. Generate one from your dashboard.</p>
-      <Link to="/dashboard"><Button>Go to dashboard</Button></Link>
+      <EmptyState
+        icon={Utensils}
+        title="No meal plan yet"
+        description="Generate your plan and your personalized breakfast, lunch, dinner, and snacks will appear here — built to hit your targets."
+        action={
+          <Link to="/dashboard">
+            <Button className="font-bold uppercase tracking-wider h-11 px-6">Build my plan</Button>
+          </Link>
+        }
+      />
     </MobileShell>
   );
 

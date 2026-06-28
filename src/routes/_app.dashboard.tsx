@@ -15,6 +15,7 @@ import { generateFitnessPlan } from "@/lib/plan-generation.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { WelcomeChecklist } from "@/components/WelcomeChecklist";
+import { DashboardSkeleton } from "@/components/app-ui";
 
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -142,10 +143,7 @@ function Dashboard() {
   if (!profile) {
     return (
       <MobileShell>
-        <div className="pt-20 flex flex-col items-center gap-3">
-          <div className="size-12 rounded-full border-2 border-muted border-t-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading your plan…</p>
-        </div>
+        <DashboardSkeleton />
       </MobileShell>
     );
   }

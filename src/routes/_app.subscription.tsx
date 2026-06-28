@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MobileShell } from "@/components/MobileShell";
+import { PlanScreenSkeleton } from "@/components/app-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,7 +101,7 @@ function Subscription() {
   if (loading) {
     return (
       <MobileShell>
-        <div className="pt-20 text-center text-muted-foreground">Loading…</div>
+        <PlanScreenSkeleton />
       </MobileShell>
     );
   }
