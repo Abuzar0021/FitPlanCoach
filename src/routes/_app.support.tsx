@@ -12,6 +12,7 @@ import { createSupportTicket, replySupportTicket } from "@/lib/support.functions
 import { toast } from "sonner";
 import { HelpCircle, Plus, Send, Mail, Zap } from "lucide-react";
 import { usePlan } from "@/hooks/use-plan";
+import { useSiteConfig } from "@/lib/site-config";
 
 export const Route = createFileRoute("/_app/support")({
   head: () => ({ meta: [{ title: "Support — FitPlanCoach" }] }),
@@ -51,6 +52,7 @@ function SupportPage() {
   const navigate = useNavigate();
   const { has } = usePlan();
   const priority = has("priority_support");
+  const { config } = useSiteConfig();
   const createFn = useServerFn(createSupportTicket);
   const replyFn = useServerFn(replySupportTicket);
 
@@ -217,7 +219,7 @@ function SupportPage() {
               </p>
               <Button onClick={() => setCreating(true)}><Plus className="size-4 mr-1.5" /> Open a ticket</Button>
               <p className="text-xs text-muted-foreground mt-4 inline-flex items-center gap-1.5">
-                <Mail className="size-3.5" /> Or email abuzarelahi01@gmail.com
+                <Mail className="size-3.5" /> Or email {config.support_email}
               </p>
             </div>
           ) : (

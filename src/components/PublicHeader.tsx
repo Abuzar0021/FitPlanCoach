@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/Logo";
 import { GooglePlayButton } from "@/components/GooglePlayButton";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 
 /**
  * Shared marketing-site header. Keeps the Logo, primary nav, and a persistent
@@ -16,6 +17,7 @@ export function PublicHeader() {
       >
         Skip to content
       </a>
+      <AnnouncementBar />
       <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between gap-3">
           <Link to="/" aria-label="FitPlanCoach home">
