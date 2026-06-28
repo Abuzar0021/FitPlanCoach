@@ -16,6 +16,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { WelcomeChecklist } from "@/components/WelcomeChecklist";
 import { DashboardSkeleton } from "@/components/app-ui";
+import { DailyTip } from "@/components/DailyTip";
 
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -238,6 +239,8 @@ function Dashboard() {
         />
 
 
+
+        <DailyTip context={{ goal: profile.goal }} className="mb-4" />
 
         {/* Hero stats card */}
         <section className="surface-card p-5 mb-4 relative overflow-hidden">
