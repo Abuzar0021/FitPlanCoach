@@ -43,6 +43,7 @@ export function PublicFooter() {
               <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
               <Link to="/privacy" className="hover:text-foreground">Privacy Notice</Link>
               <Link to="/refunds" className="hover:text-foreground">Refund Policy</Link>
+              <Link to="/delete-account" className="hover:text-foreground">Delete account</Link>
             </nav>
           </div>
         </div>

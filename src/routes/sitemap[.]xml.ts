@@ -14,6 +14,7 @@ const entries = [
   { path: "/terms", changefreq: "yearly", priority: "0.4" },
   { path: "/privacy", changefreq: "yearly", priority: "0.4" },
   { path: "/refunds", changefreq: "yearly", priority: "0.4" },
+  { path: "/delete-account", changefreq: "yearly", priority: "0.3" },
   { path: "/auth", changefreq: "yearly", priority: "0.3" },
 ];
 

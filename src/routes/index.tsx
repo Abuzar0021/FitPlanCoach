@@ -281,11 +281,11 @@ function Landing() {
               <h2 className="mt-3 text-3xl md:text-4xl font-display uppercase italic text-balance">Your coach, one tap from the home screen</h2>
               <p className="mt-3 text-muted-foreground">
                 The Android app keeps your plan, workouts, and tracking always within reach — and your
-                current plan stays available even when you're offline at the gym.
+                current meal plan is saved to your device, so it's there in a tap even on a flaky gym connection.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
-                  { icon: WifiOff, text: "Your plan, workouts & shopping list work offline" },
+                  { icon: WifiOff, text: "Your current plan is saved to your device for quick access" },
                   { icon: Bell, text: "Gentle, optional reminders to protect your streak" },
                   { icon: Smartphone, text: "Fast, native-feeling, one-tap logging" },
                 ].map((b) => (

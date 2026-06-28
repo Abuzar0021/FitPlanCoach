@@ -61,7 +61,7 @@ export const Route = createFileRoute("/download")({
 });
 
 const WHY_INSTALL = [
-  { icon: WifiOff, title: "Works offline", body: "Your current plan, workouts, and shopping list stay available at the gym or on the road — no signal required." },
+  { icon: WifiOff, title: "Your plan, on your phone", body: "Your current meal plan is saved to your device, so you can check today's food even if you lose your connection." },
   { icon: Bell, title: "Gentle reminders", body: "Optional nudges help you keep your streak and never miss a planned session. Turn them off any time." },
   { icon: Gauge, title: "Faster and smoother", body: "A native-feeling home-screen app: instant launch, fluid navigation, and one-tap logging." },
   { icon: Flame, title: "Streaks that motivate", body: "Watch your consistency build day by day. Progress you can see is progress you keep." },
@@ -79,7 +79,7 @@ const APP_FAQ = [
   { q: "Is the app free?", a: "Yes. Download and start free — generate a plan and track your basics at no cost. Premium plans unlock weekly regeneration and deeper customization, and you can upgrade whenever you're ready." },
   { q: "Which Android versions are supported?", a: `FitPlanCoach runs on Android ${ANDROID_MIN_VERSION} and newer, which covers the vast majority of active devices.` },
   { q: "Is there an iPhone version?", a: "Not yet — Android is first. In the meantime, FitPlanCoach works in any modern browser, and you can add it to your iPhone home screen from Safari for an app-like experience." },
-  { q: "Does it work offline?", a: "Your current plan, workouts, and shopping list are viewable offline. Logging and generating new plans sync automatically once you're back online." },
+  { q: "Does it work offline?", a: "Your current meal plan is saved on your device, so you can still view it if you lose your connection. Generating new plans and logging your progress require you to be online." },
   { q: "Will my data be safe?", a: "Your data is encrypted in transit, protected by row-level security so only you can see it, and never sold. You can export or delete it any time." },
 ];
 
@@ -125,7 +125,7 @@ function DownloadPage() {
               <div className="mt-8 flex items-center justify-center lg:justify-start gap-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> Free to start</span>
                 <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> No credit card</span>
-                <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> Works offline</span>
+                <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> Private &amp; secure</span>
               </div>
             </div>
             <div className="flex justify-center">

@@ -43,7 +43,7 @@ export const FAQS = [
   },
   {
     q: "Can I use FitPlanCoach on mobile?",
-    a: "Yes — the Android app is the best experience and is available on Google Play, keeping your plan, workouts, and shopping list available even offline. Prefer the web? FitPlanCoach also runs in any modern browser, and you can add it to your home screen on iOS or Android.",
+    a: "Yes — the Android app is the best experience and is available on Google Play, and your current meal plan is saved to your device so you can view it even if you lose your connection. Prefer the web? FitPlanCoach also runs in any modern browser, and you can add it to your home screen on iOS or Android.",
   },
 ];
 

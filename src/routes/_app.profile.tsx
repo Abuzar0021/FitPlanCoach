@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { updateProfileBasic } from "@/lib/engagement.functions";
-import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings } from "lucide-react";
+import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Profile — FitPlanCoach" }] }),
@@ -203,6 +203,21 @@ function Profile() {
         </Button>
         <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/onboarding" })}>
           <Settings className="size-4 mr-2" /> Edit fitness details
+        </Button>
+      </div>
+
+      {/* Danger zone */}
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5 mb-4">
+        <h2 className="font-display uppercase italic text-base text-destructive">Danger zone</h2>
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Permanently delete your account and all associated data. This cannot be undone.
+        </p>
+        <Button
+          variant="outline"
+          className="mt-3 w-full justify-center h-11 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => navigate({ to: "/delete-account" })}
+        >
+          <Trash2 className="size-4 mr-2" /> Delete account
         </Button>
       </div>
     </MobileShell>
