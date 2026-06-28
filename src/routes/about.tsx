@@ -56,7 +56,7 @@ function AboutPage() {
             <div><dt className="inline font-semibold text-foreground">Product:</dt> <dd className="inline">FitPlanCoach — personalized meal & workout planning</dd></div>
             <div><dt className="inline font-semibold text-foreground">Support:</dt> <dd className="inline"><a className="underline" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a></dd></div>
             <div><dt className="inline font-semibold text-foreground">Privacy:</dt> <dd className="inline"><a className="underline" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a></dd></div>
-            <div><dt className="inline font-semibold text-foreground">Payments:</dt> <dd className="inline">PayPal / QRIS — Merchant of Record</dd></div>
+            <div><dt className="inline font-semibold text-foreground">Payments:</dt> <dd className="inline">Google Play — merchant of record</dd></div>
           </dl>
         </section>
 

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/pricing")({
       { title: "Pricing — FitPlanCoach" },
       { name: "description", content: "Start free. Upgrade to Pro for unlimited personalized plans, weekly regeneration, and advanced progress tracking. Cancel anytime." },
       { property: "og:title", content: "FitPlanCoach Pricing — Free, Pro Monthly, Pro Annual" },
-      { property: "og:description", content: "Pro from $5/mo. Cancel anytime. 30-day money-back guarantee." },
+      { property: "og:description", content: "Pro from $5/mo, billed securely through Google Play. Cancel anytime." },
       { property: "og:url", content: "https://fitplancoach.com/pricing" },
     ],
     links: [{ rel: "canonical", href: "https://fitplancoach.com/pricing" }],
@@ -49,7 +49,7 @@ const PRO_PERKS = [
   "Full progress charts & streaks",
   "Achievements & badges",
   "Priority support",
-  "30-day money-back guarantee",
+  "Cancel anytime in Google Play",
 ];
 
 function PricingPage() {

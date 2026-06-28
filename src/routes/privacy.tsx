@@ -48,7 +48,7 @@ function Privacy() {
         <h2>3. Who we share it with</h2>
         <ul>
           <li><strong>Service providers and subprocessors</strong> that help us operate the Service (hosting, databases, analytics, email delivery, customer support tooling).</li>
-          <li><strong>PayPal / QRIS</strong>, our Merchant of Record, which handles payments, subscription management, tax compliance, and invoicing.</li>
+          <li><strong>Google Play</strong>, the merchant of record for in-app subscriptions, which handles payment, subscription management, tax compliance, and invoicing.</li>
           <li><strong>Professional advisers</strong> (legal, accounting) under confidentiality obligations.</li>
           <li><strong>Authorities</strong> where required by law or to protect rights, safety, and property.</li>
         </ul>

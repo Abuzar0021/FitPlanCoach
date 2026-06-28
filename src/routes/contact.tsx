@@ -21,7 +21,7 @@ function ContactPage() {
   const channels = [
     { icon: Mail, label: "General support", email: "abuzarelahi01@gmail.com", desc: "Account help, plan generation, app questions. We reply within 1–2 business days." },
     { icon: ShieldCheck, label: "Privacy & data requests", email: "abuzarelahi01@gmail.com", desc: "Access, correction, deletion, or portability requests under GDPR/CCPA." },
-    { icon: CreditCard, label: "Billing & refunds", email: "abuzarelahi01@gmail.com", desc: "Billing is handled by PayPal / QRIS. Manage your subscription at your account billing page or email us." },
+    { icon: CreditCard, label: "Billing & refunds", email: "abuzarelahi01@gmail.com", desc: "Pro is billed through Google Play. Manage or cancel in your Google Play subscriptions, or email us for help." },
   ];
 
   return (

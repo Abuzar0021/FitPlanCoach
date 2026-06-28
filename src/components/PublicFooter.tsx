@@ -50,7 +50,7 @@ export function PublicFooter() {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
           <div>© {new Date().getFullYear()} FitPlanCoach. All rights reserved.</div>
-          <div className="text-muted-foreground">PayPal & QRIS · Manually reviewed · 30-day money-back guarantee</div>
+          <div className="text-muted-foreground">Billed securely through Google Play · Cancel anytime</div>
         </div>
       </div>
     </footer>

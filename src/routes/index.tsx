@@ -107,7 +107,7 @@ const FAQ_TEASER = [
   { q: "Is it really free to start?", a: "Yes. Download the app, complete onboarding, and get a personalized plan with basic tracking at no cost. Pro unlocks unlimited regeneration and full tracking from $5/month, and you can upgrade whenever you're ready." },
   { q: "Will it guarantee weight loss or muscle gain?", a: "No honest service can. Results depend on consistency, sleep, stress, genetics, and adherence. FitPlanCoach gives you a structured plan and clear tracking — the work is still yours, but you'll never be guessing." },
   { q: "Is this medical advice?", a: "No. FitPlanCoach provides fitness and nutrition guidance and is not medical advice. Consult a qualified professional before significant changes to your diet or exercise routine." },
-  { q: "Can I cancel anytime?", a: "Yes — cancel in one click from your billing page. You keep access until the end of the current paid period, and every subscription is backed by a 30-day money-back guarantee." },
+  { q: "Can I cancel anytime?", a: "Yes — cancel anytime from your subscriptions in Google Play. You keep Pro until the end of the current paid period, and refunds follow Google Play's refund policy." },
 ];
 
 function Landing() {
@@ -148,8 +148,8 @@ function Landing() {
               <div className="mt-7 flex items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> No credit card</span>
                 <span className="flex items-center gap-1.5"><Check className="size-3 text-primary" /> Cancel anytime</span>
-                <span className="flex items-center gap-1.5"><RefreshCcw className="size-3 text-primary" /> 30-day refund</span>
-                <span className="flex items-center gap-1.5"><Lock className="size-3 text-primary" /> Secure checkout</span>
+                <span className="flex items-center gap-1.5"><RefreshCcw className="size-3 text-primary" /> Free to start</span>
+                <span className="flex items-center gap-1.5"><Lock className="size-3 text-primary" /> Billed via Google Play</span>
               </div>
             </div>
 
@@ -341,7 +341,7 @@ function Landing() {
             <div className="text-center max-w-2xl mx-auto reveal">
               <div className="text-xs font-bold uppercase tracking-widest text-primary">Simple pricing</div>
               <h2 className="mt-3 text-3xl md:text-4xl font-display uppercase italic text-balance">Start free. Upgrade when you're ready.</h2>
-              <p className="mt-3 text-muted-foreground">No credit card to begin. Cancel in one click. Every paid plan is backed by a 30-day money-back guarantee.</p>
+              <p className="mt-3 text-muted-foreground">Free to start — no card needed. Upgrade to Pro in the app, billed securely through Google Play, and cancel anytime.</p>
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-3 max-w-4xl mx-auto reveal">
               {[
@@ -374,10 +374,10 @@ function Landing() {
         <section className="border-y border-border bg-card/40">
           <div className="mx-auto max-w-6xl px-6 py-10 grid gap-6 md:grid-cols-4 text-center md:text-left reveal">
             {[
-              { icon: RefreshCcw, title: "30-day refund", body: "Money back, no fine print" },
+              { icon: RefreshCcw, title: "Free to start", body: "No card needed to begin" },
               { icon: ShieldCheck, title: "Private by default", body: "Encrypted, row-level secured" },
-              { icon: Clock, title: "Cancel anytime", body: "One click, no phone calls" },
-              { icon: Lock, title: "Secure checkout", body: "PayPal & QRIS, manually reviewed" },
+              { icon: Clock, title: "Cancel anytime", body: "Manage your plan in Google Play" },
+              { icon: Lock, title: "Secure billing", body: "Handled entirely by Google Play" },
             ].map((b) => (
               <div key={b.title} className="flex items-center gap-3 justify-center md:justify-start">
                 <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center shrink-0">
