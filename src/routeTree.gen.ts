@@ -33,8 +33,6 @@ import { Route as AdminWorkoutsRouteImport } from './routes/admin.workouts'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
-import { Route as AdminPaymentSettingsRouteImport } from './routes/admin.payment-settings'
 import { Route as AdminFoodsRouteImport } from './routes/admin.foods'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppWorkoutsRouteImport } from './routes/_app.workouts'
@@ -175,16 +173,6 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPaymentSettingsRoute = AdminPaymentSettingsRouteImport.update({
-  id: '/payment-settings',
-  path: '/payment-settings',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminFoodsRoute = AdminFoodsRouteImport.update({
   id: '/foods',
   path: '/foods',
@@ -321,8 +309,6 @@ export interface FileRoutesByFullPath {
   '/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
-  '/admin/payment-settings': typeof AdminPaymentSettingsRoute
-  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
@@ -367,8 +353,6 @@ export interface FileRoutesByTo {
   '/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
-  '/admin/payment-settings': typeof AdminPaymentSettingsRoute
-  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
@@ -416,8 +400,6 @@ export interface FileRoutesById {
   '/_app/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
-  '/admin/payment-settings': typeof AdminPaymentSettingsRoute
-  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
@@ -775,20 +757,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/payments': {
-      id: '/admin/payments'
-      path: '/payments'
-      fullPath: '/admin/payments'
-      preLoaderRoute: typeof AdminPaymentsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/payment-settings': {
-      id: '/admin/payment-settings'
-      path: '/payment-settings'
-      fullPath: '/admin/payment-settings'
-      preLoaderRoute: typeof AdminPaymentSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/foods': {
       id: '/admin/foods'
       path: '/foods'
@@ -965,8 +933,6 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface AdminRouteChildren {
   AdminExercisesRoute: typeof AdminExercisesRoute
   AdminFoodsRoute: typeof AdminFoodsRoute
-  AdminPaymentSettingsRoute: typeof AdminPaymentSettingsRoute
-  AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -977,8 +943,6 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminExercisesRoute: AdminExercisesRoute,
   AdminFoodsRoute: AdminFoodsRoute,
-  AdminPaymentSettingsRoute: AdminPaymentSettingsRoute,
-  AdminPaymentsRoute: AdminPaymentsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminUsersRoute: AdminUsersRoute,
