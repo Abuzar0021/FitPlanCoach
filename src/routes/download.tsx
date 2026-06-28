@@ -92,6 +92,7 @@ function DownloadPage() {
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 hero-gradient" />
+          <div className="absolute inset-0 bg-grid opacity-60" />
           <div className="absolute top-10 -left-24 size-72 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute -bottom-10 -right-24 size-96 rounded-full bg-accent/10 blur-3xl" />
           <div className="relative mx-auto max-w-6xl px-6 pt-16 pb-20 grid lg:grid-cols-2 gap-12 items-center">
@@ -99,9 +100,9 @@ function DownloadPage() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-6">
                 <Smartphone className="size-3" /> Android app
               </span>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-display uppercase italic tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-display uppercase italic tracking-tight text-balance">
                 Your coach,<br />
-                <span className="text-primary">in your pocket.</span>
+                <span className="text-gradient">in your pocket.</span>
               </h1>
               <p className="mt-5 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
                 Personalized workouts, meal plans, and honest progress tracking — built around your
@@ -128,7 +129,7 @@ function DownloadPage() {
               </div>
             </div>
             <div className="flex justify-center">
-              <PhoneMockup width={264}>
+              <PhoneMockup width={264} glow>
                 <DashboardScreen />
               </PhoneMockup>
             </div>
@@ -146,7 +147,7 @@ function DownloadPage() {
                 different apps and a spreadsheet.
               </p>
             </div>
-            <div className="mt-12 flex flex-wrap items-start justify-center gap-8 sm:gap-10">
+            <div className="mt-12 flex flex-wrap items-start justify-center gap-8 sm:gap-10 reveal">
               {[
                 { screen: <DashboardScreen />, label: "Daily dashboard", sub: "Calories, macros & streak at a glance" },
                 { screen: <WorkoutScreen />, label: "Guided workouts", sub: "Today's session, set by set" },
@@ -171,9 +172,9 @@ function DownloadPage() {
               <div className="text-xs font-bold uppercase tracking-widest text-primary">Why the app</div>
               <h2 className="mt-3 text-3xl md:text-4xl font-display uppercase italic">Reasons to install</h2>
             </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3 reveal">
               {WHY_INSTALL.map((f) => (
-                <div key={f.title} className="surface-card p-7 hover:border-border-strong transition">
+                <div key={f.title} className="surface-card card-lift p-7">
                   <div className="size-11 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center mb-4">
                     <f.icon className="size-5 text-primary" />
                   </div>
@@ -195,9 +196,9 @@ function DownloadPage() {
               you the structure and tracking to show up for the work.
             </p>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-5 md:grid-cols-3 reveal">
             {OUTCOMES.map((o) => (
-              <div key={o.title} className="surface-card p-7">
+              <div key={o.title} className="surface-card card-lift p-7">
                 <o.icon className="size-6 text-primary" />
                 <h3 className="mt-4 font-display text-lg uppercase italic">{o.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{o.body}</p>

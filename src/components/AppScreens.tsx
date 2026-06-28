@@ -10,7 +10,17 @@ import { Flame, Check, Utensils, ChevronRight } from "lucide-react";
 
 function ScreenChrome({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex h-full flex-col pt-7">
+    <div className="flex h-full flex-col">
+      {/* status bar */}
+      <div className="flex items-center justify-between px-4 pt-[7px] pb-1">
+        <span className="text-[8px] font-bold tabular-nums text-foreground">9:41</span>
+        <div className="flex items-center gap-[3px]">
+          <span className="h-[6px] w-[6px] rounded-[1px] bg-foreground/70" />
+          <span className="h-[6px] w-[9px] rounded-[1px] bg-foreground/45" />
+          <span className="h-[7px] w-[12px] rounded-[2px] border border-foreground/45" />
+        </div>
+      </div>
+      {/* app top bar */}
       <div className="px-4 pb-2 flex items-center justify-between">
         <span className="text-[11px] font-display uppercase italic tracking-wide">{title}</span>
         <span className="size-5 rounded-full bg-primary/15 border border-primary/30" />

@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Button } from "@/components/ui/button";
+import { AppCtaBand } from "@/components/AppCtaBand";
 import { Utensils, Dumbbell, LineChart, Target, Calendar, ShoppingCart, Camera, Smartphone } from "lucide-react";
 
 export const Route = createFileRoute("/features")({
@@ -34,17 +34,20 @@ function FeaturesPage() {
       <PublicHeader />
 
       <main className="flex-1 mx-auto max-w-6xl px-6 py-16 w-full">
-        <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight">Everything inside FitPlanCoach</h1>
+        <div className="max-w-2xl reveal">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-4">
+            Features
+          </span>
+          <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Everything inside FitPlanCoach</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            A complete fitness operating system: personalized planning, adaptive workouts, and honest
-            progress tracking. No fads, no guarantees — just structure that compounds.
+            A complete fitness toolkit in one app: personalized planning, adaptive workouts, and honest
+            progress tracking. No fads, no guarantees — just structure that compounds, week after week.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 reveal">
           {FEATURES.map((f) => (
-            <div key={f.title} className="surface-card p-6 hover:border-border-strong transition">
+            <div key={f.title} className="surface-card card-lift p-6">
               <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center mb-4">
                 <f.icon className="size-5 text-primary" />
               </div>
@@ -54,20 +57,16 @@ function FeaturesPage() {
           ))}
         </div>
 
-        <div className="mt-14 text-center">
-          <Link to="/auth">
-            <Button size="lg" className="font-bold uppercase tracking-wider px-8 h-12 shadow-[var(--shadow-lime)]">
-              Start free
-            </Button>
-          </Link>
-          <p className="mt-3 text-xs text-muted-foreground">No credit card required.</p>
-        </div>
-
-        <p className="mt-12 text-xs text-muted-foreground italic text-center max-w-2xl mx-auto">
+        <p className="mt-14 text-xs text-muted-foreground italic text-center max-w-2xl mx-auto">
           FitPlanCoach provides fitness and nutrition guidance and is not medical advice. Individual results
           vary and depend on consistency, sleep, stress, genetics, and other factors.
         </p>
       </main>
+
+      <AppCtaBand
+        heading="See it work for your goals"
+        sub="Download FitPlanCoach free on Android and turn these features into a plan built around you."
+      />
 
       <PublicFooter />
     </div>
