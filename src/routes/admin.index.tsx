@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
 import { Link } from "@tanstack/react-router";
-import { TrendingUp, Users, DollarSign, Activity, AlertTriangle, CheckCircle2, Sparkles, Flame } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Activity, AlertTriangle, Sparkles, Flame } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — FitPlanCoach" }] }),
@@ -19,14 +19,12 @@ function AdminHome() {
     paidSubs: 0, freeUsers: 0,
     conversionRate: 0,
     mrr: 0, arr: 0,
-    pendingPayments: 0, approved30: 0, rejected30: 0,
     openTickets: 0, urgentTickets: 0,
     avgStreak: 0,
   });
   const [eventsDaily, setEventsDaily] = useState<{ day: string; events: number }[]>([]);
   const [signupsDaily, setSignupsDaily] = useState<{ day: string; signups: number }[]>([]);
   const [topUsers, setTopUsers] = useState<any[]>([]);
-  const [pendingPaymentList, setPendingPaymentList] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -36,10 +34,9 @@ function AdminHome() {
         { data: dauData }, { data: wauData }, { data: mauData },
         { data: subs },
         { data: events30 }, { data: signups30 },
-        { count: pendingPayments }, { count: approved30 }, { count: rejected30 },
         { count: openTickets }, { count: urgentTickets },
-        { data: settings }, { data: streakStats },
-        { data: pendingList }, { data: topEngaged },
+        { data: streakStats },
+        { data: topEngaged },
       ] = await Promise.all([
         db.from("profiles").select("*", { count: "exact", head: true }),
         db.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", since(7)),
@@ -50,14 +47,9 @@ function AdminHome() {
         db.from("subscriptions").select("plan_type,billing_interval,status"),
         db.from("analytics_events").select("created_at").gte("created_at", since(30)),
         db.from("profiles").select("created_at").gte("created_at", since(30)),
-        db.from("payment_submissions").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        db.from("payment_submissions").select("*", { count: "exact", head: true }).eq("status", "approved").gte("reviewed_at", since(30)),
-        db.from("payment_submissions").select("*", { count: "exact", head: true }).eq("status", "rejected").gte("reviewed_at", since(30)),
         db.from("support_tickets").select("*", { count: "exact", head: true }).in("status", ["open", "in_progress"]),
         db.from("support_tickets").select("*", { count: "exact", head: true }).eq("priority", "urgent").in("status", ["open", "in_progress"]),
-        db.from("payment_settings").select("monthly_price_cents,annual_price_cents,currency").eq("id", 1).maybeSingle(),
         db.from("profiles").select("streak_current"),
-        db.from("payment_submissions").select("id,user_id,amount_cents,currency,method,billing_interval,created_at,profiles!inner(name,email)").eq("status", "pending").order("created_at").limit(5),
         db.from("profiles").select("id,name,email,streak_current,streak_longest,last_workout_date").order("streak_current", { ascending: false }).limit(8),
       ]);
 
@@ -67,8 +59,8 @@ function AdminHome() {
       const paidSubs = (subs ?? []).filter((s: any) => s.plan_type !== "free" && s.status === "active");
       const totalUsers = users ?? 0;
       const conversionRate = totalUsers > 0 ? (paidSubs.length / totalUsers) * 100 : 0;
-      const monthlyPriceCents = settings?.monthly_price_cents ?? 500;
-      const annualPriceCents = settings?.annual_price_cents ?? 5000;
+      const monthlyPriceCents = 500; // Pro monthly (Google Play product price)
+      const annualPriceCents = 5000; // Pro annual (Google Play product price)
       const mrr = paidSubs.reduce((sum: number, s: any) => {
         if (s.billing_interval === "annual") return sum + annualPriceCents / 12;
         return sum + monthlyPriceCents;
@@ -100,12 +92,10 @@ function AdminHome() {
         paidSubs: paidSubs.length, freeUsers: totalUsers - paidSubs.length,
         conversionRate,
         mrr, arr,
-        pendingPayments: pendingPayments ?? 0, approved30: approved30 ?? 0, rejected30: rejected30 ?? 0,
         openTickets: openTickets ?? 0, urgentTickets: urgentTickets ?? 0,
         avgStreak,
       });
       setTopUsers(topEngaged ?? []);
-      setPendingPaymentList(pendingList ?? []);
     })();
   }, []);
 
@@ -126,22 +116,17 @@ function AdminHome() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Owner dashboard</h1>
-        <p className="text-sm text-muted-foreground">Real-time metrics across users, revenue, payments, and support.</p>
+        <p className="text-sm text-muted-foreground">Real-time metrics across users, revenue, engagement, and support.</p>
       </div>
 
       {/* Alerts */}
-      {(stats.pendingPayments > 0 || stats.urgentTickets > 0) && (
+      {stats.urgentTickets > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
           <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-semibold text-sm">Needs attention</p>
-            <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1">
-              {stats.pendingPayments > 0 && (
-                <Link to="/admin/payments" className="underline hover:text-foreground">{stats.pendingPayments} pending payment{stats.pendingPayments === 1 ? "" : "s"}</Link>
-              )}
-              {stats.urgentTickets > 0 && (
-                <Link to="/admin/support" className="underline hover:text-foreground">{stats.urgentTickets} urgent ticket{stats.urgentTickets === 1 ? "" : "s"}</Link>
-              )}
+            <div className="text-xs text-muted-foreground mt-1">
+              <Link to="/admin/support" className="underline hover:text-foreground">{stats.urgentTickets} urgent ticket{stats.urgentTickets === 1 ? "" : "s"}</Link>
             </div>
           </div>
         </div>
@@ -150,11 +135,10 @@ function AdminHome() {
       {/* Revenue */}
       <div>
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Revenue</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <Stat icon={DollarSign} label="MRR" value={`$${fmt(Math.round(stats.mrr))}`} accent="text-primary" />
           <Stat icon={TrendingUp} label="ARR" value={`$${fmt(Math.round(stats.arr))}`} accent="text-primary" />
           <Stat icon={Sparkles} label="Paid subs" value={stats.paidSubs} sub={`${stats.conversionRate.toFixed(1)}% conversion`} />
-          <Stat icon={CheckCircle2} label="Approved 30d" value={stats.approved30} sub={`${stats.rejected30} rejected`} />
         </div>
       </div>
 
@@ -169,9 +153,9 @@ function AdminHome() {
         </div>
       </div>
 
-      {/* Support + Payments queue */}
+      {/* Support queue */}
       <div className="grid md:grid-cols-2 gap-3">
-        <Stat icon={AlertTriangle} label="Pending payments" value={stats.pendingPayments} accent={stats.pendingPayments > 0 ? "text-amber-500" : undefined} />
+        <Stat icon={Sparkles} label="Free users" value={fmt(stats.freeUsers)} sub={`${stats.paidSubs} paid`} />
         <Stat icon={AlertTriangle} label="Open tickets" value={stats.openTickets} sub={`${stats.urgentTickets} urgent`} accent={stats.openTickets > 0 ? "text-amber-500" : undefined} />
       </div>
 
@@ -208,7 +192,7 @@ function AdminHome() {
       </div>
 
       {/* Lists */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div>
         <div className="bg-card border border-border rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-sm">Most engaged users</h3>
@@ -226,26 +210,6 @@ function AdminHome() {
                   <Flame className="size-3" /> {u.streak_current ?? 0}
                   <span className="text-muted-foreground font-normal">/ {u.streak_longest ?? 0}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm">Pending payments</h3>
-            <Link to="/admin/payments" className="text-xs text-primary hover:underline">Review →</Link>
-          </div>
-          <div className="space-y-1.5">
-            {pendingPaymentList.length === 0 && <p className="text-xs text-muted-foreground">No pending payments.</p>}
-            {pendingPaymentList.map((p: any) => (
-              <div key={p.id} className="flex items-center justify-between text-sm py-1.5 border-b border-border last:border-0">
-                <div className="min-w-0">
-                  <p className="font-medium truncate">{p.profiles?.email ?? p.user_id.slice(0, 8)}</p>
-                  <p className="text-[10px] text-muted-foreground">{p.method} · {p.billing_interval}</p>
-                </div>
-                <p className="text-xs font-bold tabular-nums shrink-0">
-                  ${(p.amount_cents / 100).toFixed(2)}
-                </p>
               </div>
             ))}
           </div>
