@@ -22,3 +22,9 @@ export const isPlayStoreLive = PLAY_STORE_URL.length > 0;
 
 /** Minimum supported Android version, surfaced in the app FAQ and schema. */
 export const ANDROID_MIN_VERSION = "8.0";
+
+/** Release version name shown in-app and used for the Android versionName. */
+export const APP_VERSION = "1.0.0";
+
+/** Android versionCode for the next release build. */
+export const ANDROID_VERSION_CODE = 1;

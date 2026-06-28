@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { updateProfileBasic } from "@/lib/engagement.functions";
-import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2 } from "lucide-react";
+import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2, RefreshCcw, LifeBuoy, ShieldCheck, FileText, Info } from "lucide-react";
+import { restorePurchases } from "@/lib/billing";
+import { APP_VERSION } from "@/lib/app-config";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Profile — FitPlanCoach" }] }),
@@ -52,6 +54,13 @@ function Profile() {
     await supabase.auth.signOut();
     toast.success("Signed out");
     navigate({ to: "/auth" });
+  }
+
+  async function handleRestore() {
+    const res = await restorePurchases();
+    if (res.ok) toast.success("Purchases restored.");
+    else if (res.reason === "unavailable_on_web") toast.info("Restore is available inside the Android app.");
+    else toast.error(res.message ?? "Nothing to restore.");
   }
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
@@ -193,17 +202,34 @@ function Profile() {
         </div>
       )}
 
-      {/* Actions */}
+      {/* Account & app */}
       <div className="space-y-2.5 mb-4">
         <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/subscription" })}>
-          <Sparkles className="size-4 mr-2 text-primary" /> Manage subscription
+          <Crown className="size-4 mr-2 text-primary" /> Manage subscription
         </Button>
-        <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/billing" })}>
-          <Scale className="size-4 mr-2" /> Billing history
+        <Button variant="outline" className="w-full justify-start h-12" onClick={handleRestore}>
+          <RefreshCcw className="size-4 mr-2" /> Restore purchases
         </Button>
         <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/onboarding" })}>
           <Settings className="size-4 mr-2" /> Edit fitness details
         </Button>
+        <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/support" })}>
+          <LifeBuoy className="size-4 mr-2" /> Support
+        </Button>
+        <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/privacy" })}>
+          <ShieldCheck className="size-4 mr-2" /> Privacy Policy
+        </Button>
+        <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/terms" })}>
+          <FileText className="size-4 mr-2" /> Terms of Service
+        </Button>
+        <Button variant="outline" className="w-full justify-start h-12" onClick={signOut}>
+          <LogOut className="size-4 mr-2" /> Log out
+        </Button>
+      </div>
+
+      {/* App version */}
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground mb-4">
+        <Info className="size-3" /> FitPlanCoach v{APP_VERSION}
       </div>
 
       {/* Danger zone */}

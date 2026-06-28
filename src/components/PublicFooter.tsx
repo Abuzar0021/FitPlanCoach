@@ -10,9 +10,9 @@ export function PublicFooter() {
             <div className="font-display uppercase italic text-lg text-foreground">FitPlanCoach</div>
             <p className="mt-2 text-xs leading-relaxed max-w-sm">
               Personalized fitness and nutrition guidance from{" "}
-              <span className="text-foreground font-semibold">FitPlanCoach</span>. Payments accepted via
-              PayPal (international) and QRIS (Indonesia) and verified manually by our team.
-              FitPlanCoach provides fitness and nutrition guidance and is not medical advice.
+              <span className="text-foreground font-semibold">FitPlanCoach</span>. Premium is available
+              through Google Play Billing inside the Android app. FitPlanCoach provides fitness and
+              nutrition guidance and is not medical advice.
             </p>
 
             <div className="mt-3 text-xs">

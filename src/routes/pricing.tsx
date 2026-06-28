@@ -149,7 +149,7 @@ function PricingPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Payments are processed securely via PayPal and QRIS. All prices in USD. Taxes calculated at checkout where applicable. See our{" "}
+          Premium is purchased securely through Google Play Billing inside the Android app. All prices in USD; taxes are handled by Google Play. See our{" "}
           <Link to="/refunds" className="underline">refund policy</Link> and{" "}
           <Link to="/terms" className="underline">terms</Link>.
         </p>
