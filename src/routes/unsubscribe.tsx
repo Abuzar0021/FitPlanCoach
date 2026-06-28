@@ -89,7 +89,7 @@ function UnsubscribePage() {
               <CheckCircle2 className="size-12 text-primary mx-auto mb-4" />
               <h1 className="text-2xl font-display uppercase italic mb-2">You're unsubscribed</h1>
               <p className="text-sm text-muted-foreground">
-                We won't email you anymore. Change your mind? Reach <a href="mailto:support@fitplancoach.com" className="text-primary underline">support@fitplancoach.com</a>.
+                We won't email you anymore. Change your mind? Reach <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a>.
               </p>
             </>
           )}
@@ -105,7 +105,7 @@ function UnsubscribePage() {
               <AlertCircle className="size-12 text-amber-500 mx-auto mb-4" />
               <h1 className="text-2xl font-display uppercase italic mb-2">Link not valid</h1>
               <p className="text-sm text-muted-foreground">
-                This unsubscribe link is invalid or expired. Email <a href="mailto:support@fitplancoach.com" className="text-primary underline">support@fitplancoach.com</a> and we'll unsubscribe you manually.
+                This unsubscribe link is invalid or expired. Email <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a> and we'll unsubscribe you manually.
               </p>
             </>
           )}

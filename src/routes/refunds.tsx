@@ -39,7 +39,7 @@ function Refunds() {
             sign in with the email you used at checkout to manage your order and request a refund.
           </li>
           <li>
-            Or email our team at <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a> and
+            Or email our team at <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a> and
             we'll help you process the refund through our team.
           </li>
         </ol>
@@ -58,7 +58,7 @@ function Refunds() {
         <h2>Questions</h2>
         <p>
           For anything related to refunds or billing, contact{" "}
-          <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>. See also our{" "}
+          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>. See also our{" "}
           <Link to="/terms">Terms of Service</Link>.
         </p>
       </main>

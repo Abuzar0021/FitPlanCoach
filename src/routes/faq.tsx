@@ -93,7 +93,7 @@ function FAQPage() {
         </Accordion>
 
         <div className="mt-12 surface-card p-6 text-sm text-muted-foreground">
-          Still have questions? Email <a className="text-foreground underline" href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>{" "}
+          Still have questions? Email <a className="text-foreground underline" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>{" "}
           or visit our <Link to="/contact" className="text-foreground underline">contact page</Link>.
         </div>
       </main>

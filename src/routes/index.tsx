@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
           url: "https://fitplancoach.com/",
           logo: "https://fitplancoach.com/icon-512.png",
           sameAs: [],
-          contactPoint: [{ "@type": "ContactPoint", email: "support@fitplancoach.com", contactType: "customer support" }],
+          contactPoint: [{ "@type": "ContactPoint", email: "abuzarelahi01@gmail.com", contactType: "customer support" }],
         }),
       },
       {

@@ -144,7 +144,7 @@ function PricingPage() {
         <div className="mt-12 surface-card p-6 text-center">
           <h3 className="font-display uppercase italic text-lg">Risk-free trial</h3>
           <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
-            Not satisfied within 30 days? Email <a href="mailto:support@fitplancoach.com" className="text-primary underline">support@fitplancoach.com</a> for a full refund — no questions, no forms.
+            Not satisfied within 30 days? Email <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a> for a full refund — no questions, no forms.
           </p>
         </div>
 

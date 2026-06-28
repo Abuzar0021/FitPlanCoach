@@ -26,7 +26,7 @@ const Welcome = ({ name = "Athlete" }: Props) => (
           <Button href="https://fitplancoach.com/dashboard" style={button}>Open my dashboard</Button>
         </Section>
         <Text style={text}>
-          Stuck? Email <a href="mailto:support@fitplancoach.com" style={link}>support@fitplancoach.com</a> — real humans reply within 1–2 business days.
+          Stuck? Email <a href="mailto:abuzarelahi01@gmail.com" style={link}>abuzarelahi01@gmail.com</a> — real humans reply within 1–2 business days.
         </Text>
         <Hr style={hr} />
         <Text style={footer}>Train smart, eat with purpose. — FitPlanCoach</Text>

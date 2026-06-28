@@ -16,7 +16,7 @@ export function PublicFooter() {
             </p>
 
             <div className="mt-3 text-xs">
-              Support: <a href="mailto:support@fitplancoach.com" className="text-foreground hover:underline">support@fitplancoach.com</a>
+              Support: <a href="mailto:abuzarelahi01@gmail.com" className="text-foreground hover:underline">abuzarelahi01@gmail.com</a>
             </div>
 
             <div className="mt-5">

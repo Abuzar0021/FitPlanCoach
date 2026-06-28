@@ -106,7 +106,7 @@ function Terms() {
 
         <h2>10. Contact</h2>
         <p>
-          Questions about these Terms: <a href="mailto:support@fitplancoach.com">support@fitplancoach.com</a>.
+          Questions about these Terms: <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
           Billing questions: your account billing page.
         </p>
       </main>

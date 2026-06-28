@@ -202,7 +202,7 @@ function SupportPage() {
               </p>
               <Button onClick={() => setCreating(true)}><Plus className="size-4 mr-1.5" /> Open a ticket</Button>
               <p className="text-xs text-muted-foreground mt-4 inline-flex items-center gap-1.5">
-                <Mail className="size-3.5" /> Or email support@fitplancoach.com
+                <Mail className="size-3.5" /> Or email abuzarelahi01@gmail.com
               </p>
             </div>
           ) : (

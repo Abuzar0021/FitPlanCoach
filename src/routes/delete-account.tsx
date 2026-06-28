@@ -4,7 +4,7 @@ import { PublicFooter } from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Trash2, Mail, ShieldCheck, Clock } from "lucide-react";
 
-const SUPPORT_EMAIL = "support@fitplancoach.com";
+const SUPPORT_EMAIL = "abuzarelahi01@gmail.com";
 const MAILTO =
   `mailto:${SUPPORT_EMAIL}` +
   `?subject=${encodeURIComponent("Account deletion request")}` +
