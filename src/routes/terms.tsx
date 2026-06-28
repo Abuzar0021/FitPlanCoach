@@ -17,7 +17,7 @@ function Terms() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
         <h1>Terms of Service</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 

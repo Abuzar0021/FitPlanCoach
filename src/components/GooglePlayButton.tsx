@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { PLAY_STORE_URL, isPlayStoreLive } from "@/lib/app-config";
+import { track } from "@/lib/analytics";
 
 /** The recognizable Google Play triangle, drawn as four colored facets. */
 function PlayGlyph({ className }: { className?: string }) {
@@ -72,6 +73,7 @@ export function GooglePlayButton({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={label}
+        onClick={() => track("play_store_click", { live: true, size })}
         className={cn("inline-flex active:scale-[0.98] transition-transform", className)}
       >
         {badge}
@@ -91,6 +93,7 @@ export function GooglePlayButton({
     <Link
       to="/download"
       aria-label={label}
+      onClick={() => track("play_store_click", { live: false, size })}
       className={cn("inline-flex active:scale-[0.98] transition-transform", className)}
     >
       {badge}

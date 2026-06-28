@@ -28,7 +28,7 @@ function ContactPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
         <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Contact us</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Real humans at FitPlanCoach read every message. Pick the right inbox below for the fastest response.

@@ -88,7 +88,7 @@ function DownloadPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 hero-gradient" />

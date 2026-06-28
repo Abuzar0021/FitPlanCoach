@@ -57,7 +57,7 @@ function PricingPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-5xl px-6 py-16 w-full">
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-5xl px-6 py-16 w-full">
         <div className="text-center max-w-2xl mx-auto reveal">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-4">
             <Zap className="size-3" fill="currentColor" /> Simple, honest pricing
