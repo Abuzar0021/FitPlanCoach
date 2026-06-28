@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
-import { Logo } from "@/components/Logo";
+import { PublicHeader } from "@/components/PublicHeader";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -15,13 +15,9 @@ export const Route = createFileRoute("/terms")({
 function Terms() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 py-4">
-          <Link to="/"><Logo /></Link>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
         <h1>Terms of Service</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
-import { Logo } from "@/components/Logo";
-import { Button } from "@/components/ui/button";
+import { PublicHeader } from "@/components/PublicHeader";
+import { AppCtaBand } from "@/components/AppCtaBand";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export const FAQS = [
@@ -19,11 +19,11 @@ export const FAQS = [
   },
   {
     q: "What is included in a subscription?",
-    a: "Free includes one starter plan and basic tracking. Pro ($5/mo) unlocks unlimited plans, full progress tracking, and country-specific food databases. Premium ($10/mo) adds weekly regeneration and deeper customization. Elite ($15/mo) adds advanced analytics and priority access to new features.",
+    a: "Free includes one starter plan and basic tracking, yours to keep. Pro unlocks unlimited plan regeneration, a weekly meal and workout refresh, and full progress tracking — for $5/month or $50/year (two months free). Every paid plan is backed by a 30-day money-back guarantee.",
   },
   {
     q: "How does billing work?",
-    a: "Subscriptions are billed monthly by PayPal and QRIS, with each payment manually verified by our team. Prices are in USD and applicable taxes are calculated at checkout. Your subscription renews automatically each month until cancelled.",
+    a: "Subscriptions are billed through PayPal and QRIS, with each payment manually verified by our team. Prices are in USD and applicable taxes are calculated at checkout. Your plan renews automatically each billing period — monthly or annual — until you cancel.",
   },
   {
     q: "How do I cancel?",
@@ -43,7 +43,7 @@ export const FAQS = [
   },
   {
     q: "Can I use FitPlanCoach on mobile?",
-    a: "Yes. FitPlanCoach is a Progressive Web App — open it in your browser, tap 'Add to Home Screen', and it works like a native app on iOS and Android.",
+    a: "Yes — the Android app is the best experience and is available on Google Play, and your current meal plan is saved to your device so you can view it even if you lose your connection. Prefer the web? FitPlanCoach also runs in any modern browser, and you can add it to your home screen on iOS or Android.",
   },
 ];
 
@@ -77,16 +77,11 @@ export const Route = createFileRoute("/faq")({
 function FAQPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between">
-          <Link to="/"><Logo /></Link>
-          <Link to="/auth"><Button size="sm" className="font-bold uppercase tracking-wide">Sign in</Button></Link>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
-        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight">Frequently asked</h1>
-        <p className="mt-4 text-muted-foreground">Everything most people want to know before signing up.</p>
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
+        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Frequently asked questions</h1>
+        <p className="mt-4 text-muted-foreground">Everything most people want to know before they download — pricing, privacy, results, and how plans are made.</p>
 
         <Accordion type="single" collapsible className="mt-8">
           {FAQS.map((f, i) => (
@@ -102,6 +97,11 @@ function FAQPage() {
           or visit our <Link to="/contact" className="text-foreground underline">contact page</Link>.
         </div>
       </main>
+
+      <AppCtaBand
+        heading="Ready when you are"
+        sub="Download FitPlanCoach free on Android and put these answers into practice with your own personalized plan."
+      />
 
       <PublicFooter />
     </div>

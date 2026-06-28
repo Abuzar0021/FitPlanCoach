@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
-import { Logo } from "@/components/Logo";
-import { Button } from "@/components/ui/button";
+import { PublicHeader } from "@/components/PublicHeader";
+import { AppCtaBand } from "@/components/AppCtaBand";
 import { Mail, ShieldCheck, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
@@ -26,22 +26,17 @@ function ContactPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between">
-          <Link to="/"><Logo /></Link>
-          <Link to="/auth"><Button size="sm" className="font-bold uppercase tracking-wide">Sign in</Button></Link>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
-        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight">Contact us</h1>
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
+        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Contact us</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Real humans at FitPlanCoach read every message. Pick the right inbox below for the fastest response.
         </p>
 
-        <div className="mt-10 space-y-4">
+        <div className="mt-10 space-y-4 reveal">
           {channels.map((c) => (
-            <a key={c.email + c.label} href={`mailto:${c.email}`} className="surface-card p-6 flex gap-4 items-start hover:border-border-strong transition">
+            <a key={c.email + c.label} href={`mailto:${c.email}`} className="surface-card card-lift p-6 flex gap-4 items-start">
               <div className="size-11 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center shrink-0">
                 <c.icon className="size-5 text-primary" />
               </div>
@@ -70,6 +65,11 @@ function ContactPage() {
           </p>
         </div>
       </main>
+
+      <AppCtaBand
+        heading="Prefer to just get started?"
+        sub="Download FitPlanCoach free on Android — most questions answer themselves once you see your first plan."
+      />
 
       <PublicFooter />
     </div>

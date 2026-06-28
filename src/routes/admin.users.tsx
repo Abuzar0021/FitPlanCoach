@@ -48,7 +48,7 @@ function UsersAdmin() {
       supabase.from("subscriptions").select("user_id,plan_type,status"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
-    const subMap = new Map((subs ?? []).map((s: any) => [s.user_id, s]));
+    const subMap: Map<string, any> = new Map((subs ?? []).map((s: any) => [s.user_id, s]));
     const roleMap = new Map<string, "owner" | "admin" | "user">();
     for (const r of rolesRows ?? []) {
       const cur = roleMap.get((r as any).user_id);

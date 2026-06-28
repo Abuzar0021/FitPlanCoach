@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { logWorkoutSession } from "@/lib/engagement.functions";
 import { toast } from "sonner";
-import { CheckCircle2, Flame } from "lucide-react";
+import { CheckCircle2, Flame, Dumbbell } from "lucide-react";
+import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
 
 export const Route = createFileRoute("/_app/workouts")({
   head: () => ({
@@ -58,12 +59,19 @@ function Workouts() {
     } finally { setLogging(false); }
   }
 
-  if (loading) return <MobileShell><div className="pt-20 text-center text-muted-foreground">Loading…</div></MobileShell>;
+  if (loading) return <MobileShell><PlanScreenSkeleton /></MobileShell>;
   if (!days) return (
     <MobileShell>
-      <h1 className="text-2xl mb-2">Workouts</h1>
-      <p className="text-sm text-muted-foreground mb-6">No workout plan yet.</p>
-      <Link to="/dashboard"><Button>Generate plan</Button></Link>
+      <EmptyState
+        icon={Dumbbell}
+        title="No workout plan yet"
+        description="Generate your personalized weekly training plan and your first session will appear right here."
+        action={
+          <Link to="/dashboard">
+            <Button className="font-bold uppercase tracking-wider h-11 px-6">Build my plan</Button>
+          </Link>
+        }
+      />
     </MobileShell>
   );
 

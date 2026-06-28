@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GooglePlayButton } from "@/components/GooglePlayButton";
 
 export function PublicFooter() {
   return (
@@ -9,19 +10,24 @@ export function PublicFooter() {
             <div className="font-display uppercase italic text-lg text-foreground">FitPlanCoach</div>
             <p className="mt-2 text-xs leading-relaxed max-w-sm">
               Personalized fitness and nutrition guidance from{" "}
-              <span className="text-foreground font-semibold">FitPlanCoach</span>. Payments accepted via
-              PayPal (international) and QRIS (Indonesia) and verified manually by our team.
-              FitPlanCoach provides fitness and nutrition guidance and is not medical advice.
+              <span className="text-foreground font-semibold">FitPlanCoach</span>. Premium is available
+              through Google Play Billing inside the Android app. FitPlanCoach provides fitness and
+              nutrition guidance and is not medical advice.
             </p>
 
             <div className="mt-3 text-xs">
               Support: <a href="mailto:support@fitplancoach.com" className="text-foreground hover:underline">support@fitplancoach.com</a>
+            </div>
+
+            <div className="mt-5">
+              <GooglePlayButton size="md" />
             </div>
           </div>
 
           <div>
             <div className="text-xs font-bold uppercase tracking-widest text-foreground mb-3">Product</div>
             <nav className="flex flex-col gap-2">
+              <Link to="/download" className="hover:text-foreground">Get the app</Link>
               <Link to="/features" className="hover:text-foreground">Features</Link>
               <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
               <Link to="/faq" className="hover:text-foreground">FAQ</Link>
@@ -37,6 +43,7 @@ export function PublicFooter() {
               <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
               <Link to="/privacy" className="hover:text-foreground">Privacy Notice</Link>
               <Link to="/refunds" className="hover:text-foreground">Refund Policy</Link>
+              <Link to="/delete-account" className="hover:text-foreground">Delete account</Link>
             </nav>
           </div>
         </div>

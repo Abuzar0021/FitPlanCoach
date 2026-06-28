@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
+import { PlanScreenSkeleton } from "@/components/app-ui";
 
 export const Route = createFileRoute("/_app/progress")({
   head: () => ({ meta: [{ title: "Progress — FitPlanCoach" }] }),
@@ -22,6 +23,7 @@ function Progress() {
   const [weight, setWeight] = useState("");
   const [sessions, setSessions] = useState<Array<{ performed_on: string }>>([]);
   const [streak, setStreak] = useState<{ current: number; longest: number }>({ current: 0, longest: 0 });
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     if (!user) return;
@@ -34,6 +36,7 @@ function Progress() {
     setEntries((data ?? []) as Entry[]);
     setSessions((ss ?? []) as any);
     setStreak({ current: prof?.streak_current ?? 0, longest: prof?.streak_longest ?? 0 });
+    setLoading(false);
   }
   useEffect(() => { load(); }, [user]);
 
@@ -43,12 +46,14 @@ function Progress() {
     const w = Number(weight);
     if (!w || w < 20 || w > 500) { toast.error("Enter a realistic weight"); return; }
     const { error } = await supabase.from("progress_entries").insert({ user_id: user.id, weight_kg: w });
-    if (error) { toast.error(error.message); return; }
+    if (error) { console.error(error); toast.error("We couldn't save that entry. Please try again."); return; }
     await supabase.from("profiles").update({ weight_kg: w }).eq("id", user.id);
     setWeight("");
     toast.success("Logged");
     load();
   }
+
+  if (loading) return <MobileShell><PlanScreenSkeleton rows={4} /></MobileShell>;
 
   const latest = entries[entries.length - 1]?.weight_kg;
   const first = entries[0]?.weight_kg;

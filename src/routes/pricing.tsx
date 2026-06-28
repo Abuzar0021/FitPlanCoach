@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
-import { Logo } from "@/components/Logo";
+import { PublicHeader } from "@/components/PublicHeader";
+import { AppCtaBand } from "@/components/AppCtaBand";
 import { Button } from "@/components/ui/button";
 import { Check, Zap } from "lucide-react";
 
@@ -25,9 +26,8 @@ export const Route = createFileRoute("/pricing")({
           brand: { "@type": "Brand", name: "FitPlanCoach" },
           offers: [
             { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
-            { "@type": "Offer", name: "Pro", price: "5", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
-            { "@type": "Offer", name: "Premium", price: "10", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
-            { "@type": "Offer", name: "Elite", price: "15", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
+            { "@type": "Offer", name: "Pro Monthly", price: "5", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
+            { "@type": "Offer", name: "Pro Annual", price: "50", priceCurrency: "USD", url: "https://fitplancoach.com/pricing", availability: "https://schema.org/InStock" },
           ],
         }),
       },
@@ -55,25 +55,20 @@ const PRO_PERKS = [
 function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-5 py-3.5 flex items-center justify-between">
-          <Link to="/"><Logo /></Link>
-          <Link to="/auth"><Button size="sm" className="font-bold uppercase tracking-wide">Sign in</Button></Link>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-5xl px-6 py-16 w-full">
-        <div className="text-center max-w-2xl mx-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-5xl px-6 py-16 w-full">
+        <div className="text-center max-w-2xl mx-auto reveal">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-4">
             <Zap className="size-3" fill="currentColor" /> Simple, honest pricing
           </span>
-          <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight">Choose your plan</h1>
+          <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Choose your plan</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Start free, no credit card required. Upgrade to Pro when you're ready for unlimited personalized plans. Cancel anytime in one click.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 md:grid-cols-3 reveal">
           {/* Free */}
           <div className="surface-card p-6 flex flex-col">
             <h2 className="text-xl font-display uppercase italic">Free</h2>
@@ -154,11 +149,16 @@ function PricingPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Payments are processed securely via PayPal and QRIS. All prices in USD. Taxes calculated at checkout where applicable. See our{" "}
+          Premium is purchased securely through Google Play Billing inside the Android app. All prices in USD; taxes are handled by Google Play. See our{" "}
           <Link to="/refunds" className="underline">refund policy</Link> and{" "}
           <Link to="/terms" className="underline">terms</Link>.
         </p>
       </main>
+
+      <AppCtaBand
+        heading="Get started free on Android"
+        sub="Download the app, complete a 5-minute onboarding, and see your personalized plan before you ever pay a cent."
+      />
 
       <PublicFooter />
     </div>

@@ -3,7 +3,7 @@
  * Calls the internal send route which validates suppression, enqueues, and renders.
  */
 export async function sendAppEmail(input: {
-  templateName: "payment-approved" | "payment-rejected" | "welcome";
+  templateName: "welcome";
   recipientEmail: string;
   templateData?: Record<string, unknown>;
   idempotencyKey?: string;
