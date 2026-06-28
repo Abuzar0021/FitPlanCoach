@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { updateProfileBasic } from "@/lib/engagement.functions";
-import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2, RefreshCcw, LifeBuoy, ShieldCheck, FileText, Info } from "lucide-react";
+import { Camera, Flame, Trophy, Crown, Dumbbell, Scale, Target, UserCheck, Sparkles, CheckCircle2, LogOut, Settings, Trash2, RefreshCcw, LifeBuoy, ShieldCheck, FileText, Info, Lightbulb } from "lucide-react";
 import { restorePurchases } from "@/lib/billing";
 import { APP_VERSION } from "@/lib/app-config";
 
@@ -212,6 +212,9 @@ function Profile() {
         </Button>
         <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/onboarding" })}>
           <Settings className="size-4 mr-2" /> Edit fitness details
+        </Button>
+        <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/feedback" })}>
+          <Lightbulb className="size-4 mr-2" /> Feature requests
         </Button>
         <Button variant="outline" className="w-full justify-start h-12" onClick={() => navigate({ to: "/support" })}>
           <LifeBuoy className="size-4 mr-2" /> Support

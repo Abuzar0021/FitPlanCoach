@@ -39,6 +39,7 @@ import { Route as AdminFoodsRouteImport } from './routes/admin.foods'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppWorkoutsRouteImport } from './routes/_app.workouts'
 import { Route as AppSupportRouteImport } from './routes/_app.support'
+import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppSubscriptionRouteImport } from './routes/_app.subscription'
 import { Route as AppProgressRouteImport } from './routes/_app.progress'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
@@ -204,6 +205,11 @@ const AppSupportRoute = AppSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFeedbackRoute = AppFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSubscriptionRoute = AppSubscriptionRouteImport.update({
   id: '/subscription',
   path: '/subscription',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/feedback': typeof AppFeedbackRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/feedback': typeof AppFeedbackRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/_app/progress': typeof AppProgressRoute
   '/_app/subscription': typeof AppSubscriptionRoute
   '/_app/support': typeof AppSupportRoute
+  '/_app/feedback': typeof AppFeedbackRoute
   '/_app/workouts': typeof AppWorkoutsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
@@ -452,6 +461,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/feedback'
     | '/workouts'
     | '/admin/exercises'
     | '/admin/foods'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/feedback'
     | '/workouts'
     | '/admin/exercises'
     | '/admin/foods'
@@ -544,6 +555,7 @@ export interface FileRouteTypes {
     | '/_app/progress'
     | '/_app/subscription'
     | '/_app/support'
+    | '/_app/feedback'
     | '/_app/workouts'
     | '/admin/exercises'
     | '/admin/foods'
@@ -805,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSupportRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/feedback': {
+      id: '/_app/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof AppFeedbackRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/subscription': {
       id: '/_app/subscription'
       path: '/subscription'
@@ -923,6 +942,7 @@ interface AppRouteChildren {
   AppProgressRoute: typeof AppProgressRoute
   AppSubscriptionRoute: typeof AppSubscriptionRoute
   AppSupportRoute: typeof AppSupportRoute
+  AppFeedbackRoute: typeof AppFeedbackRoute
   AppWorkoutsRoute: typeof AppWorkoutsRoute
 }
 
@@ -936,6 +956,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProgressRoute: AppProgressRoute,
   AppSubscriptionRoute: AppSubscriptionRoute,
   AppSupportRoute: AppSupportRoute,
+  AppFeedbackRoute: AppFeedbackRoute,
   AppWorkoutsRoute: AppWorkoutsRoute,
 }
 
