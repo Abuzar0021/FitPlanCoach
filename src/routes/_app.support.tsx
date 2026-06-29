@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useServerFn } from "@tanstack/react-start";
 import { createSupportTicket, replySupportTicket } from "@/lib/support.functions";
 import { toast } from "sonner";
-import { HelpCircle, Plus, Send, Mail, Zap } from "lucide-react";
+import { HelpCircle, Plus, Send, Mail, Zap, Loader2 } from "lucide-react";
 import { usePlan } from "@/hooks/use-plan";
 import { useSiteConfig } from "@/lib/site-config";
 import { ListSkeleton } from "@/components/app-ui";
@@ -180,8 +180,11 @@ function SupportPage() {
       {creating && (
         <form onSubmit={submitNew} className="surface-card p-4 mb-4 space-y-3 animate-fade-in">
           <div>
-            <Label className="label-overline">Subject</Label>
+            <Label htmlFor="ticket-subject" className="label-overline">
+              Subject
+            </Label>
             <Input
+              id="ticket-subject"
               required
               maxLength={140}
               value={form.subject}
@@ -189,15 +192,16 @@ function SupportPage() {
               placeholder="What's going on?"
             />
           </div>
-          <div>
+          <div role="group" aria-label="Category">
             <Label className="label-overline">Category</Label>
             <div className="grid grid-cols-3 gap-1.5 mt-1">
               {CATEGORIES.map((c) => (
                 <button
                   key={c.v}
                   type="button"
+                  aria-pressed={form.category === c.v}
                   onClick={() => setForm((f) => ({ ...f, category: c.v }))}
-                  className={`text-xs font-semibold py-2 rounded-lg border ${form.category === c.v ? "bg-primary text-primary-foreground border-primary" : "border-border bg-card"}`}
+                  className={`text-xs font-semibold py-2 rounded-lg border transition-colors ${form.category === c.v ? "bg-primary text-primary-foreground border-primary" : "border-border bg-card hover:border-border-strong"}`}
                 >
                   {c.l}
                 </button>
@@ -205,8 +209,11 @@ function SupportPage() {
             </div>
           </div>
           <div>
-            <Label className="label-overline">Message</Label>
+            <Label htmlFor="ticket-message" className="label-overline">
+              Message
+            </Label>
             <Textarea
+              id="ticket-message"
               required
               maxLength={4000}
               rows={5}
@@ -217,7 +224,13 @@ function SupportPage() {
           </div>
           <div className="flex gap-2">
             <Button type="submit" disabled={busy} className="flex-1">
-              {busy ? "Sending…" : "Send ticket"}
+              {busy ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Sending…
+                </>
+              ) : (
+                "Send ticket"
+              )}
             </Button>
             <Button type="button" variant="outline" onClick={() => setCreating(false)}>
               Cancel
