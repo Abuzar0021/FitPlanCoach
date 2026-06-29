@@ -129,6 +129,7 @@ function MediaAdmin() {
                 <Input
                   defaultValue={a.alt ?? ""}
                   placeholder="Alt text"
+                  aria-label={`Alt text for ${a.filename}`}
                   className="h-8 text-xs"
                   onBlur={(e) => saveAlt(a, e.target.value)}
                 />
@@ -144,6 +145,7 @@ function MediaAdmin() {
                   <button
                     onClick={() => remove(a)}
                     title="Delete"
+                    aria-label={`Delete ${a.filename}`}
                     className="size-8 rounded-lg border border-border inline-flex items-center justify-center text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="size-4" />

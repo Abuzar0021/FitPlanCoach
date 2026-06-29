@@ -69,7 +69,7 @@ function FoodsAdmin() {
         <div className="col-span-2 md:col-span-7"><Button type="submit" className="w-full md:w-auto">Add food</Button></div>
       </form>
 
-      <Input placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} className="max-w-sm" />
+      <Input type="search" aria-label="Search foods" placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} className="max-w-sm" />
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         <table className="w-full text-sm">

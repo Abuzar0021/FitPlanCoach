@@ -125,6 +125,8 @@ function UsersAdmin() {
         Users <span className="text-sm text-muted-foreground font-normal">({rows.length})</span>
       </h1>
       <Input
+        type="search"
+        aria-label="Search users by email or name"
         placeholder="Search by email or name…"
         value={q}
         onChange={(e) => setQ(e.target.value)}

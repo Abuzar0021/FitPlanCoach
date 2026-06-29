@@ -252,6 +252,7 @@ function BlogAdmin() {
             <button
               onClick={() => togglePublish(p)}
               title={p.status === "published" ? "Unpublish" : "Publish"}
+              aria-label={p.status === "published" ? `Unpublish ${p.title}` : `Publish ${p.title}`}
               className="text-muted-foreground hover:text-foreground"
             >
               <Eye className="size-4" />
@@ -259,11 +260,17 @@ function BlogAdmin() {
             <button
               onClick={() => edit(p)}
               title="Edit"
+              aria-label={`Edit ${p.title}`}
               className="text-muted-foreground hover:text-foreground"
             >
               <Pencil className="size-4" />
             </button>
-            <button onClick={() => del(p.id)} title="Delete" className="text-destructive">
+            <button
+              onClick={() => del(p.id)}
+              title="Delete"
+              aria-label={`Delete ${p.title}`}
+              className="text-destructive"
+            >
               <Trash2 className="size-4" />
             </button>
           </div>
