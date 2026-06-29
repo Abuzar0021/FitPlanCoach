@@ -86,6 +86,17 @@ export function PlanScreenSkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
+/** Loading placeholder for list/inbox screens (notifications, support tickets). */
+export function ListSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-2.5">
+      {Array.from({ length: rows }).map((_, i) => (
+        <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+      ))}
+    </div>
+  );
+}
+
 /* ---- Membership gating. A single visual language for "this lives behind Pro",
    driven entirely by `hasFeature` in src/lib/access.ts. Use these instead of
    ad-hoc plan checks so every locked surface looks and behaves the same. */
