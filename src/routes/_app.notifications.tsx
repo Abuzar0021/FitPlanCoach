@@ -109,7 +109,7 @@ function NotificationsPage() {
         {items?.map((n) => {
           const Icon = ICON[n.category] ?? Bell;
           const body = (
-            <div className={`surface-card p-4 flex items-start gap-3 transition ${n.read_at ? "opacity-70" : "border-primary/30"}`}>
+            <div className={`surface-card p-4 flex items-start gap-3 transition-colors ${n.link ? "hover:border-border-strong" : ""} ${n.read_at ? "opacity-70" : "border-primary/30"}`}>
               <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center">
                 <Icon className="size-4 text-primary" />
               </div>
