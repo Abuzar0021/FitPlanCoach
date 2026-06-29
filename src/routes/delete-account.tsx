@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
@@ -90,9 +90,12 @@ function DeleteAccountPage() {
         <section className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
           <h2 className="font-display uppercase italic text-lg">Request deletion</h2>
           <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-            If you have an active subscription, please cancel it first from your billing page so you
-            aren't charged again. Then send your request — from your account email — and we'll handle
-            the rest.
+            If you have an active subscription, please cancel it first in Google Play so you aren't
+            charged again. Then send your request — from your account email — and we'll handle the
+            rest.
+          </p>
+          <p className="mt-2 text-xs font-semibold text-destructive">
+            This is permanent and cannot be undone.
           </p>
           <a href={MAILTO} className="inline-flex mt-5">
             <Button size="lg" className="font-bold uppercase tracking-wider h-12 px-7">
@@ -110,7 +113,10 @@ function DeleteAccountPage() {
 
         <p className="mt-8 text-xs text-muted-foreground">
           For full details on how we handle your data, see our{" "}
-          <a href="/privacy" className="underline">Privacy Notice</a>.
+          <Link to="/privacy" className="underline hover:text-foreground">
+            Privacy Notice
+          </Link>
+          .
         </p>
       </main>
 
