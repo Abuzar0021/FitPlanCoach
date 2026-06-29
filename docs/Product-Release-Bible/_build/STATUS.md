@@ -1,7 +1,13 @@
 # Build Status — FitPlanCoach Product & Release Bible
 
-**Phase:** 5 (QA gate) — Phases 0–4 complete; all 27 chapters authored, full PDF builds (~71 pp)
+**Phase:** COMPLETE — all 6 phases (0–5) done; Bible builds (~71 pp), QA gate passed
 **Last updated:** 2026-06-29
+
+> Next focus per the standing directive: drive the remaining **code-actionable**
+> Planned items (Vitest engine tests → close the Ch. 23 gap; regenerate types.ts;
+> legacy payment-table cleanup) to *implemented*, syncing the affected chapters.
+> All other Planned items are explicitly blocked (external build / Play Console /
+> operator credentials) — see `00_INVENTORY.md` §8 and Ch. 26.
 
 ## Toolchain (Phase 0)
 
@@ -27,7 +33,7 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 - [x] **Phase 2** — author 27 chapters
 - [x] **Phase 3** — diagrams (27 mermaid diagrams, one+ per chapter, all render)
 - [x] **Phase 4** — assemble PDF (~71 pp, linked TOC + page numbers)
-- [ ] **Phase 5** — QA gate vs Definition of Done → `QA_REPORT.md` (in progress)
+- [x] **Phase 5** — QA gate vs Definition of Done → `QA_REPORT.md` (complete)
 
 ## Chapters (Phase 2)
 
