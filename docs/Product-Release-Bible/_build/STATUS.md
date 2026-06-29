@@ -38,15 +38,15 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 - [x] 05 Database
 - [x] 06 Backend
 - [x] 07 Frontend
-- [ ] 08 Mobile App  ⚠cond
+- [x] 08 Mobile App  ⚠cond (Partial)
 - [ ] 09 Website
-- [ ] 10 Admin CMS  ⚠cond
+- [x] 10 Admin CMS  ⚠cond
 - [x] 11 Authentication
 - [x] 12 Memberships  ⚠cond (Partial)
 - [x] 13 Workout System
 - [x] 14 Nutrition System
-- [ ] 15 Daily Tips
-- [ ] 16 Analytics
+- [x] 15 Daily Tips
+- [x] 16 Analytics
 - [ ] 17 Blog
 - [ ] 18 Media Library
 - [ ] 19 SEO
