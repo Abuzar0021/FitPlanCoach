@@ -72,7 +72,14 @@ function BlogPostPage() {
 
         {post.cover_image_url && (
           <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted mb-8 border border-border">
-            <img src={post.cover_image_url} alt="" className="size-full object-cover" />
+            <img
+              src={post.cover_image_url}
+              alt=""
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="size-full object-cover"
+            />
           </div>
         )}
 

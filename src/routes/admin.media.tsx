@@ -117,6 +117,7 @@ function MediaAdmin() {
                   alt={a.alt ?? ""}
                   className="size-full object-cover"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="p-3 space-y-2">

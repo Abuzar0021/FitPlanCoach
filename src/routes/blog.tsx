@@ -54,6 +54,8 @@ function BlogIndex() {
                     <img
                       src={p.cover_image_url}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="size-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>

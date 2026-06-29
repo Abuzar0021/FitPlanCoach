@@ -113,7 +113,7 @@ export function MediaPicker({
                         : "border-border hover:border-border-strong"
                     }`}
                   >
-                    <img src={a.url} alt={a.alt ?? ""} className="size-full object-cover" />
+                    <img src={a.url} alt={a.alt ?? ""} loading="lazy" decoding="async" className="size-full object-cover" />
                     {value === a.url && (
                       <span className="absolute top-1 right-1 size-5 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center">
                         <Check className="size-3" />
@@ -128,7 +128,7 @@ export function MediaPicker({
       </div>
       {value && (
         <div className="rounded-lg overflow-hidden border border-border w-full max-w-[240px]">
-          <img src={value} alt="" className="w-full h-auto" />
+          <img src={value} alt="" loading="lazy" decoding="async" className="w-full h-auto" />
         </div>
       )}
     </div>
