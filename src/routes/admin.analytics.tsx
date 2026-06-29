@@ -21,6 +21,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { getAnalyticsSummary, type AnalyticsSummary } from "@/lib/analytics-admin.functions";
+import { AdminHeader, StatCard } from "@/components/admin-ui";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "Analytics — Admin" }] }),
@@ -72,24 +73,26 @@ function AnalyticsAdmin() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <div className="flex gap-1.5">
-          {RANGES.map((r) => (
-            <button
-              key={r}
-              onClick={() => setDays(r)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold border ${
-                days === r
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border hover:bg-muted"
-              }`}
-            >
-              {r}d
-            </button>
-          ))}
-        </div>
-      </div>
+      <AdminHeader
+        title="Analytics"
+        actions={
+          <div className="flex gap-1.5">
+            {RANGES.map((r) => (
+              <button
+                key={r}
+                onClick={() => setDays(r)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${
+                  days === r
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
+                {r}d
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -104,19 +107,18 @@ function AnalyticsAdmin() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {cards.map((c) => {
-              const Icon = c.icon;
-              return (
-                <div key={c.label} className="bg-card border border-border rounded-2xl p-4">
-                  <Icon className="size-4 text-primary mb-2" />
-                  <p className="text-2xl font-bold tabular-nums">{c.value.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">{c.label}</p>
-                </div>
-              );
-            })}
+            {cards.map((c) => (
+              <StatCard
+                key={c.label}
+                icon={c.icon}
+                label={c.label}
+                value={c.value.toLocaleString()}
+                accent="text-primary"
+              />
+            ))}
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="surface-card p-5">
             <h2 className="font-semibold mb-3">Events over time</h2>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -139,7 +141,7 @@ function AnalyticsAdmin() {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="surface-card p-5">
             <h2 className="font-semibold mb-3">Events by type</h2>
             {data.byEvent.length === 0 ? (
               <p className="text-sm text-muted-foreground">No events recorded in this range.</p>
