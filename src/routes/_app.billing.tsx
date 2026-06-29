@@ -23,7 +23,12 @@ function Billing() {
           Your payment history, receipts, and renewals are handled by Google Play. View or manage
           them any time from your Play account.
         </p>
-        <a href={PLAY_MANAGE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex mt-5">
+        <a
+          href={PLAY_MANAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex mt-5"
+        >
           <Button variant="outline" className="h-11 px-6 border-border-strong">
             Open Google Play <ExternalLink className="size-4 ml-2" />
           </Button>

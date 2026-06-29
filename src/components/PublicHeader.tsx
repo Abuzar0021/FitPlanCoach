@@ -24,19 +24,34 @@ export function PublicHeader() {
             <Logo />
           </Link>
           <nav aria-label="Primary" className="flex items-center gap-3 sm:gap-4 text-sm">
-            <Link to="/features" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">
+            <Link
+              to="/features"
+              className="text-muted-foreground hover:text-foreground transition hidden sm:inline"
+            >
               Features
             </Link>
-            <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">
+            <Link
+              to="/pricing"
+              className="text-muted-foreground hover:text-foreground transition hidden sm:inline"
+            >
               Pricing
             </Link>
-            <Link to="/faq" className="text-muted-foreground hover:text-foreground transition hidden md:inline">
+            <Link
+              to="/faq"
+              className="text-muted-foreground hover:text-foreground transition hidden md:inline"
+            >
               FAQ
             </Link>
-            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition hidden md:inline">
+            <Link
+              to="/blog"
+              className="text-muted-foreground hover:text-foreground transition hidden md:inline"
+            >
               Blog
             </Link>
-            <Link to="/auth" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">
+            <Link
+              to="/auth"
+              className="text-muted-foreground hover:text-foreground transition hidden sm:inline"
+            >
               Sign in
             </Link>
             <GooglePlayButton size="sm" />

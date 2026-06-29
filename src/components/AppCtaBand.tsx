@@ -24,7 +24,11 @@ export function AppCtaBand({
         <div className="mt-7 flex items-center justify-center gap-3 flex-wrap">
           <GooglePlayButton size="lg" />
           <Link to="/auth">
-            <Button size="lg" variant="outline" className="font-bold uppercase tracking-wider px-7 h-14 border-border-strong">
+            <Button
+              size="lg"
+              variant="outline"
+              className="font-bold uppercase tracking-wider px-7 h-14 border-border-strong"
+            >
               Start free on web
             </Button>
           </Link>

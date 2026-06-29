@@ -6,7 +6,11 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Notice — FitPlanCoach" },
-      { name: "description", content: "How FitPlanCoach collects, uses, and shares personal data for the FitPlanCoach service." },
+      {
+        name: "description",
+        content:
+          "How FitPlanCoach collects, uses, and shares personal data for the FitPlanCoach service.",
+      },
     ],
   }),
   component: Privacy,
@@ -17,22 +21,36 @@ function Privacy() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert"
+      >
         <h1>Privacy Notice</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 
         <p>
-          This Privacy Notice describes how <strong>FitPlanCoach</strong> ("we", "us") collects, uses, and
-          shares personal data when you use the FitPlanCoach service. FitPlanCoach is the data controller for
-          personal data processed through the Service.
+          This Privacy Notice describes how <strong>FitPlanCoach</strong> ("we", "us") collects,
+          uses, and shares personal data when you use the FitPlanCoach service. FitPlanCoach is the
+          data controller for personal data processed through the Service.
         </p>
 
         <h2>1. Data we collect</h2>
         <ul>
-          <li><strong>Account data:</strong> name, email, login credentials.</li>
-          <li><strong>Profile and fitness data:</strong> body metrics, goals, preferences, dietary restrictions, workout logs, progress photos you choose to upload.</li>
-          <li><strong>Support messages:</strong> content of correspondence with our team.</li>
-          <li><strong>Usage and device data:</strong> pages visited, features used, device identifiers, IP address, browser type.</li>
+          <li>
+            <strong>Account data:</strong> name, email, login credentials.
+          </li>
+          <li>
+            <strong>Profile and fitness data:</strong> body metrics, goals, preferences, dietary
+            restrictions, workout logs, progress photos you choose to upload.
+          </li>
+          <li>
+            <strong>Support messages:</strong> content of correspondence with our team.
+          </li>
+          <li>
+            <strong>Usage and device data:</strong> pages visited, features used, device
+            identifiers, IP address, browser type.
+          </li>
         </ul>
 
         <h2>2. Why we use it</h2>
@@ -40,17 +58,32 @@ function Privacy() {
           <li>To create and operate your account (contract performance).</li>
           <li>To generate and personalize your meal and workout plans (contract performance).</li>
           <li>To provide customer support (legitimate interests).</li>
-          <li>To secure the Service and prevent fraud or abuse (legitimate interests, legal obligation).</li>
+          <li>
+            To secure the Service and prevent fraud or abuse (legitimate interests, legal
+            obligation).
+          </li>
           <li>To improve the Service through aggregated analytics (legitimate interests).</li>
           <li>To send service emails and, where you have opted in, marketing emails (consent).</li>
         </ul>
 
         <h2>3. Who we share it with</h2>
         <ul>
-          <li><strong>Service providers and subprocessors</strong> that help us operate the Service (hosting, databases, analytics, email delivery, customer support tooling).</li>
-          <li><strong>Google Play</strong>, the merchant of record for in-app subscriptions, which handles payment, subscription management, tax compliance, and invoicing.</li>
-          <li><strong>Professional advisers</strong> (legal, accounting) under confidentiality obligations.</li>
-          <li><strong>Authorities</strong> where required by law or to protect rights, safety, and property.</li>
+          <li>
+            <strong>Service providers and subprocessors</strong> that help us operate the Service
+            (hosting, databases, analytics, email delivery, customer support tooling).
+          </li>
+          <li>
+            <strong>Google Play</strong>, the merchant of record for in-app subscriptions, which
+            handles payment, subscription management, tax compliance, and invoicing.
+          </li>
+          <li>
+            <strong>Professional advisers</strong> (legal, accounting) under confidentiality
+            obligations.
+          </li>
+          <li>
+            <strong>Authorities</strong> where required by law or to protect rights, safety, and
+            property.
+          </li>
         </ul>
 
         <h2>4. International transfers</h2>
@@ -74,7 +107,8 @@ function Privacy() {
           requests within one month.
         </p>
         <p>
-          To exercise a right, email <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
+          To exercise a right, email{" "}
+          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
         </p>
 
         <h2>7. Security</h2>
@@ -92,7 +126,10 @@ function Privacy() {
         </p>
 
         <h2>9. Children</h2>
-        <p>The Service is not directed to children under 16, and we do not knowingly collect data from them.</p>
+        <p>
+          The Service is not directed to children under 16, and we do not knowingly collect data
+          from them.
+        </p>
 
         <h2>10. Changes and contact</h2>
         <p>

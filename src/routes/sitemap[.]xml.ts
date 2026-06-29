@@ -27,7 +27,12 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         // Append every published blog post. Degrades gracefully to the static
         // list if the blog table isn't available yet.
-        let postEntries: Array<{ path: string; changefreq: string; priority: string; lastmod: string }> = [];
+        let postEntries: Array<{
+          path: string;
+          changefreq: string;
+          priority: string;
+          lastmod: string;
+        }> = [];
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const db: any = supabaseAdmin;

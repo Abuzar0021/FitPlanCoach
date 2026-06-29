@@ -6,7 +6,11 @@ export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms of Service — FitPlanCoach" },
-      { name: "description", content: "The terms that govern your use of FitPlanCoach. Subscriptions are purchased in the Android app and billed securely through Google Play." },
+      {
+        name: "description",
+        content:
+          "The terms that govern your use of FitPlanCoach. Subscriptions are purchased in the Android app and billed securely through Google Play.",
+      },
       { property: "og:title", content: "Terms of Service — FitPlanCoach" },
       { property: "og:description", content: "The terms that govern your use of FitPlanCoach." },
       { property: "og:url", content: "https://fitplancoach.com/terms" },
@@ -21,23 +25,27 @@ function Terms() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert"
+      >
         <h1>Terms of Service</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 
         <p>
           These Terms govern your use of the FitPlanCoach service ("Service") provided by
-          <strong> FitPlanCoach</strong> ("we", "us", "our"). By creating an account or using the Service,
-          you agree to these Terms.
+          <strong> FitPlanCoach</strong> ("we", "us", "our"). By creating an account or using the
+          Service, you agree to these Terms.
         </p>
 
         <h2>1. The Service</h2>
         <p>
           FitPlanCoach generates personalized meal plans, workouts, and progress tracking tools. The
           Service is provided on an "as is" basis. We do not guarantee uninterrupted or error-free
-          operation, and the Service does not constitute medical, nutritional, or professional advice.
-          Consult a qualified professional before making significant changes to your diet or exercise
-          routine.
+          operation, and the Service does not constitute medical, nutritional, or professional
+          advice. Consult a qualified professional before making significant changes to your diet or
+          exercise routine.
         </p>
 
         <h2>2. Accounts</h2>
@@ -103,14 +111,15 @@ function Terms() {
 
         <h2>9. Governing law</h2>
         <p>
-          These Terms are governed by the laws of the jurisdiction in which FitPlanCoach is established,
-          without regard to conflict of law principles.
+          These Terms are governed by the laws of the jurisdiction in which FitPlanCoach is
+          established, without regard to conflict of law principles.
         </p>
 
         <h2>10. Contact</h2>
         <p>
-          Questions about these Terms: <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
-          For billing, manage your subscription in Google Play or email us.
+          Questions about these Terms:{" "}
+          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>. For billing, manage
+          your subscription in Google Play or email us.
         </p>
       </main>
 

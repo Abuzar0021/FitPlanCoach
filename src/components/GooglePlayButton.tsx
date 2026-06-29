@@ -17,10 +17,34 @@ function PlayGlyph({ className }: { className?: string }) {
 
 type Size = "sm" | "md" | "lg";
 
-const DIMS: Record<Size, { h: string; px: string; gap: string; glyph: string; eyebrow: string; word: string }> = {
-  sm: { h: "h-10", px: "px-3", gap: "gap-2.5", glyph: "size-5", eyebrow: "text-[8px]", word: "text-sm" },
-  md: { h: "h-12", px: "px-4", gap: "gap-3", glyph: "size-6", eyebrow: "text-[9px]", word: "text-base" },
-  lg: { h: "h-14", px: "px-5", gap: "gap-3", glyph: "size-7", eyebrow: "text-[10px]", word: "text-lg" },
+const DIMS: Record<
+  Size,
+  { h: string; px: string; gap: string; glyph: string; eyebrow: string; word: string }
+> = {
+  sm: {
+    h: "h-10",
+    px: "px-3",
+    gap: "gap-2.5",
+    glyph: "size-5",
+    eyebrow: "text-[8px]",
+    word: "text-sm",
+  },
+  md: {
+    h: "h-12",
+    px: "px-4",
+    gap: "gap-3",
+    glyph: "size-6",
+    eyebrow: "text-[9px]",
+    word: "text-base",
+  },
+  lg: {
+    h: "h-14",
+    px: "px-5",
+    gap: "gap-3",
+    glyph: "size-7",
+    eyebrow: "text-[10px]",
+    word: "text-lg",
+  },
 };
 
 /**

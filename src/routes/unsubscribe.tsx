@@ -23,10 +23,16 @@ function UnsubscribePage() {
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("token");
     setToken(t);
-    if (!t) { setState("invalid"); return; }
+    if (!t) {
+      setState("invalid");
+      return;
+    }
     fetch(`/email/unsubscribe?token=${encodeURIComponent(t)}`)
       .then(async (r) => {
-        if (!r.ok) { setState("invalid"); return; }
+        if (!r.ok) {
+          setState("invalid");
+          return;
+        }
         const d = await r.json();
         if (d.valid === false && d.reason === "already_unsubscribed") setState("already");
         else if (d.valid) setState("valid");
@@ -72,10 +78,15 @@ function UnsubscribePage() {
             <>
               <h1 className="text-2xl font-display uppercase italic mb-3">Unsubscribe?</h1>
               <p className="text-sm text-muted-foreground mb-6">
-                You'll stop receiving emails from FitPlanCoach. You can still sign in and use your account normally.
+                You'll stop receiving emails from FitPlanCoach. You can still sign in and use your
+                account normally.
               </p>
-              <Button onClick={confirm} className="w-full mb-2">Confirm unsubscribe</Button>
-              <a href="/" className="text-xs text-muted-foreground hover:text-foreground underline">Keep my emails</a>
+              <Button onClick={confirm} className="w-full mb-2">
+                Confirm unsubscribe
+              </Button>
+              <a href="/" className="text-xs text-muted-foreground hover:text-foreground underline">
+                Keep my emails
+              </a>
             </>
           )}
           {state === "confirming" && (
@@ -89,7 +100,11 @@ function UnsubscribePage() {
               <CheckCircle2 className="size-12 text-primary mx-auto mb-4" />
               <h1 className="text-2xl font-display uppercase italic mb-2">You're unsubscribed</h1>
               <p className="text-sm text-muted-foreground">
-                We won't email you anymore. Change your mind? Reach <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a>.
+                We won't email you anymore. Change your mind? Reach{" "}
+                <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">
+                  abuzarelahi01@gmail.com
+                </a>
+                .
               </p>
             </>
           )}
@@ -105,7 +120,11 @@ function UnsubscribePage() {
               <AlertCircle className="size-12 text-amber-500 mx-auto mb-4" />
               <h1 className="text-2xl font-display uppercase italic mb-2">Link not valid</h1>
               <p className="text-sm text-muted-foreground">
-                This unsubscribe link is invalid or expired. Email <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">abuzarelahi01@gmail.com</a> and we'll unsubscribe you manually.
+                This unsubscribe link is invalid or expired. Email{" "}
+                <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">
+                  abuzarelahi01@gmail.com
+                </a>{" "}
+                and we'll unsubscribe you manually.
               </p>
             </>
           )}

@@ -2,7 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const FAQS = [
   {
@@ -51,7 +56,11 @@ export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
       { title: "FAQ — FitPlanCoach" },
-      { name: "description", content: "Answers to common questions about FitPlanCoach: plans, pricing, billing, cancellation, refunds, and data privacy." },
+      {
+        name: "description",
+        content:
+          "Answers to common questions about FitPlanCoach: plans, pricing, billing, cancellation, refunds, and data privacy.",
+      },
       { property: "og:title", content: "FitPlanCoach FAQ" },
       { property: "og:url", content: "https://fitplancoach.com/faq" },
     ],
@@ -80,21 +89,35 @@ function FAQPage() {
       <PublicHeader />
 
       <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
-        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Frequently asked questions</h1>
-        <p className="mt-4 text-muted-foreground">Everything most people want to know before they download — pricing, privacy, results, and how plans are made.</p>
+        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">
+          Frequently asked questions
+        </h1>
+        <p className="mt-4 text-muted-foreground">
+          Everything most people want to know before they download — pricing, privacy, results, and
+          how plans are made.
+        </p>
 
         <Accordion type="single" collapsible className="mt-8">
           {FAQS.map((f, i) => (
             <AccordionItem key={i} value={`faq-${i}`}>
               <AccordionTrigger className="text-left font-semibold">{f.q}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">{f.a}</AccordionContent>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                {f.a}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
         <div className="mt-12 surface-card p-6 text-sm text-muted-foreground">
-          Still have questions? Email <a className="text-foreground underline" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>{" "}
-          or visit our <Link to="/contact" className="text-foreground underline">contact page</Link>.
+          Still have questions? Email{" "}
+          <a className="text-foreground underline" href="mailto:abuzarelahi01@gmail.com">
+            abuzarelahi01@gmail.com
+          </a>{" "}
+          or visit our{" "}
+          <Link to="/contact" className="text-foreground underline">
+            contact page
+          </Link>
+          .
         </div>
       </main>
 

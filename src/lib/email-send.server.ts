@@ -22,7 +22,8 @@ export async function sendAppEmail(input: {
         templateName: input.templateName,
         recipientEmail: input.recipientEmail.toLowerCase(),
         templateData: input.templateData ?? {},
-        idempotencyKey: input.idempotencyKey ?? `${input.templateName}-${input.recipientEmail}-${Date.now()}`,
+        idempotencyKey:
+          input.idempotencyKey ?? `${input.templateName}-${input.recipientEmail}-${Date.now()}`,
       },
     } as any);
   } catch (err) {

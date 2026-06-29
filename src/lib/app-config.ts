@@ -9,7 +9,9 @@
 // No code changes are required when the app goes live — the value is read here
 // once and consumed by GooglePlayButton, the /download page, and schema.org.
 
-const RAW_PLAY_STORE_URL = ((import.meta.env.VITE_PLAY_STORE_URL as string | undefined) ?? "").trim();
+const RAW_PLAY_STORE_URL = (
+  (import.meta.env.VITE_PLAY_STORE_URL as string | undefined) ?? ""
+).trim();
 
 /** Android application id used on the Play Store listing. */
 export const ANDROID_PACKAGE_ID = "com.fitplancoach.app";

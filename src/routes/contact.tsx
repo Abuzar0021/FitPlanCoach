@@ -8,7 +8,10 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact — FitPlanCoach" },
-      { name: "description", content: "Get in touch with FitPlanCoach. Email our support, privacy, or billing teams." },
+      {
+        name: "description",
+        content: "Get in touch with FitPlanCoach. Email our support, privacy, or billing teams.",
+      },
       { property: "og:title", content: "Contact FitPlanCoach" },
       { property: "og:url", content: "https://fitplancoach.com/contact" },
     ],
@@ -19,9 +22,24 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const channels = [
-    { icon: Mail, label: "General support", email: "abuzarelahi01@gmail.com", desc: "Account help, plan generation, app questions. We reply within 1–2 business days." },
-    { icon: ShieldCheck, label: "Privacy & data requests", email: "abuzarelahi01@gmail.com", desc: "Access, correction, deletion, or portability requests under GDPR/CCPA." },
-    { icon: CreditCard, label: "Billing & refunds", email: "abuzarelahi01@gmail.com", desc: "Pro is billed through Google Play. Manage or cancel in your Google Play subscriptions, or email us for help." },
+    {
+      icon: Mail,
+      label: "General support",
+      email: "abuzarelahi01@gmail.com",
+      desc: "Account help, plan generation, app questions. We reply within 1–2 business days.",
+    },
+    {
+      icon: ShieldCheck,
+      label: "Privacy & data requests",
+      email: "abuzarelahi01@gmail.com",
+      desc: "Access, correction, deletion, or portability requests under GDPR/CCPA.",
+    },
+    {
+      icon: CreditCard,
+      label: "Billing & refunds",
+      email: "abuzarelahi01@gmail.com",
+      desc: "Pro is billed through Google Play. Manage or cancel in your Google Play subscriptions, or email us for help.",
+    },
   ];
 
   return (
@@ -29,14 +47,21 @@ function ContactPage() {
       <PublicHeader />
 
       <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-16 w-full">
-        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">Contact us</h1>
+        <h1 className="text-4xl md:text-5xl font-display uppercase italic tracking-tight text-balance">
+          Contact us
+        </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Real humans at FitPlanCoach read every message. Pick the right inbox below for the fastest response.
+          Real humans at FitPlanCoach read every message. Pick the right inbox below for the fastest
+          response.
         </p>
 
         <div className="mt-10 space-y-4 reveal">
           {channels.map((c) => (
-            <a key={c.email + c.label} href={`mailto:${c.email}`} className="surface-card card-lift p-6 flex gap-4 items-start">
+            <a
+              key={c.email + c.label}
+              href={`mailto:${c.email}`}
+              className="surface-card card-lift p-6 flex gap-4 items-start"
+            >
               <div className="size-11 rounded-xl bg-primary/10 border border-primary/20 inline-flex items-center justify-center shrink-0">
                 <c.icon className="size-5 text-primary" />
               </div>
@@ -53,15 +78,25 @@ function ContactPage() {
           <h2 className="font-display uppercase italic text-lg">Manage your subscription</h2>
           <p className="text-sm text-muted-foreground mt-2">
             Update billing, cancel, or view payment history from your{" "}
-            <Link to="/billing" className="underline text-foreground">billing page</Link> when signed in,
-            or email <a className="underline text-foreground" href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a> and we'll handle it for you.
+            <Link to="/billing" className="underline text-foreground">
+              billing page
+            </Link>{" "}
+            when signed in, or email{" "}
+            <a className="underline text-foreground" href="mailto:abuzarelahi01@gmail.com">
+              abuzarelahi01@gmail.com
+            </a>{" "}
+            and we'll handle it for you.
           </p>
         </div>
 
         <div className="mt-4 surface-card p-6">
           <h2 className="font-display uppercase italic text-lg">Already have an account?</h2>
           <p className="text-sm text-muted-foreground mt-2">
-            Open a tracked support ticket from your <Link to="/support" className="underline text-foreground">support page</Link> for the fastest reply.
+            Open a tracked support ticket from your{" "}
+            <Link to="/support" className="underline text-foreground">
+              support page
+            </Link>{" "}
+            for the fastest reply.
           </p>
         </div>
       </main>

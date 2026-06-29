@@ -38,7 +38,11 @@ const PRO_PERKS = [
 function fmtDate(d?: string | null) {
   if (!d) return null;
   try {
-    return new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    return new Date(d).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   } catch {
     return null;
   }
@@ -54,7 +58,9 @@ function Subscription() {
     if (!user) return;
     const { data } = await supabase
       .from("subscriptions")
-      .select("plan_type,status,current_period_end,billing_interval,cancel_at_period_end,renews_at,ends_at")
+      .select(
+        "plan_type,status,current_period_end,billing_interval,cancel_at_period_end,renews_at,ends_at",
+      )
       .eq("user_id", user.id)
       .maybeSingle();
     setSub((data as SubRow) ?? { plan_type: "free" });
@@ -188,7 +194,9 @@ function Subscription() {
                 disabled={busy !== null}
                 onClick={() => upgrade("annual")}
               >
-                {busy === "annual" ? "Opening Google Play…" : "Go Pro Annual — $50 / year (2 months free)"}
+                {busy === "annual"
+                  ? "Opening Google Play…"
+                  : "Go Pro Annual — $50 / year (2 months free)"}
               </Button>
               <p className="text-[11px] text-muted-foreground text-center mt-1">
                 Billed securely through Google Play. Cancel anytime.
@@ -198,7 +206,8 @@ function Subscription() {
             /* Web: premium is sold only in the app */
             <div className="surface-card p-5 text-center">
               <p className="text-sm text-muted-foreground">
-                Premium is purchased securely through Google Play, inside the FitPlanCoach Android app.
+                Premium is purchased securely through Google Play, inside the FitPlanCoach Android
+                app.
               </p>
               <div className="mt-4 flex justify-center">
                 <GooglePlayButton size="lg" />

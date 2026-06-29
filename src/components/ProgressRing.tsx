@@ -1,7 +1,7 @@
 type RingProps = {
-  value: number;        // 0..1
-  size?: number;        // px
-  stroke?: number;      // px
+  value: number; // 0..1
+  size?: number; // px
+  stroke?: number; // px
   trackClassName?: string;
   progressClassName?: string;
   children?: React.ReactNode;
@@ -20,7 +20,10 @@ export function ProgressRing({
   const v = Math.max(0, Math.min(1, value));
   const offset = c * (1 - v);
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -72,7 +75,12 @@ export function StatBar({
       <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1.5">
         <span>{label}</span>
         <span className="text-foreground tabular-nums">
-          {Math.round(value)}{unit} <span className="text-muted-foreground">/ {Math.round(max)}{unit}</span>
+          {Math.round(value)}
+          {unit}{" "}
+          <span className="text-muted-foreground">
+            / {Math.round(max)}
+            {unit}
+          </span>
         </span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">

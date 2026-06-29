@@ -26,12 +26,12 @@ export function MobileShell({ children }: { children: ReactNode }) {
                   to={to}
                   aria-current={active ? "page" : undefined}
                   className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${
-                    active
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span className={`relative inline-flex ${active ? "scale-110" : ""} transition-transform`}>
+                  <span
+                    className={`relative inline-flex ${active ? "scale-110" : ""} transition-transform`}
+                  >
                     <Icon className="size-5" strokeWidth={active ? 2.6 : 2} />
                     {active && (
                       <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-1 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />

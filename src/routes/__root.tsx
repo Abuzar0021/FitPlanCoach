@@ -82,7 +82,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "FitPlanCoach — Personalized Fitness Coaching" },
-      { name: "description", content: "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget." },
+      {
+        name: "description",
+        content:
+          "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget.",
+      },
       { name: "author", content: "FitPlanCoach" },
       { name: "theme-color", content: "#0a0f0c" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -90,14 +94,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "FitPlanCoach" },
       { name: "mobile-web-app-capable", content: "yes" },
       { property: "og:title", content: "FitPlanCoach — Personalized Fitness Coaching" },
-      { property: "og:description", content: "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget." },
+      {
+        property: "og:description",
+        content:
+          "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "FitPlanCoach" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "FitPlanCoach — Personalized Fitness Coaching" },
-      { name: "twitter:description", content: "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/45a4247d-e5c0-4201-afee-9846d6ed9422" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/45a4247d-e5c0-4201-afee-9846d6ed9422" },
+      {
+        name: "twitter:description",
+        content:
+          "Personalized meal plans, workouts, and progress tracking, tuned to your body, goal, and budget.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/45a4247d-e5c0-4201-afee-9846d6ed9422",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/45a4247d-e5c0-4201-afee-9846d6ed9422",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -106,7 +126,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,

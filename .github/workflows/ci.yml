@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  engine-tests:
+    name: Fitness-engine unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The pure fitness engine and its tests have no third-party imports, so the
+      # suite runs on Node's built-in test runner with TypeScript type-stripping
+      # and needs no `npm install` — keeping CI fast and conflict-free.
+      - name: Run engine unit tests
+        run: node --test --experimental-strip-types "src/**/*.test.ts"
