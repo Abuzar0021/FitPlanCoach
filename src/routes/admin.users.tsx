@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminHeader } from "@/components/admin-ui";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -121,9 +122,13 @@ function UsersAdmin() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">
-        Users <span className="text-sm text-muted-foreground font-normal">({rows.length})</span>
-      </h1>
+      <AdminHeader
+        title={
+          <>
+            Users <span className="text-sm text-muted-foreground font-normal">({rows.length})</span>
+          </>
+        }
+      />
       <Input
         type="search"
         aria-label="Search users by email or name"
@@ -132,9 +137,9 @@ function UsersAdmin() {
         onChange={(e) => setQ(e.target.value)}
         className="max-w-sm"
       />
-      <div className="bg-card border border-border rounded-2xl overflow-x-auto">
+      <div className="surface-card overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
-          <thead className="bg-muted text-xs uppercase tracking-wider">
+          <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             <tr>
               <th className="text-left p-3">Name</th>
               <th className="text-left p-3">Email</th>
@@ -146,7 +151,10 @@ function UsersAdmin() {
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.id} className={`border-t border-border ${r.banned ? "opacity-50" : ""}`}>
+              <tr
+                key={r.id}
+                className={`border-t border-border hover:bg-muted/30 transition-colors ${r.banned ? "opacity-50" : ""}`}
+              >
                 <td className="p-3 font-medium">{r.name ?? "—"}</td>
                 <td className="p-3">{r.email ?? "—"}</td>
                 <td className="p-3">
@@ -171,18 +179,10 @@ function UsersAdmin() {
                 <td className="p-3 text-right space-x-1 whitespace-nowrap">
                   {isOwner && r.id !== user?.id && r.role !== "owner" && (
                     <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => toggleAdmin(r.id, r.role)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => toggleAdmin(r.id, r.role)}>
                         {r.role === "admin" ? "− admin" : "+ admin"}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => doTransfer(r.id, r.email)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => doTransfer(r.id, r.email)}>
                         Transfer ownership
                       </Button>
                     </>
@@ -212,4 +212,3 @@ function UsersAdmin() {
     </div>
   );
 }
-
