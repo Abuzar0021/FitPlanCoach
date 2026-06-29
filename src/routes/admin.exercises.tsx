@@ -59,7 +59,7 @@ function ExAdmin() {
       <AdminHeader title="Exercises" />
       <form
         onSubmit={add}
-        className="bg-card border border-border rounded-2xl p-4 grid grid-cols-2 md:grid-cols-5 gap-2 items-end"
+        className="surface-card p-4 grid grid-cols-2 md:grid-cols-5 gap-2 items-end"
       >
         <div>
           <label className="text-xs">Name</label>
@@ -91,9 +91,9 @@ function ExAdmin() {
         </div>
         <Button type="submit">Add</Button>
       </form>
-      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      <div className="surface-card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted text-xs uppercase tracking-wider">
+          <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             <tr>
               <th className="text-left p-3">Name</th>
               <th className="text-left p-3">Muscle</th>
@@ -104,7 +104,7 @@ function ExAdmin() {
           </thead>
           <tbody>
             {items.map((x) => (
-              <tr key={x.id} className="border-t border-border">
+              <tr key={x.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                 <td className="p-3 font-medium">{x.name}</td>
                 <td className="p-3">{x.muscle_group}</td>
                 <td className="p-3">{x.equipment ?? "—"}</td>

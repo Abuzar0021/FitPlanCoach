@@ -76,7 +76,7 @@ function WtAdmin() {
 
       <form
         onSubmit={create}
-        className="bg-card border border-border rounded-2xl p-4 grid grid-cols-2 md:grid-cols-4 gap-2 items-end"
+        className="surface-card p-4 grid grid-cols-2 md:grid-cols-4 gap-2 items-end"
       >
         <div>
           <label className="text-xs">Name</label>
@@ -115,7 +115,7 @@ function WtAdmin() {
 
       <div className="space-y-3">
         {items.map((x) => (
-          <div key={x.id} className="bg-card border border-border rounded-2xl p-4">
+          <div key={x.id} className="surface-card p-4">
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-semibold">{x.name}</div>

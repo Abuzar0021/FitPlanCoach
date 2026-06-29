@@ -130,7 +130,7 @@ function AdminSupport() {
           ))}
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="surface-card p-5">
           {!active ? (
             <p className="text-sm text-muted-foreground">Select a ticket.</p>
           ) : (

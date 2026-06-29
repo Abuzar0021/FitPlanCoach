@@ -105,7 +105,7 @@ function MediaAdmin() {
           ))}
         </div>
       ) : assets.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-12 text-center">
+        <div className="surface-card p-12 text-center">
           <div className="size-14 mx-auto mb-3 rounded-2xl bg-muted inline-flex items-center justify-center">
             <ImageIcon className="size-6 text-muted-foreground" />
           </div>
@@ -117,7 +117,7 @@ function MediaAdmin() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {assets.map((a) => (
-            <div key={a.id} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div key={a.id} className="surface-card overflow-hidden">
               <div className="aspect-square bg-muted">
                 <img
                   src={a.url}

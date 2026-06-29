@@ -100,7 +100,7 @@ function SettingsAdmin() {
         subtitle="Branding, contact, content, analytics, pricing, and engine rules."
       />
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Branding</h2>
         <div className="space-y-1.5">
           <Label>App name</Label>
@@ -108,7 +108,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Contact</h2>
         <p className="text-xs text-muted-foreground">
           Shown in the footer, support center, and contact page across the site.
@@ -124,7 +124,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Social links</h2>
         <p className="text-xs text-muted-foreground">
           Paste full profile URLs. Empty fields are hidden.
@@ -144,7 +144,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Announcement bar</h2>
         <p className="text-xs text-muted-foreground">
           A dismissible banner at the top of the marketing site. Leave disabled to hide it.
@@ -177,7 +177,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Analytics & tracking</h2>
         <p className="text-xs text-muted-foreground">
           Paste your IDs to enable tracking site-wide. Leave blank to keep an integration off.
@@ -202,7 +202,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Pricing (USD / month)</h2>
         <div className="grid grid-cols-3 gap-3">
           <div>
@@ -232,7 +232,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Plans enabled</h2>
         <div className="flex flex-wrap gap-4">
           {(["free", "pro", "premium", "elite"] as const).map((k) => (
@@ -257,7 +257,7 @@ function SettingsAdmin() {
         </div>
       </section>
 
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <section className="surface-card p-5 space-y-3">
         <h2 className="font-semibold">Calorie & macro rules</h2>
         <div>
           <Label>Protein per kg bodyweight (g)</Label>

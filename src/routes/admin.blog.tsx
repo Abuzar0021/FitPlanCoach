@@ -137,7 +137,7 @@ function BlogAdmin() {
         }
       />
 
-      <form onSubmit={save} className="bg-card border border-border rounded-2xl p-5 space-y-3">
+      <form onSubmit={save} className="surface-card p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">{editing ? "Edit post" : "New post"}</h2>
           {editing && (
@@ -230,7 +230,7 @@ function BlogAdmin() {
         </div>
       </form>
 
-      <div className="bg-card border border-border rounded-2xl divide-y divide-border overflow-hidden">
+      <div className="surface-card divide-y divide-border overflow-hidden">
         {posts.length === 0 && (
           <div className="p-6 text-sm text-muted-foreground">No posts yet.</div>
         )}

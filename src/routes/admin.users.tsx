@@ -137,9 +137,9 @@ function UsersAdmin() {
         onChange={(e) => setQ(e.target.value)}
         className="max-w-sm"
       />
-      <div className="bg-card border border-border rounded-2xl overflow-x-auto">
+      <div className="surface-card overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
-          <thead className="bg-muted text-xs uppercase tracking-wider">
+          <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             <tr>
               <th className="text-left p-3">Name</th>
               <th className="text-left p-3">Email</th>
@@ -151,7 +151,10 @@ function UsersAdmin() {
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.id} className={`border-t border-border ${r.banned ? "opacity-50" : ""}`}>
+              <tr
+                key={r.id}
+                className={`border-t border-border hover:bg-muted/30 transition-colors ${r.banned ? "opacity-50" : ""}`}
+              >
                 <td className="p-3 font-medium">{r.name ?? "—"}</td>
                 <td className="p-3">{r.email ?? "—"}</td>
                 <td className="p-3">

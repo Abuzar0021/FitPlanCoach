@@ -94,7 +94,7 @@ function FoodsAdmin() {
       />
       <form
         onSubmit={add}
-        className="bg-card border border-border rounded-2xl p-4 grid grid-cols-2 md:grid-cols-7 gap-2 items-end"
+        className="surface-card p-4 grid grid-cols-2 md:grid-cols-7 gap-2 items-end"
       >
         <div className="col-span-2">
           <label className="text-xs">Name</label>
@@ -162,9 +162,9 @@ function FoodsAdmin() {
         className="max-w-sm"
       />
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      <div className="surface-card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted text-xs uppercase tracking-wider">
+          <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             <tr>
               <th className="text-left p-3">Name</th>
               <th className="text-left p-3">Country</th>
@@ -178,7 +178,7 @@ function FoodsAdmin() {
           </thead>
           <tbody>
             {filtered.map((x) => (
-              <tr key={x.id} className="border-t border-border">
+              <tr key={x.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                 <td className="p-3 font-medium">{x.name}</td>
                 <td className="p-3">{x.country}</td>
                 <td className="p-3 text-right">{x.calories_per_100g}</td>

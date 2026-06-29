@@ -101,7 +101,7 @@ function AnalyticsAdmin() {
           ))}
         </div>
       ) : !data ? (
-        <div className="bg-card border border-border rounded-2xl p-12 text-center text-muted-foreground">
+        <div className="surface-card p-12 text-center text-muted-foreground">
           Couldn't load analytics.
         </div>
       ) : (
