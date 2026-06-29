@@ -23,8 +23,10 @@ by disposition: **[code]** doable in-repo · **[ops]** operator/config ·
 **P1 — quality & safety**
 - [x] **DONE** — pure-engine unit tests (14 tests, Node built-in runner, `npm
   test`) (Ch. 23, `src/lib/fitness-engine.test.ts`).
+- [x] **DONE** — CI runs the engine tests on every push/PR
+  (`.github/workflows/ci.yml`).
 - [code] Entitlement-gate + billing integration tests; Playwright signup→plan
-  smoke; wire `npm test`/`tsc`/`lint` into CI (Ch. 23).
+  smoke; resolve the `tsc` baseline then add `tsc`/`lint` as CI gates (Ch. 23).
 - [code] App-layer rate-limiting on auth + sensitive server functions; complete
   Zod input coverage; admin audit log; CI dependency/secret scanning (Ch. 20).
 - [code] Regenerate `types.ts`; cleanup migration removing legacy `payment_*`

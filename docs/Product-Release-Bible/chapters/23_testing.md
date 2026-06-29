@@ -56,7 +56,9 @@ flowchart LR
 - The **engine** is now covered, but the **entitlement gate, billing-result
   handling, and RLS** are not yet exercised by automated tests — regressions
   there would still escape CI.
-- **No CI pipeline** runs `npm test` automatically yet.
+- **CI runs the engine tests** (`.github/workflows/ci.yml`) but does **not** yet
+  gate on `tsc`/`lint` (a documented ~45-error environment-only `tsc` baseline
+  must be resolved first to avoid a perpetually-red gate).
 - No coverage measurement.
 
 ## 6. Planned Future Improvements
@@ -64,9 +66,9 @@ flowchart LR
 - Server-function integration tests around the entitlement gate and billing
   verification result handling.
 - Playwright smoke e2e for signup→onboarding→plan.
-- Wire `npm test` (+ `tsc`/`lint`) into CI as a required gate.
+- Resolve the `tsc` baseline, then add `tsc` + `lint` as required CI gates.
 
 ---
 **Source Files**
 - `src/lib/fitness-engine.test.ts` (14 tests), `package.json` (`test` script)
-- `eslint.config.js`, `docs/LAUNCH.md` §8
+- `.github/workflows/ci.yml`, `eslint.config.js`, `docs/LAUNCH.md` §8
