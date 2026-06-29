@@ -129,6 +129,19 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       meta: { goal: stats.goal, plan_type: planType },
     });
 
+    // First-ever plan → send the one-time welcome email. Best-effort and
+    // server-only: sendAppEmail skips silently if LOVABLE_API_KEY is unset and
+    // never throws, so it can't break plan generation.
+    if (freeUsed === 0 && profile.email) {
+      const { sendAppEmail } = await import("@/lib/email-send.server");
+      await sendAppEmail({
+        templateName: "welcome",
+        recipientEmail: profile.email,
+        templateData: { name: profile.name ?? undefined },
+        idempotencyKey: `welcome-${userId}`,
+      });
+    }
+
     return {
       ok: true,
       plan: mealPlan,
