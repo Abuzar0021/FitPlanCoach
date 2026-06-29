@@ -15,12 +15,14 @@ async function ensureStaff(userId: string) {
 export const createSupportTicket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      subject: z.string().min(3).max(140),
-      category: z.enum(["account", "billing", "payment", "technical", "feedback", "other"]),
-      message: z.string().min(5).max(4000),
-      priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
-    }).parse(d),
+    z
+      .object({
+        subject: z.string().min(3).max(140),
+        category: z.enum(["account", "billing", "payment", "technical", "feedback", "other"]),
+        message: z.string().min(5).max(4000),
+        priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -35,7 +37,8 @@ export const createSupportTicket = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error || !ticket) throw new Response(error?.message ?? "Failed to create ticket", { status: 400 });
+    if (error || !ticket)
+      throw new Response(error?.message ?? "Failed to create ticket", { status: 400 });
     await db.from("support_ticket_messages").insert({
       ticket_id: ticket.id,
       author_id: context.userId,
@@ -48,10 +51,12 @@ export const createSupportTicket = createServerFn({ method: "POST" })
 export const replySupportTicket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      ticket_id: z.string().uuid(),
-      body: z.string().min(1).max(4000),
-    }).parse(d),
+    z
+      .object({
+        ticket_id: z.string().uuid(),
+        body: z.string().min(1).max(4000),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -68,7 +73,8 @@ export const replySupportTicket = createServerFn({ method: "POST" })
       .select("role")
       .eq("user_id", context.userId);
     const isStaff = (roles ?? []).some((r: any) => r.role === "admin" || r.role === "owner");
-    if (ticket.user_id !== context.userId && !isStaff) throw new Response("Forbidden", { status: 403 });
+    if (ticket.user_id !== context.userId && !isStaff)
+      throw new Response("Forbidden", { status: 403 });
 
     await db.from("support_ticket_messages").insert({
       ticket_id: data.ticket_id,
@@ -87,10 +93,12 @@ export const replySupportTicket = createServerFn({ method: "POST" })
 export const updateTicketStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      ticket_id: z.string().uuid(),
-      status: z.enum(["open", "in_progress", "waiting_user", "resolved", "closed"]),
-    }).parse(d),
+    z
+      .object({
+        ticket_id: z.string().uuid(),
+        status: z.enum(["open", "in_progress", "waiting_user", "resolved", "closed"]),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     await ensureStaff(context.userId);

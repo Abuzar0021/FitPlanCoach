@@ -27,7 +27,11 @@ export const PLAY_MANAGE_URL = "https://play.google.com/store/account/subscripti
 
 export type BillingResult =
   | { ok: true }
-  | { ok: false; reason: "unavailable_on_web" | "not_implemented" | "cancelled" | "error"; message?: string };
+  | {
+      ok: false;
+      reason: "unavailable_on_web" | "not_implemented" | "cancelled" | "error";
+      message?: string;
+    };
 
 /** True when running inside the native Android (Capacitor) shell. */
 export function isAndroidApp(): boolean {
@@ -49,7 +53,11 @@ export async function startProPurchase(_interval: PlanInterval): Promise<Billing
   //   const { purchaseToken } = await Plugin.purchase(PLAY_PRODUCTS[_interval]);
   //   const res = await verifyAndroidPurchase(purchaseToken, PLAY_PRODUCTS[_interval]);
   //   return res.ok ? { ok: true } : { ok: false, reason: "error", message: res.reason };
-  return { ok: false, reason: "not_implemented", message: "Please update to the latest app version." };
+  return {
+    ok: false,
+    reason: "not_implemented",
+    message: "Please update to the latest app version.",
+  };
 }
 
 /** Restore previously purchased subscriptions (Android only). */
@@ -58,7 +66,11 @@ export async function restorePurchases(): Promise<BillingResult> {
   // TODO (Android build): query the plugin for the user's active purchases and
   // re-verify each token via verifyAndroidPurchase() so entitlements are
   // restored from the server rather than trusted from the device.
-  return { ok: false, reason: "not_implemented", message: "Please update to the latest app version." };
+  return {
+    ok: false,
+    reason: "not_implemented",
+    message: "Please update to the latest app version.",
+  };
 }
 
 /**

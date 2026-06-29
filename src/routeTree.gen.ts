@@ -19,36 +19,36 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as FaqRouteImport } from './routes/faq'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as AdminBlogRouteImport } from './routes/admin.blog'
-import { Route as AdminMediaRouteImport } from './routes/admin.media'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as DownloadRouteImport } from './routes/download'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as DownloadRouteImport } from './routes/download'
-import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminWorkoutsRouteImport } from './routes/admin.workouts'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminFoodsRouteImport } from './routes/admin.foods'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppWorkoutsRouteImport } from './routes/_app.workouts'
 import { Route as AppSupportRouteImport } from './routes/_app.support'
-import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppSubscriptionRouteImport } from './routes/_app.subscription'
 import { Route as AppProgressRouteImport } from './routes/_app.progress'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppOnboardingRouteImport } from './routes/_app.onboarding'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMealsRouteImport } from './routes/_app.meals'
+import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -109,19 +109,24 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/blog/$slug',
-  path: '/blog/$slug',
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -137,16 +142,6 @@ const AdminRoute = AdminRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DownloadRoute = DownloadRouteImport.update({
-  id: '/download',
-  path: '/download',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DeleteAccountRoute = DeleteAccountRouteImport.update({
-  id: '/delete-account',
-  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -168,6 +163,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 const AdminWorkoutsRoute = AdminWorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
@@ -183,24 +183,14 @@ const AdminSupportRoute = AdminSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBlogRoute = AdminBlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMediaRoute = AdminMediaRouteImport.update({
   id: '/media',
   path: '/media',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminFoodsRoute = AdminFoodsRouteImport.update({
@@ -213,6 +203,16 @@ const AdminExercisesRoute = AdminExercisesRouteImport.update({
   path: '/exercises',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppWorkoutsRoute = AppWorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
@@ -221,11 +221,6 @@ const AppWorkoutsRoute = AppWorkoutsRouteImport.update({
 const AppSupportRoute = AppSupportRouteImport.update({
   id: '/support',
   path: '/support',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFeedbackRoute = AppFeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSubscriptionRoute = AppSubscriptionRouteImport.update({
@@ -256,6 +251,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppMealsRoute = AppMealsRouteImport.update({
   id: '/meals',
   path: '/meals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedbackRoute = AppFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -309,15 +309,11 @@ const ApiPublicLemonsqueezyWebhookRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/blog': typeof BlogRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/delete-account': typeof DeleteAccountRoute
   '/download': typeof DownloadRoute
@@ -333,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
+  '/feedback': typeof AppFeedbackRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -340,14 +337,17 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
-  '/feedback': typeof AppFeedbackRoute
   '/workouts': typeof AppWorkoutsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
+  '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -359,14 +359,10 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/blog': typeof BlogRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/delete-account': typeof DeleteAccountRoute
   '/download': typeof DownloadRoute
@@ -382,6 +378,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
+  '/feedback': typeof AppFeedbackRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -389,14 +386,17 @@ export interface FileRoutesByTo {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
-  '/feedback': typeof AppFeedbackRoute
   '/workouts': typeof AppWorkoutsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
+  '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -409,16 +409,12 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/blog': typeof BlogRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/delete-account': typeof DeleteAccountRoute
   '/download': typeof DownloadRoute
@@ -434,6 +430,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/feedback': typeof AppFeedbackRoute
   '/_app/meals': typeof AppMealsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/onboarding': typeof AppOnboardingRoute
@@ -441,14 +438,17 @@ export interface FileRoutesById {
   '/_app/progress': typeof AppProgressRoute
   '/_app/subscription': typeof AppSubscriptionRoute
   '/_app/support': typeof AppSupportRoute
-  '/_app/feedback': typeof AppFeedbackRoute
   '/_app/workouts': typeof AppWorkoutsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/admin/foods': typeof AdminFoodsRoute
+  '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/workouts': typeof AdminWorkoutsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -462,15 +462,11 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/admin/analytics'
-    | '/admin/media'
-    | '/blog'
-    | '/blog/$slug'
-    | '/admin/blog'
     | '/'
     | '/about'
     | '/admin'
     | '/auth'
+    | '/blog'
     | '/contact'
     | '/delete-account'
     | '/download'
@@ -486,6 +482,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/billing'
     | '/dashboard'
+    | '/feedback'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -493,14 +490,17 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
-    | '/feedback'
     | '/workouts'
+    | '/admin/analytics'
+    | '/admin/blog'
     | '/admin/exercises'
     | '/admin/foods'
+    | '/admin/media'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
     | '/admin/workouts'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/'
     | '/lovable/email/suppression'
@@ -512,14 +512,10 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/admin/analytics'
-    | '/admin/media'
-    | '/blog'
-    | '/blog/$slug'
-    | '/admin/blog'
     | '/'
     | '/about'
     | '/auth'
+    | '/blog'
     | '/contact'
     | '/delete-account'
     | '/download'
@@ -535,6 +531,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/billing'
     | '/dashboard'
+    | '/feedback'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -542,14 +539,17 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
-    | '/feedback'
     | '/workouts'
+    | '/admin/analytics'
+    | '/admin/blog'
     | '/admin/exercises'
     | '/admin/foods'
+    | '/admin/media'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
     | '/admin/workouts'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin'
     | '/lovable/email/suppression'
@@ -561,16 +561,12 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   id:
     | '__root__'
-    | '/admin/analytics'
-    | '/admin/media'
-    | '/blog'
-    | '/blog/$slug'
-    | '/admin/blog'
     | '/'
     | '/_app'
     | '/about'
     | '/admin'
     | '/auth'
+    | '/blog'
     | '/contact'
     | '/delete-account'
     | '/download'
@@ -586,6 +582,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/_app/billing'
     | '/_app/dashboard'
+    | '/_app/feedback'
     | '/_app/meals'
     | '/_app/notifications'
     | '/_app/onboarding'
@@ -593,14 +590,17 @@ export interface FileRouteTypes {
     | '/_app/progress'
     | '/_app/subscription'
     | '/_app/support'
-    | '/_app/feedback'
     | '/_app/workouts'
+    | '/admin/analytics'
+    | '/admin/blog'
     | '/admin/exercises'
     | '/admin/foods'
+    | '/admin/media'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
     | '/admin/workouts'
+    | '/blog/$slug'
     | '/email/unsubscribe'
     | '/admin/'
     | '/lovable/email/suppression'
@@ -618,12 +618,11 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
   DeleteAccountRoute: typeof DeleteAccountRoute
   DownloadRoute: typeof DownloadRoute
   FaqRoute: typeof FaqRoute
-  BlogRoute: typeof BlogRoute
-  BlogSlugRoute: typeof BlogSlugRoute
   FeaturesRoute: typeof FeaturesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PricingRoute: typeof PricingRoute
@@ -715,18 +714,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/blog/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -734,6 +733,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -755,20 +761,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/delete-account': {
-      id: '/delete-account'
-      path: '/delete-account'
-      fullPath: '/delete-account'
-      preLoaderRoute: typeof DeleteAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/download': {
-      id: '/download'
-      path: '/download'
-      fullPath: '/download'
-      preLoaderRoute: typeof DownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -799,6 +791,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
     '/admin/workouts': {
       id: '/admin/workouts'
       path: '/workouts'
@@ -820,11 +819,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSupportRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/blog': {
-      id: '/admin/blog'
-      path: '/blog'
-      fullPath: '/admin/blog'
-      preLoaderRoute: typeof AdminBlogRouteImport
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/media': {
@@ -832,20 +831,6 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/admin/media'
       preLoaderRoute: typeof AdminMediaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/foods': {
@@ -862,6 +847,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExercisesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/workouts': {
       id: '/_app/workouts'
       path: '/workouts'
@@ -874,13 +873,6 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof AppSupportRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/feedback': {
-      id: '/_app/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof AppFeedbackRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/subscription': {
@@ -923,6 +915,13 @@ declare module '@tanstack/react-router' {
       path: '/meals'
       fullPath: '/meals'
       preLoaderRoute: typeof AppMealsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/feedback': {
+      id: '/_app/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof AppFeedbackRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -994,6 +993,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppFeedbackRoute: typeof AppFeedbackRoute
   AppMealsRoute: typeof AppMealsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
@@ -1001,13 +1001,13 @@ interface AppRouteChildren {
   AppProgressRoute: typeof AppProgressRoute
   AppSubscriptionRoute: typeof AppSubscriptionRoute
   AppSupportRoute: typeof AppSupportRoute
-  AppFeedbackRoute: typeof AppFeedbackRoute
   AppWorkoutsRoute: typeof AppWorkoutsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppFeedbackRoute: AppFeedbackRoute,
   AppMealsRoute: AppMealsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOnboardingRoute: AppOnboardingRoute,
@@ -1015,18 +1015,17 @@ const AppRouteChildren: AppRouteChildren = {
   AppProgressRoute: AppProgressRoute,
   AppSubscriptionRoute: AppSubscriptionRoute,
   AppSupportRoute: AppSupportRoute,
-  AppFeedbackRoute: AppFeedbackRoute,
   AppWorkoutsRoute: AppWorkoutsRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AdminRouteChildren {
-  AdminBlogRoute: typeof AdminBlogRoute
-  AdminMediaRoute: typeof AdminMediaRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminBlogRoute: typeof AdminBlogRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
   AdminFoodsRoute: typeof AdminFoodsRoute
+  AdminMediaRoute: typeof AdminMediaRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1035,11 +1034,11 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminBlogRoute: AdminBlogRoute,
-  AdminMediaRoute: AdminMediaRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminBlogRoute: AdminBlogRoute,
   AdminExercisesRoute: AdminExercisesRoute,
   AdminFoodsRoute: AdminFoodsRoute,
+  AdminMediaRoute: AdminMediaRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -1049,18 +1048,27 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
   DeleteAccountRoute: DeleteAccountRoute,
   DownloadRoute: DownloadRoute,
   FaqRoute: FaqRoute,
-  BlogRoute: BlogRoute,
-  BlogSlugRoute: BlogSlugRoute,
   FeaturesRoute: FeaturesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PricingRoute: PricingRoute,

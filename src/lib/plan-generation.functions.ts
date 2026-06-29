@@ -28,7 +28,10 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     const [{ data: profile }, { data: sub }, { data: settings }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
       supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
-      supabase.from("app_settings").select("key,value").in("key", ["calorie_rules", "free_plan_limit"]),
+      supabase
+        .from("app_settings")
+        .select("key,value")
+        .in("key", ["calorie_rules", "free_plan_limit"]),
     ]);
 
     if (!profile || !profile.onboarded) {
@@ -36,9 +39,12 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     }
 
     const rules =
-      ((settings ?? []).find((s: any) => s.key === "calorie_rules")?.value as unknown as CalorieRules) ?? DEFAULT_RULES;
+      ((settings ?? []).find((s: any) => s.key === "calorie_rules")
+        ?.value as unknown as CalorieRules) ?? DEFAULT_RULES;
     const freeLimit =
-      ((settings ?? []).find((s: any) => s.key === "free_plan_limit")?.value as number | undefined) ?? 1;
+      ((settings ?? []).find((s: any) => s.key === "free_plan_limit")?.value as
+        | number
+        | undefined) ?? 1;
 
     // SERVER-SIDE ENTITLEMENT GATE — single source of truth.
     const planType = (sub?.plan_type ?? "free") as "free" | "pro" | "premium" | "elite";
@@ -88,8 +94,16 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       (templates ?? []) as unknown as WorkoutTemplate[],
     );
 
-    await supabase.from("meal_plans").update({ is_active: false }).eq("user_id", userId).eq("is_active", true);
-    await supabase.from("workout_plans").update({ is_active: false }).eq("user_id", userId).eq("is_active", true);
+    await supabase
+      .from("meal_plans")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("is_active", true);
+    await supabase
+      .from("workout_plans")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("is_active", true);
 
     await supabase.from("meal_plans").insert({
       user_id: userId,
@@ -109,9 +123,11 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       .update({ plan_count_used: freeUsed + 1 })
       .eq("user_id", userId);
 
-    await supabase
-      .from("analytics_events")
-      .insert({ user_id: userId, event: "plan_generated", meta: { goal: stats.goal, plan_type: planType } });
+    await supabase.from("analytics_events").insert({
+      user_id: userId,
+      event: "plan_generated",
+      meta: { goal: stats.goal, plan_type: planType },
+    });
 
     return {
       ok: true,

@@ -59,7 +59,9 @@ export const verifyPlayPurchase = createServerFn({ method: "POST" })
     };
     const sa = readServiceAccount();
     if (!sa) {
-      console.error("[billing] Google Play service account not configured — refusing to grant premium");
+      console.error(
+        "[billing] Google Play service account not configured — refusing to grant premium",
+      );
       return { ok: false as const, reason: "verification_unavailable" };
     }
 
@@ -155,7 +157,10 @@ export const verifyPlayPurchase = createServerFn({ method: "POST" })
       .eq("user_id", context.userId);
 
     // 4) Acknowledge the purchase if Google flagged it pending (required <3 days).
-    if ((purchase as { acknowledgementState?: string }).acknowledgementState === "ACKNOWLEDGEMENT_STATE_PENDING") {
+    if (
+      (purchase as { acknowledgementState?: string }).acknowledgementState ===
+      "ACKNOWLEDGEMENT_STATE_PENDING"
+    ) {
       try {
         const ackUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PACKAGE_NAME}/purchases/subscriptions/${encodeURIComponent(
           data.productId,

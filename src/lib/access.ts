@@ -41,7 +41,8 @@ function isActive(p: PlanContext): boolean {
 
 export function hasFeature(p: PlanContext, feature: Feature): boolean {
   const active = isActive(p);
-  const isPro = active && (p.plan_type === "pro" || p.plan_type === "premium" || p.plan_type === "elite");
+  const isPro =
+    active && (p.plan_type === "pro" || p.plan_type === "premium" || p.plan_type === "elite");
   const isPremium = active && (p.plan_type === "premium" || p.plan_type === "elite");
   const isElite = active && p.plan_type === "elite";
   const isAnnual = active && p.billing_interval === "annual";

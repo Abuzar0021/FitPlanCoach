@@ -36,7 +36,9 @@ export function DashboardScreen() {
       <div className="surface-card p-3 flex flex-col items-center">
         <ProgressRing value={0.68} size={92} stroke={9}>
           <span className="text-lg font-display tabular-nums">1,420</span>
-          <span className="text-[8px] uppercase tracking-widest text-muted-foreground">kcal left</span>
+          <span className="text-[8px] uppercase tracking-widest text-muted-foreground">
+            kcal left
+          </span>
         </ProgressRing>
         <div className="mt-3 w-full space-y-2">
           <StatBar label="Protein" value={118} max={160} unit="g" />
@@ -67,12 +69,16 @@ export function WorkoutScreen() {
   return (
     <ScreenChrome title="Workout">
       <div className="surface-card p-3">
-        <div className="text-[9px] uppercase tracking-widest text-primary font-bold">Day 3 · Full body</div>
+        <div className="text-[9px] uppercase tracking-widest text-primary font-bold">
+          Day 3 · Full body
+        </div>
         <div className="mt-0.5 text-sm font-display uppercase italic">Push & pull</div>
         <div className="mt-3 space-y-2">
           {sets.map((s, i) => (
             <div key={s.name} className="flex items-center gap-2.5">
-              <div className={`size-6 rounded-md inline-flex items-center justify-center text-[9px] font-bold ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              <div
+                className={`size-6 rounded-md inline-flex items-center justify-center text-[9px] font-bold ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+              >
                 {i === 0 ? <Check className="size-3.5" /> : i + 1}
               </div>
               <div className="flex-1 text-xs font-medium">{s.name}</div>
@@ -103,7 +109,9 @@ export function MealsScreen() {
               <Utensils className="size-4 text-accent" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">{m.tag}</div>
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                {m.tag}
+              </div>
               <div className="text-xs font-medium truncate">{m.name}</div>
             </div>
             <div className="text-[10px] font-bold tabular-nums shrink-0">{m.kcal} kcal</div>
@@ -111,7 +119,9 @@ export function MealsScreen() {
         ))}
       </div>
       <div className="mt-2.5 surface-card p-2.5 flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Daily total</span>
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          Daily total
+        </span>
         <span className="text-xs font-display tabular-nums">1,390 / 2,100 kcal</span>
       </div>
     </ScreenChrome>

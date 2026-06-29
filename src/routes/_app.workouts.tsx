@@ -14,9 +14,16 @@ export const Route = createFileRoute("/_app/workouts")({
   head: () => ({
     meta: [
       { title: "Your Workouts — FitPlanCoach" },
-      { name: "description", content: "Your weekly workout schedule with sets, reps, and rest — matched to your equipment, experience, and availability. Log sessions and grow your streak." },
+      {
+        name: "description",
+        content:
+          "Your weekly workout schedule with sets, reps, and rest — matched to your equipment, experience, and availability. Log sessions and grow your streak.",
+      },
       { property: "og:title", content: "Your FitPlanCoach Workouts" },
-      { property: "og:description", content: "Personalized weekly training plan with built-in progression." },
+      {
+        property: "og:description",
+        content: "Personalized weekly training plan with built-in progression.",
+      },
       { property: "og:url", content: "https://fitplancoach.com/workouts" },
       { name: "robots", content: "noindex,follow" },
     ],
@@ -39,41 +46,68 @@ function Workouts() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("workout_plans").select("schedule").eq("user_id", user.id).eq("is_active", true).order("created_at", { ascending: false }).limit(1).maybeSingle()
+    supabase
+      .from("workout_plans")
+      .select("schedule")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
       .then(({ data }) => {
         if (data?.schedule) setDays(data.schedule as Day[]);
         setLoading(false);
       });
-    (supabase as any).from("profiles").select("streak_current").eq("id", user.id).maybeSingle()
+    (supabase as any)
+      .from("profiles")
+      .select("streak_current")
+      .eq("id", user.id)
+      .maybeSingle()
       .then(({ data }: any) => setStreak(data?.streak_current ?? 0));
   }, [user]);
 
   async function markDone(focus?: string, items?: number) {
     setLogging(true);
     try {
-      const res = await logFn({ data: { focus, duration_min: items ? Math.max(20, items * 7) : undefined } });
+      const res = await logFn({
+        data: { focus, duration_min: items ? Math.max(20, items * 7) : undefined },
+      });
       setStreak(res.streak_current);
-      toast.success(res.unlocked.length ? `🏆 ${res.unlocked.length} achievement${res.unlocked.length === 1 ? "" : "s"} unlocked!` : `Logged · streak ${res.streak_current} 🔥`);
+      toast.success(
+        res.unlocked.length
+          ? `🏆 ${res.unlocked.length} achievement${res.unlocked.length === 1 ? "" : "s"} unlocked!`
+          : `Logged · streak ${res.streak_current} 🔥`,
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not log workout");
-    } finally { setLogging(false); }
+    } finally {
+      setLogging(false);
+    }
   }
 
-  if (loading) return <MobileShell><PlanScreenSkeleton /></MobileShell>;
-  if (!days) return (
-    <MobileShell>
-      <EmptyState
-        icon={Dumbbell}
-        title="No workout plan yet"
-        description="Generate your personalized weekly training plan and your first session will appear right here."
-        action={
-          <Link to="/dashboard">
-            <Button className="font-bold uppercase tracking-wider h-11 px-6">Build my plan</Button>
-          </Link>
-        }
-      />
-    </MobileShell>
-  );
+  if (loading)
+    return (
+      <MobileShell>
+        <PlanScreenSkeleton />
+      </MobileShell>
+    );
+  if (!days)
+    return (
+      <MobileShell>
+        <EmptyState
+          icon={Dumbbell}
+          title="No workout plan yet"
+          description="Generate your personalized weekly training plan and your first session will appear right here."
+          action={
+            <Link to="/dashboard">
+              <Button className="font-bold uppercase tracking-wider h-11 px-6">
+                Build my plan
+              </Button>
+            </Link>
+          }
+        />
+      </MobileShell>
+    );
 
   const day = days[activeDay];
 
@@ -96,7 +130,11 @@ function Workouts() {
               }`}
             >
               <div className="font-bold uppercase text-xs tracking-wider">{d.day}</div>
-              <div className={`text-[10px] mt-0.5 ${active ? "opacity-80" : "text-muted-foreground"} truncate max-w-[80px]`}>{d.focus}</div>
+              <div
+                className={`text-[10px] mt-0.5 ${active ? "opacity-80" : "text-muted-foreground"} truncate max-w-[80px]`}
+              >
+                {d.focus}
+              </div>
             </button>
           );
         })}
@@ -124,8 +162,18 @@ function Workouts() {
         ))}
       </div>
       {!day.focus?.toLowerCase().includes("rest") && (
-        <Button onClick={() => markDone(day.focus, day.items.length)} disabled={logging} className="w-full mt-4 h-12 font-bold uppercase tracking-wider rounded-xl">
-          {logging ? "Logging…" : (<><CheckCircle2 className="size-4 mr-2" /> Mark workout complete</>)}
+        <Button
+          onClick={() => markDone(day.focus, day.items.length)}
+          disabled={logging}
+          className="w-full mt-4 h-12 font-bold uppercase tracking-wider rounded-xl"
+        >
+          {logging ? (
+            "Logging…"
+          ) : (
+            <>
+              <CheckCircle2 className="size-4 mr-2" /> Mark workout complete
+            </>
+          )}
         </Button>
       )}
       {streak > 0 && (

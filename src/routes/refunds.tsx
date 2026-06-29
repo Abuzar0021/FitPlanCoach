@@ -6,9 +6,16 @@ export const Route = createFileRoute("/refunds")({
   head: () => ({
     meta: [
       { title: "Refund Policy — FitPlanCoach" },
-      { name: "description", content: "How refunds work for FitPlanCoach Pro. Subscriptions are billed through Google Play, so refunds follow Google Play's refund policy." },
+      {
+        name: "description",
+        content:
+          "How refunds work for FitPlanCoach Pro. Subscriptions are billed through Google Play, so refunds follow Google Play's refund policy.",
+      },
       { property: "og:title", content: "Refund Policy — FitPlanCoach" },
-      { property: "og:description", content: "How refunds work for FitPlanCoach Pro, billed through Google Play." },
+      {
+        property: "og:description",
+        content: "How refunds work for FitPlanCoach Pro, billed through Google Play.",
+      },
       { property: "og:url", content: "https://fitplancoach.com/refunds" },
     ],
     links: [{ rel: "canonical", href: "https://fitplancoach.com/refunds" }],
@@ -21,7 +28,11 @@ function Refunds() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      <main id="main-content" tabIndex={-1} className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 mx-auto max-w-3xl px-6 py-12 prose prose-sm dark:prose-invert"
+      >
         <h1>Refund Policy</h1>
         <p className="text-sm text-muted-foreground">Last updated: June 22, 2026</p>
 
@@ -37,7 +48,11 @@ function Refunds() {
           <li>
             Open the Google Play Store, go to your subscriptions, select FitPlanCoach, and request a
             refund — or visit{" "}
-            <a href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://play.google.com/store/account/subscriptions"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Google Play subscriptions
             </a>
             .

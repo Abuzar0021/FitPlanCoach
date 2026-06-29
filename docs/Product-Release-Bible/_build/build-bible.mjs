@@ -29,9 +29,11 @@ const DIAGRAMS_DIR = path.join(BIBLE_DIR, "assets", "diagrams");
 const MMDC = path.join(__dirname, "node_modules", ".bin", "mmdc");
 const PUPPETEER_CFG = path.join(__dirname, "puppeteer-config.json");
 const CSS = path.join(__dirname, "bible.css");
-const CHROMIUM =
-  process.env.BIBLE_CHROMIUM || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-const LAUNCH = { executablePath: CHROMIUM, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"] };
+const CHROMIUM = process.env.BIBLE_CHROMIUM || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const LAUNCH = {
+  executablePath: CHROMIUM,
+  args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+};
 
 const SMOKE = process.argv.includes("--smoke");
 
@@ -96,8 +98,17 @@ async function renderMermaid(md, srcName) {
     const png = path.join(DIAGRAMS_DIR, `${base}.png`);
     await writeFile(mmd, j.code);
     await execFileP(MMDC, [
-      "-i", mmd, "-o", png, "-s", "3", "-b", "transparent",
-      "-p", PUPPETEER_CFG, "-q",
+      "-i",
+      mmd,
+      "-o",
+      png,
+      "-s",
+      "3",
+      "-b",
+      "transparent",
+      "-p",
+      PUPPETEER_CFG,
+      "-q",
     ]);
     const rel = path.relative(BIBLE_DIR, png);
     out = out.replace(j.block, `\n![${base}](${rel})\n`);
@@ -137,13 +148,11 @@ async function build() {
     sources = [
       {
         name: "smoke-01.md",
-        body:
-          "# Smoke Chapter One\n\nThis is a **toolchain smoke test**. If you can read this in a PDF with a working table of contents and the diagram below renders, the pipeline is healthy.\n\n## Architecture sketch\n\n```mermaid\nflowchart LR\n  A[Browser] --> B[TanStack Start SSR]\n  B --> C[(Supabase)]\n  B --> D[Server Functions]\n  D --> C\n```\n\n## A table\n\n| Layer | Tech |\n|---|---|\n| UI | React 19 |\n| Data | Supabase |\n",
+        body: "# Smoke Chapter One\n\nThis is a **toolchain smoke test**. If you can read this in a PDF with a working table of contents and the diagram below renders, the pipeline is healthy.\n\n## Architecture sketch\n\n```mermaid\nflowchart LR\n  A[Browser] --> B[TanStack Start SSR]\n  B --> C[(Supabase)]\n  B --> D[Server Functions]\n  D --> C\n```\n\n## A table\n\n| Layer | Tech |\n|---|---|\n| UI | React 19 |\n| Data | Supabase |\n",
       },
       {
         name: "smoke-02.md",
-        body:
-          "# Smoke Chapter Two\n\nSecond page to confirm multi-page assembly and page breaks.\n\n## Closing\n\nIf this paragraph is on its own page, `page-break` works.\n",
+        body: "# Smoke Chapter Two\n\nSecond page to confirm multi-page assembly and page breaks.\n\n## Closing\n\nIf this paragraph is on its own page, `page-break` works.\n",
       },
     ];
   } else {
@@ -190,12 +199,12 @@ async function build() {
     `<div class="meta">Generated ${today}${SMOKE ? " · SMOKE TEST" : ""}</div>\n` +
     `</div>\n`;
 
-  const combined =
-    titlePage +
-    tocHtml +
-    processed.join('\n\n<div class="page-break"></div>\n\n');
+  const combined = titlePage + tocHtml + processed.join('\n\n<div class="page-break"></div>\n\n');
 
-  const dest = path.join(SMOKE ? __dirname : BIBLE_DIR, SMOKE ? "smoke.pdf" : "FitPlanCoach_Product_Release_Bible.pdf");
+  const dest = path.join(
+    SMOKE ? __dirname : BIBLE_DIR,
+    SMOKE ? "smoke.pdf" : "FitPlanCoach_Product_Release_Bible.pdf",
+  );
 
   console.log(`Rendering PDF → ${dest} …`);
   await mdToPdf(
@@ -221,7 +230,9 @@ async function build() {
   // Report real page count by counting PDF page objects.
   const buf = await readFile(dest);
   const pages = (buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
-  console.log(`\n✅ Built ${path.basename(dest)} — ~${pages} pages, ${(buf.length / 1024).toFixed(0)} KB`);
+  console.log(
+    `\n✅ Built ${path.basename(dest)} — ~${pages} pages, ${(buf.length / 1024).toFixed(0)} KB`,
+  );
 }
 
 build().catch((e) => {

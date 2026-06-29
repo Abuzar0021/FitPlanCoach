@@ -15,6 +15,7 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 /** Canonical launch funnel events. Strings are allowed for ad-hoc events. */
 export type AnalyticsEvent =
@@ -52,9 +53,11 @@ async function persist(event: string, meta: Meta): Promise<void> {
     const userId = data.session?.user?.id;
     // Anonymous events are captured via dataLayer only (RLS blocks the insert).
     if (!userId) return;
-    await supabase
-      .from("analytics_events")
-      .insert({ user_id: userId, event, meta: Object.keys(meta).length ? meta : null });
+    await supabase.from("analytics_events").insert({
+      user_id: userId,
+      event,
+      meta: (Object.keys(meta).length ? meta : null) as Json,
+    });
   } catch {
     /* swallow — analytics is best-effort */
   }

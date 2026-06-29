@@ -7,11 +7,13 @@ const ISO_DAY = () => new Date().toISOString().slice(0, 10);
 export const logWorkoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      focus: z.string().max(80).optional(),
-      duration_min: z.number().int().min(1).max(600).optional(),
-      notes: z.string().max(500).optional(),
-    }).parse(d ?? {}),
+    z
+      .object({
+        focus: z.string().max(80).optional(),
+        duration_min: z.number().int().min(1).max(600).optional(),
+        notes: z.string().max(500).optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -105,10 +107,12 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
 export const updateProfileBasic = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      name: z.string().min(1).max(80).optional(),
-      avatar_url: z.string().url().max(500).nullable().optional(),
-    }).parse(d ?? {}),
+    z
+      .object({
+        name: z.string().min(1).max(80).optional(),
+        avatar_url: z.string().url().max(500).nullable().optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

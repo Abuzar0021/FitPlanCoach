@@ -65,7 +65,7 @@ export interface MealPlan {
   totals: { calories: number; protein: number };
 }
 
-const MEAL_SPLIT = { breakfast: 0.25, lunch: 0.35, dinner: 0.30, snack: 0.10 } as const;
+const MEAL_SPLIT = { breakfast: 0.25, lunch: 0.35, dinner: 0.3, snack: 0.1 } as const;
 
 function pickFoods(
   foods: Food[],

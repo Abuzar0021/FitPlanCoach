@@ -4,7 +4,10 @@ import { z } from "zod";
 
 async function assertAdminOrOwner(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+  const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
+    _user_id: userId,
+    _role: "admin",
+  });
   const { data: isOwner } = await supabaseAdmin.rpc("is_owner", { _user_id: userId });
   if (!isAdmin && !isOwner) throw new Response("Forbidden", { status: 403 });
   return { isOwner: !!isOwner, isAdmin: !!isAdmin };
@@ -37,12 +40,11 @@ export const adminResetSubscription = createServerFn({ method: "POST" })
 // Owner-only: grant or revoke admin role on another user.
 export const setAdminRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
-    z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(data),
-  )
+  .inputValidator((data) => z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(data))
   .handler(async ({ context, data }) => {
     await assertOwner(context.userId);
-    if (data.userId === context.userId) throw new Response("Cannot modify your own role", { status: 400 });
+    if (data.userId === context.userId)
+      throw new Response("Cannot modify your own role", { status: 400 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.grant) {
       const { error } = await supabaseAdmin
