@@ -23,6 +23,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -192,6 +193,11 @@ const AdminMediaRoute = AdminMediaRouteImport.update({
   path: '/media',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -303,6 +309,7 @@ const ApiPublicLemonsqueezyWebhookRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/media': typeof AdminMediaRoute
   '/blog': typeof BlogRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/media': typeof AdminMediaRoute
   '/blog': typeof BlogRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -401,6 +409,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/media': typeof AdminMediaRoute
   '/blog': typeof BlogRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -453,6 +462,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/admin/analytics'
     | '/admin/media'
     | '/blog'
     | '/blog/$slug'
@@ -502,6 +512,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/admin/analytics'
     | '/admin/media'
     | '/blog'
     | '/blog/$slug'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   id:
     | '__root__'
+    | '/admin/analytics'
     | '/admin/media'
     | '/blog'
     | '/blog/$slug'
@@ -822,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -1005,6 +1024,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRoute
   AdminMediaRoute: typeof AdminMediaRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
   AdminFoodsRoute: typeof AdminFoodsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -1017,6 +1037,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRoute,
   AdminMediaRoute: AdminMediaRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
   AdminFoodsRoute: AdminFoodsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
