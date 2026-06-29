@@ -13,7 +13,7 @@ export function AdminHeader({
   subtitle,
   actions,
 }: {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   actions?: ReactNode;
 }) {

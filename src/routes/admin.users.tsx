@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminHeader } from "@/components/admin-ui";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -121,9 +122,13 @@ function UsersAdmin() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">
-        Users <span className="text-sm text-muted-foreground font-normal">({rows.length})</span>
-      </h1>
+      <AdminHeader
+        title={
+          <>
+            Users <span className="text-sm text-muted-foreground font-normal">({rows.length})</span>
+          </>
+        }
+      />
       <Input
         type="search"
         aria-label="Search users by email or name"
@@ -171,18 +176,10 @@ function UsersAdmin() {
                 <td className="p-3 text-right space-x-1 whitespace-nowrap">
                   {isOwner && r.id !== user?.id && r.role !== "owner" && (
                     <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => toggleAdmin(r.id, r.role)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => toggleAdmin(r.id, r.role)}>
                         {r.role === "admin" ? "− admin" : "+ admin"}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => doTransfer(r.id, r.email)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => doTransfer(r.id, r.email)}>
                         Transfer ownership
                       </Button>
                     </>
@@ -212,4 +209,3 @@ function UsersAdmin() {
     </div>
   );
 }
-

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminHeader } from "@/components/admin-ui";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,16 +81,22 @@ function MediaAdmin() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">
-          Media{" "}
-          <span className="text-sm text-muted-foreground font-normal">({assets?.length ?? 0})</span>
-        </h1>
-        <Button disabled={uploading} onClick={() => fileRef.current?.click()}>
-          <Upload className="size-4 mr-1.5" /> {uploading ? "Uploading…" : "Upload"}
-        </Button>
-        <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={onFiles} />
-      </div>
+      <AdminHeader
+        title={
+          <>
+            Media{" "}
+            <span className="text-sm text-muted-foreground font-normal">
+              ({assets?.length ?? 0})
+            </span>
+          </>
+        }
+        actions={
+          <Button disabled={uploading} onClick={() => fileRef.current?.click()}>
+            <Upload className="size-4 mr-1.5" /> {uploading ? "Uploading…" : "Upload"}
+          </Button>
+        }
+      />
+      <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={onFiles} />
 
       {assets === null ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

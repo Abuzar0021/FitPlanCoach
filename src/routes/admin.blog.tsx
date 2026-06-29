@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminHeader } from "@/components/admin-ui";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -128,9 +129,13 @@ function BlogAdmin() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h1 className="text-2xl font-bold">
-        Blog <span className="text-sm text-muted-foreground font-normal">({posts.length})</span>
-      </h1>
+      <AdminHeader
+        title={
+          <>
+            Blog <span className="text-sm text-muted-foreground font-normal">({posts.length})</span>
+          </>
+        }
+      />
 
       <form onSubmit={save} className="bg-card border border-border rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
