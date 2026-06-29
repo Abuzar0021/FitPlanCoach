@@ -196,8 +196,10 @@ the canonical prior art and are treated as required input.
 | Native Android build / Play listing | **Blocked (external)** | Requires Android toolchain + Google Play Console account + signing. |
 | Apply newest migrations (feedback/blog/media) | **Blocked (credentials)** | Requires Supabase DB access (user-run). |
 | Set CMS values (support email, GA4, Clarity) | **Blocked (config)** | Requires admin login + real property ids. |
-| Regenerate/repair stale `types.ts` | **Actionable in code** | Can be hand-reconciled (add missing tables, drop legacy) without external creds — candidate for Task #18. |
-| Legacy `payment_*` tables + dead web-payment code | **Actionable in code** | Removal/with-migration cleanup — candidate for Task #18. |
+| Automated test coverage (engine) | **✅ IMPLEMENTED** | `src/lib/fitness-engine.test.ts` — 14 tests via Node's built-in runner (`npm test`), zero new deps. Closes the highest-ROI in-repo gap. |
+| Integration/e2e tests + CI | **Actionable in code (open)** | Server-fn/RLS/billing tests + CI wiring — next code item. |
+| Regenerate/repair stale `types.ts` | **Actionable in code (open)** | Best done via Supabase CLI introspection (needs DB access); hand-reconciliation is error-prone. Partially blocked. |
+| Legacy `payment_*` tables + dead web-payment code | **Operator decision** | Dropping tables is destructive (data-loss) — write the migration, but the operator must choose to apply it. Not auto-executed. |
 | Any TODO/placeholder found during chapter authoring | **Triage as found** | Implement if code-only; else mark blocked here. |
 
 ---

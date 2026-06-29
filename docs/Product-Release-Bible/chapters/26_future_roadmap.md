@@ -21,8 +21,10 @@ by disposition: **[code]** doable in-repo · **[ops]** operator/config ·
   renewals/cancellations (Ch. 12).
 
 **P1 — quality & safety**
-- [code] **Vitest** unit tests for the pure engine; entitlement-gate integration
-  tests; Playwright signup→plan smoke; wire CI (Ch. 23).
+- [x] **DONE** — pure-engine unit tests (14 tests, Node built-in runner, `npm
+  test`) (Ch. 23, `src/lib/fitness-engine.test.ts`).
+- [code] Entitlement-gate + billing integration tests; Playwright signup→plan
+  smoke; wire `npm test`/`tsc`/`lint` into CI (Ch. 23).
 - [code] App-layer rate-limiting on auth + sensitive server functions; complete
   Zod input coverage; admin audit log; CI dependency/secret scanning (Ch. 20).
 - [code] Regenerate `types.ts`; cleanup migration removing legacy `payment_*`

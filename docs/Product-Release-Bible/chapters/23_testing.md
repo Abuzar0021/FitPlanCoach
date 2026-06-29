@@ -1,7 +1,7 @@
 # 23. Testing
 
-**Status:** Partial (static verification only; no automated test suite)
-**Last verified against commit:** 26c8ce4 · 2026-06-29
+**Status:** Partial (engine unit-tested; broader automated coverage still pending)
+**Last verified against commit:** 90a29e1 · 2026-06-29
 
 ## 1. Purpose & Scope
 
@@ -12,31 +12,39 @@ Prime Directive #5, this chapter does not overstate coverage.
 
 **What exists.**
 
+- **Engine unit tests (NEW).** `src/lib/fitness-engine.test.ts` — 14 tests
+  covering the core IP: `bmr` (Mifflin–St Jeor, sex constants), `calorieTargets`
+  (multiplier, goal adjust, the 1200 kcal floor, protein/kg), `generateMealPlan`
+  (all four meals, ≥20 g portions, **local-over-global** preference, global
+  fallback, empty-catalog safety), and `pickWorkoutTemplate` (activity→level
+  mapping, maintain↔lose_fat borrowing, null fallback). They run on **Node's
+  built-in test runner with TypeScript type-stripping** — *zero* test-framework
+  dependency, so nothing can conflict with the pinned Vite toolchain:
+  `npm test` → `node --test --experimental-strip-types "src/**/*.test.ts"`.
+  This was chosen deliberately over Vitest because the project pins an unusual
+  Vite 8 and the branch syncs to Lovable (must stay build-clean).
 - **Type checking.** `tsc` is the primary gate; the codebase targets zero real
   type errors (a small set of environment-only errors is the documented
-  baseline). Pure modules like `fitness-engine.ts` are written as side-effect-free
-  functions specifically so they are deterministic and *testable*.
+  baseline). Pure modules like `fitness-engine.ts` are side-effect-free precisely
+  so they are deterministic and testable — now exercised.
 - **Linting.** ESLint 9 (flat config) + typescript-eslint + prettier
-  (`eslint.config.js`); `npm run lint`. The dev loop uses `eslint --fix` plus a
-  check that ignores prettier-only/any/exhaustive-deps noise.
-- **Manual QA checklist.** `LAUNCH.md` §8 is a concrete pre-launch script
-  (signup→onboarding→plan, gating, support/feedback, admin publish→sitemap,
-  keyboard nav, billing copy).
+  (`eslint.config.js`); `npm run lint`.
+- **Manual QA checklist.** `LAUNCH.md` §8 is a concrete pre-launch script.
 
-**What does not exist.** There is **no unit/integration/e2e test runner** in
-`package.json` (no Vitest/Jest/Playwright test setup), and **no CI test
-pipeline**. Coverage is therefore static analysis + human QA, not automated
-behavioural testing.
+**What does not exist yet.** No **integration/e2e** tests (server functions, RLS,
+billing-result handling, signup→plan flow) and **no CI pipeline** wiring the
+above. Coverage today = engine unit tests + static analysis + human QA.
 
 ## 3. User & Data Flows
 
 ```mermaid
 flowchart LR
-  Code[Change] --> TSC[tsc gate]
+  Code[Change] --> Unit[npm test: engine units]
+  Unit --> TSC[tsc gate]
   TSC --> Lint[eslint]
   Lint --> Manual[LAUNCH.md manual QA]
   Manual --> Ship[Merge/deploy]
-  Auto[Automated tests] -.MISSING.-> Ship
+  E2E[Integration/e2e + CI] -.PENDING.-> Ship
 ```
 
 ## 4. Dependencies
@@ -45,20 +53,20 @@ flowchart LR
 
 ## 5. Limitations & Known Issues
 
-- **No automated tests** — the single biggest quality gap. Regressions in the
-  entitlement gate, the engine, or RLS would not be caught automatically.
-- No coverage measurement; no CI.
+- The **engine** is now covered, but the **entitlement gate, billing-result
+  handling, and RLS** are not yet exercised by automated tests — regressions
+  there would still escape CI.
+- **No CI pipeline** runs `npm test` automatically yet.
+- No coverage measurement.
 
 ## 6. Planned Future Improvements
 
-- Add **Vitest** unit tests for the pure engine (`calorieTargets`,
-  `generateMealPlan`, `pickWorkoutTemplate`, `pickFoods`) — highest ROI, zero
-  external deps.
 - Server-function integration tests around the entitlement gate and billing
   verification result handling.
-- Playwright smoke e2e for signup→onboarding→plan; wire all into CI.
+- Playwright smoke e2e for signup→onboarding→plan.
+- Wire `npm test` (+ `tsc`/`lint`) into CI as a required gate.
 
 ---
 **Source Files**
-- `package.json` (scripts; note absence of a test runner)
+- `src/lib/fitness-engine.test.ts` (14 tests), `package.json` (`test` script)
 - `eslint.config.js`, `docs/LAUNCH.md` §8

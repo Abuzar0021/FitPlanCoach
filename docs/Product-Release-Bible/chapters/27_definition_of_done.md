@@ -17,7 +17,8 @@ an honest read on where the product stands against it today.
 - [x] `tsc` clean (no real errors) + ESLint clean.
 - [x] Loading / empty / error states present for user-facing screens.
 - [x] Accessibility baseline (labels, focus, reduced-motion).
-- [ ] **Automated test coverage** — *not met* (Ch. 23, the headline gap).
+- [~] **Automated test coverage** — *partial*: the pure engine has 14 unit tests
+  (`npm test`); integration/e2e + CI still pending (Ch. 23).
 
 **Release Definition of Done (product).**
 - [x] Web surface code-complete and verifiable.
@@ -51,8 +52,8 @@ flowchart LR
 ## 5. Limitations & Known Issues
 
 - The product does **not** fully meet its own DoD on two axes: **automated
-  testing** (in-repo gap, addressable) and **published native app** (external,
-  blocked). Both are tracked in Ch. 26.
+  testing** (engine now covered; integration/e2e + CI still pending) and
+  **published native app** (external, blocked). Both are tracked in Ch. 26.
 
 ## 6. Planned Future Improvements
 

@@ -3,11 +3,15 @@
 **Phase:** COMPLETE — all 6 phases (0–5) done; Bible builds (~71 pp), QA gate passed
 **Last updated:** 2026-06-29
 
-> Next focus per the standing directive: drive the remaining **code-actionable**
-> Planned items (Vitest engine tests → close the Ch. 23 gap; regenerate types.ts;
-> legacy payment-table cleanup) to *implemented*, syncing the affected chapters.
-> All other Planned items are explicitly blocked (external build / Play Console /
-> operator credentials) — see `00_INVENTORY.md` §8 and Ch. 26.
+> Planned-item drive (standing directive) — running disposition:
+> - ✅ **Engine unit tests** implemented (`src/lib/fitness-engine.test.ts`, 14
+>   tests, `npm test`, zero new deps) — Bible synced (Ch. 23/26/27, inventory §8).
+> - ⏳ Integration/e2e tests + CI — open, code-actionable (next).
+> - ⏳ Regenerate `types.ts` — best via Supabase CLI (DB access); partially blocked.
+> - 🔒 Legacy `payment_*` cleanup — destructive; operator decision (write migration,
+>   don't auto-apply).
+> - 🔒 All native-app / Play-Console / migration-apply / CMS items — blocked
+>   (external/credentials). See `00_INVENTORY.md` §8 and Ch. 26 P0.
 
 ## Toolchain (Phase 0)
 
