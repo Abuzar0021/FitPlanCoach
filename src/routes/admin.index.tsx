@@ -12,6 +12,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { chartTooltipProps } from "@/lib/chart";
 import { Link } from "@tanstack/react-router";
 import {
   TrendingUp,
@@ -272,7 +273,7 @@ function AdminHome() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="day" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+                <Tooltip {...chartTooltipProps} />
                 <Line
                   type="monotone"
                   dataKey="signups"
@@ -292,7 +293,7 @@ function AdminHome() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="day" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+                <Tooltip {...chartTooltipProps} />
                 <Bar dataKey="events" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

@@ -10,6 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { chartTooltipProps } from "@/lib/chart";
 import {
   Users,
   Activity,
@@ -128,7 +129,7 @@ function AnalyticsAdmin() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} minTickGap={20} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+                  <Tooltip {...chartTooltipProps} />
                   <Line
                     type="monotone"
                     dataKey="events"

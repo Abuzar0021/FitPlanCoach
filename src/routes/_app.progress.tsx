@@ -16,6 +16,7 @@ import {
   Bar,
   CartesianGrid,
 } from "recharts";
+import { chartTooltipProps } from "@/lib/chart";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
 import { PlanScreenSkeleton, LockedFeature, ProBadge } from "@/components/app-ui";
@@ -157,7 +158,7 @@ function Progress() {
             >
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} domain={["auto", "auto"]} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+              <Tooltip {...chartTooltipProps} />
               <Line
                 type="monotone"
                 dataKey="kg"
@@ -225,7 +226,7 @@ function Progress() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="week" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)" }} />
+                <Tooltip {...chartTooltipProps} />
                 <Bar dataKey="count" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
