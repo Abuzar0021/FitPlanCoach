@@ -1,0 +1,32 @@
+# Keep the build context small and prevent secrets/artifacts from entering the image.
+
+# Dependencies & build artifacts (reinstalled / rebuilt inside the image)
+node_modules
+.output
+.vinxi
+.wrangler
+dist
+dist-ssr
+
+# Secrets — NEVER copy env files into the image. VITE_* values arrive as build
+# args; server secrets arrive at runtime via docker-compose env_file.
+.env
+.env.*
+!.env.docker.example
+
+# Local tooling / VCS / editor noise
+.git
+.gitignore
+.github
+.lovable
+*.log
+.DS_Store
+
+# Docs & the Product/Release Bible (not needed to build or run the app)
+docs
+
+# Docker assets themselves
+Dockerfile
+.dockerignore
+docker-compose.yml
+deploy

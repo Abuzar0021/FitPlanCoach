@@ -20,6 +20,10 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Docker deployment secrets (keep the .example template tracked)
+.env.docker
+!.env.docker.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

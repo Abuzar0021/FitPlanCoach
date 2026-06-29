@@ -1,0 +1,15 @@
+# FitPlanCoach — add this block to your EXISTING Caddyfile, then reload Caddy
+# gracefully (this does NOT interrupt OmniStack):
+#
+#   caddy reload --config /etc/caddy/Caddyfile      # or: systemctl reload caddy
+#
+# Caddy provisions and renews HTTPS automatically (Let's Encrypt). Replace the
+# domain and the port if you changed HOST_PORT.
+
+fitplancoach.com, www.fitplancoach.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+	}
+}
