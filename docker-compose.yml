@@ -1,0 +1,72 @@
+# FitPlanCoach — production compose for a shared VPS.
+#
+# Coexistence model (safe alongside OmniStack):
+#   * The container listens on its OWN internal port 3000.
+#   * It is published ONLY to 127.0.0.1:${HOST_PORT} (loopback) — never on a
+#     public interface and never on 80/443/3000. Your EXISTING Caddy/Nginx then
+#     reverse-proxies your domain to 127.0.0.1:${HOST_PORT}. This cannot collide
+#     with, stop, or overwrite any running service.
+#
+# Deploy:   docker compose --env-file .env.docker up -d --build
+# Logs:     docker compose --env-file .env.docker logs -f
+# Stop:     docker compose --env-file .env.docker down   (does NOT touch others)
+
+services:
+  fitplancoach:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # VITE_* are inlined into the client bundle at BUILD time. They come from
+        # the --env-file you pass to `docker compose`.
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-}
+        VITE_PLAY_STORE_URL: ${VITE_PLAY_STORE_URL:-}
+    image: fitplancoach:latest
+    container_name: fitplancoach
+    restart: unless-stopped
+    init: true
+
+    # Runtime secrets (server-only): SUPABASE_*, GOOGLE_PLAY_*, LOVABLE_*.
+    env_file:
+      - .env.docker
+
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
+
+    # Publish to loopback only. Pick any free host port (NOT 80/443/3000).
+    # Override with HOST_PORT in .env.docker if 8080 is taken.
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8080}:3000"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/robots.txt').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+    # Bounded logs so a busy app can't fill the VPS disk.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    # Dedicated network — does not attach to or alter any existing network.
+    networks:
+      - fitplancoach_net
+
+networks:
+  fitplancoach_net:
+    name: fitplancoach_net
+    driver: bridge
