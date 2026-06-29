@@ -1,0 +1,67 @@
+/* Print stylesheet for the FitPlanCoach Product & Release Bible. */
+:root {
+  --ink: #14181f;
+  --muted: #5b6675;
+  --accent: #2f7d32;
+  --rule: #d8dee6;
+  --code-bg: #f4f6f8;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+  color: var(--ink);
+  font-size: 10.5pt;
+  line-height: 1.5;
+  margin: 0;
+}
+h1, h2, h3, h4 { color: var(--ink); line-height: 1.25; font-weight: 700; }
+h1 { font-size: 21pt; margin: 0 0 .4em; padding-bottom: .25em; border-bottom: 3px solid var(--accent); }
+h2 { font-size: 15pt; margin: 1.4em 0 .4em; border-bottom: 1px solid var(--rule); padding-bottom: .2em; }
+h3 { font-size: 12.5pt; margin: 1.1em 0 .3em; color: #25303d; }
+h4 { font-size: 11pt; margin: 1em 0 .3em; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+p { margin: .5em 0; }
+a { color: var(--accent); text-decoration: none; }
+code {
+  font-family: "SFMono-Regular", "Consolas", monospace;
+  font-size: 9pt;
+  background: var(--code-bg);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-size: 8.5pt;
+  line-height: 1.45;
+  page-break-inside: avoid;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: .7em 0; font-size: 9pt; }
+th, td { border: 1px solid var(--rule); padding: 5px 8px; text-align: left; vertical-align: top; }
+th { background: #eef2f6; font-weight: 700; }
+blockquote {
+  border-left: 3px solid var(--accent);
+  margin: .7em 0; padding: .2em 0 .2em 12px;
+  color: var(--muted); background: #f7faf7;
+}
+img { max-width: 100%; height: auto; }
+hr { border: none; border-top: 1px solid var(--rule); margin: 1.4em 0; }
+ul, ol { margin: .4em 0; padding-left: 1.4em; }
+li { margin: .15em 0; }
+
+.page-break { page-break-after: always; }
+.title-page { text-align: center; padding-top: 32vh; page-break-after: always; }
+.title-page .title { font-size: 30pt; font-weight: 800; border: none; }
+.title-page .subtitle { font-size: 14pt; color: var(--muted); margin-top: .4em; }
+.title-page .meta { font-size: 10pt; color: var(--muted); margin-top: 3em; }
+
+.toc h1 { border: none; }
+.toc ul { list-style: none; padding-left: 0; }
+.toc .toc-h1 { font-weight: 700; margin-top: .5em; }
+.toc .toc-h2 { padding-left: 1.2em; font-size: 9.5pt; color: #33404e; }
+
+/* Status banner under each chapter title */
+.chapter-status { font-size: 9pt; color: var(--muted); margin: -.2em 0 1em; }

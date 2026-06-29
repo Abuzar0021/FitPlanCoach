@@ -1,0 +1,14 @@
+{
+  "name": "fitplancoach-bible-build",
+  "private": true,
+  "type": "module",
+  "description": "Build toolchain for the FitPlanCoach Product & Release Bible (Markdown -> PDF).",
+  "scripts": {
+    "build": "node build-bible.mjs",
+    "smoke": "node build-bible.mjs --smoke"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^11.4.2",
+    "md-to-pdf": "^5.2.4"
+  }
+}
