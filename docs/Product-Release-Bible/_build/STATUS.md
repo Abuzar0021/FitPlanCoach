@@ -32,12 +32,12 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 ## Chapters (Phase 2)
 
 - [x] 01 Executive Summary
-- [ ] 02 Company Vision
-- [ ] 03 Product Overview
+- [x] 02 Company Vision
+- [x] 03 Product Overview
 - [x] 04 System Architecture
-- [ ] 05 Database
+- [x] 05 Database
 - [x] 06 Backend
-- [ ] 07 Frontend
+- [x] 07 Frontend
 - [ ] 08 Mobile App  ⚠cond
 - [ ] 09 Website
 - [ ] 10 Admin CMS  ⚠cond
