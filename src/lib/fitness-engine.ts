@@ -149,26 +149,3 @@ export function pickWorkoutTemplate(
   if (exact) return exact;
   return goalMatch[0] ?? templates[0] ?? null;
 }
-
-// --- Entitlement ---
-export type PlanType = "free" | "pro" | "premium" | "elite";
-export interface Entitlements {
-  canGeneratePlan: boolean;
-  canTrackProgress: boolean;
-  canRegenerateWeekly: boolean;
-  canFullCustomize: boolean;
-  hasAdvancedAnalytics: boolean;
-}
-
-export function entitlementsFor(plan: PlanType, plansUsed: number, freeLimit = 1): Entitlements {
-  const isPro = plan === "pro" || plan === "premium" || plan === "elite";
-  const isPremium = plan === "premium" || plan === "elite";
-  const isElite = plan === "elite";
-  return {
-    canGeneratePlan: isPro || plansUsed < freeLimit,
-    canTrackProgress: true,
-    canRegenerateWeekly: isPremium,
-    canFullCustomize: isPremium,
-    hasAdvancedAnalytics: isElite,
-  };
-}

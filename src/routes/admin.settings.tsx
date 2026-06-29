@@ -10,6 +10,7 @@ import {
   SOCIAL_PLATFORMS,
   type SocialLinks,
   type Announcement,
+  type AnalyticsConfig,
 } from "@/lib/site-config";
 
 export const Route = createFileRoute("/admin/settings")({
@@ -32,6 +33,7 @@ function SettingsAdmin() {
   const [supportEmail, setSupportEmail] = useState(DEFAULT_SITE_CONFIG.support_email);
   const [social, setSocial] = useState<SocialLinks>(DEFAULT_SITE_CONFIG.social);
   const [announcement, setAnnouncement] = useState<Announcement>(DEFAULT_SITE_CONFIG.announcement);
+  const [analytics, setAnalytics] = useState<AnalyticsConfig>(DEFAULT_SITE_CONFIG.analytics);
 
   useEffect(() => {
     supabase.from("app_settings").select("*").then(({ data }) => {
@@ -44,6 +46,7 @@ function SettingsAdmin() {
       if (get("support_email")) setSupportEmail(get("support_email") as string);
       if (get("social_links")) setSocial({ ...DEFAULT_SITE_CONFIG.social, ...(get("social_links") as any) });
       if (get("announcement")) setAnnouncement({ ...DEFAULT_SITE_CONFIG.announcement, ...(get("announcement") as any) });
+      if (get("analytics")) setAnalytics({ ...DEFAULT_SITE_CONFIG.analytics, ...(get("analytics") as any) });
     });
   }, []);
 
@@ -57,6 +60,7 @@ function SettingsAdmin() {
       { key: "support_email", value: supportEmail.trim() as any },
       { key: "social_links", value: social as any },
       { key: "announcement", value: { ...announcement, text: announcement.text.trim(), href: announcement.href.trim() } as any },
+      { key: "analytics", value: { ga4_id: analytics.ga4_id.trim(), clarity_id: analytics.clarity_id.trim() } as any },
     ];
     for (const r of rows) {
       const { error } = await supabase.from("app_settings").upsert(r);
@@ -115,6 +119,21 @@ function SettingsAdmin() {
         <div className="space-y-1.5">
           <Label className="text-xs">Link (optional)</Label>
           <Input type="url" value={announcement.href} onChange={e=>setAnnouncement({ ...announcement, href: e.target.value })} placeholder="https://… or /pricing" />
+        </div>
+      </section>
+
+      <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <h2 className="font-semibold">Analytics & tracking</h2>
+        <p className="text-xs text-muted-foreground">Paste your IDs to enable tracking site-wide. Leave blank to keep an integration off.</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Google Analytics 4 ID</Label>
+            <Input value={analytics.ga4_id} onChange={e=>setAnalytics({ ...analytics, ga4_id: e.target.value })} placeholder="G-XXXXXXXXXX" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Microsoft Clarity ID</Label>
+            <Input value={analytics.clarity_id} onChange={e=>setAnalytics({ ...analytics, clarity_id: e.target.value })} placeholder="abcdefghij" />
+          </div>
         </div>
       </section>
 

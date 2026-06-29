@@ -18,6 +18,9 @@ export const Route = createFileRoute("/admin")({
 
 const NAV = [
   { to: "/admin", label: "Overview" },
+  { to: "/admin/analytics", label: "Analytics" },
+  { to: "/admin/blog", label: "Blog" },
+  { to: "/admin/media", label: "Media" },
   { to: "/admin/support", label: "Support" },
   { to: "/admin/foods", label: "Foods" },
   { to: "/admin/exercises", label: "Exercises" },
@@ -40,11 +43,11 @@ function AdminLayout() {
             <span className="text-xs px-2 py-0.5 rounded-md bg-accent text-accent-foreground font-semibold">Admin</span>
           </div>
         </div>
-        <nav className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+        <nav aria-label="Admin sections" className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
           {NAV.map(n => {
             const active = location.pathname === n.to;
             return (
-              <Link key={n.to} to={n.to} className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 transition ${active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{n.label}</Link>
+              <Link key={n.to} to={n.to} aria-current={active ? "page" : undefined} className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 transition ${active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{n.label}</Link>
             );
           })}
         </nav>

@@ -196,8 +196,8 @@ function SupportPage() {
 
           {activeTicket.status !== "closed" && (
             <form onSubmit={submitReply} className="flex gap-2 items-end">
-              <Textarea rows={2} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply…" className="flex-1" />
-              <Button type="submit" disabled={busy || !reply.trim()} size="sm"><Send className="size-4" /></Button>
+              <Textarea rows={2} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply…" aria-label="Reply to ticket" className="flex-1" />
+              <Button type="submit" disabled={busy || !reply.trim()} size="sm" aria-label="Send reply"><Send className="size-4" /></Button>
             </form>
           )}
         </div>

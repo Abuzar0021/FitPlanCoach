@@ -123,7 +123,7 @@ function Profile() {
           <div className="relative">
             <div className="size-20 rounded-2xl overflow-hidden bg-muted border border-border inline-flex items-center justify-center">
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="size-full object-cover" />
+                <img src={profile.avatar_url} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
               ) : (
                 <span className="font-display text-2xl text-muted-foreground">
                   {(profile.name ?? user?.email ?? "?").slice(0, 1).toUpperCase()}

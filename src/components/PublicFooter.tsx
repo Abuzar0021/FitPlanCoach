@@ -47,6 +47,7 @@ export function PublicFooter() {
               <Link to="/features" className="hover:text-foreground">Features</Link>
               <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
               <Link to="/faq" className="hover:text-foreground">FAQ</Link>
+              <Link to="/blog" className="hover:text-foreground">Blog</Link>
               <Link to="/auth" className="hover:text-foreground">Sign in</Link>
             </nav>
           </div>

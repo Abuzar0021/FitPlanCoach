@@ -25,20 +25,35 @@ export interface Announcement {
   href: string;
 }
 
+/** Third-party tracking IDs. Empty = that integration is off. */
+export interface AnalyticsConfig {
+  /** GA4 Measurement ID, e.g. G-XXXXXXX. */
+  ga4_id: string;
+  /** Microsoft Clarity project ID. */
+  clarity_id: string;
+}
+
 export interface SiteConfig {
   support_email: string;
   social: SocialLinks;
   announcement: Announcement;
+  analytics: AnalyticsConfig;
 }
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
   support_email: "abuzarelahi01@gmail.com",
   social: { twitter: "", instagram: "", facebook: "", tiktok: "", youtube: "" },
   announcement: { enabled: false, text: "", href: "" },
+  analytics: { ga4_id: "", clarity_id: "" },
 };
 
 /** app_settings keys that make up the public site config. */
-export const SITE_CONFIG_KEYS = ["support_email", "social_links", "announcement"] as const;
+export const SITE_CONFIG_KEYS = [
+  "support_email",
+  "social_links",
+  "announcement",
+  "analytics",
+] as const;
 
 type SettingRow = { key: string; value: unknown };
 
@@ -48,11 +63,13 @@ export function mergeSiteConfig(rows: SettingRow[] | null | undefined): SiteConf
   const email = get("support_email");
   const social = get("social_links") as Partial<SocialLinks> | undefined;
   const announcement = get("announcement") as Partial<Announcement> | undefined;
+  const analytics = get("analytics") as Partial<AnalyticsConfig> | undefined;
   return {
     support_email:
       typeof email === "string" && email.trim() ? email.trim() : DEFAULT_SITE_CONFIG.support_email,
     social: { ...DEFAULT_SITE_CONFIG.social, ...(social ?? {}) },
     announcement: { ...DEFAULT_SITE_CONFIG.announcement, ...(announcement ?? {}) },
+    analytics: { ...DEFAULT_SITE_CONFIG.analytics, ...(analytics ?? {}) },
   };
 }
 
