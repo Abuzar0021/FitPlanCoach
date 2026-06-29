@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Pencil, Eye } from "lucide-react";
 import { slugify, formatPostDate, type BlogPost } from "@/lib/blog";
+import { MediaPicker } from "@/components/MediaPicker";
 
 export const Route = createFileRoute("/admin/blog")({
   head: () => ({ meta: [{ title: "Blog — Admin" }] }),
@@ -178,12 +179,11 @@ function BlogAdmin() {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Cover image URL</Label>
-          <Input
-            type="url"
+          <Label>Cover image</Label>
+          <MediaPicker
             value={form.cover_image_url}
-            onChange={(e) => setForm((f) => ({ ...f, cover_image_url: e.target.value }))}
-            placeholder="https://…"
+            onChange={(url) => setForm((f) => ({ ...f, cover_image_url: url }))}
+            label="Cover image"
           />
         </div>
 
