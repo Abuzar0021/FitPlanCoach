@@ -47,10 +47,10 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 - [x] 14 Nutrition System
 - [x] 15 Daily Tips
 - [x] 16 Analytics
-- [ ] 17 Blog
-- [ ] 18 Media Library
-- [ ] 19 SEO
-- [ ] 20 Security
+- [x] 17 Blog
+- [x] 18 Media Library
+- [x] 19 SEO
+- [x] 20 Security
 - [ ] 21 Accessibility
 - [ ] 22 Performance
 - [ ] 23 Testing
