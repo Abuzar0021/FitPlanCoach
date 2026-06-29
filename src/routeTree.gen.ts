@@ -19,6 +19,9 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -104,6 +107,16 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -166,6 +179,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
 const AdminSupportRoute = AdminSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -279,6 +297,9 @@ const ApiPublicLemonsqueezyWebhookRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/blog': typeof BlogRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
@@ -324,6 +345,9 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
+  '/blog': typeof BlogRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
@@ -369,6 +393,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/blog': typeof BlogRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/about': typeof AboutRoute
@@ -417,6 +444,9 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/blog'
+    | '/blog/$slug'
+    | '/admin/blog'
     | '/'
     | '/about'
     | '/admin'
@@ -447,8 +477,6 @@ export interface FileRouteTypes {
     | '/workouts'
     | '/admin/exercises'
     | '/admin/foods'
-    | '/admin/payment-settings'
-    | '/admin/payments'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
@@ -464,6 +492,9 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/blog'
+    | '/blog/$slug'
+    | '/admin/blog'
     | '/'
     | '/about'
     | '/auth'
@@ -493,8 +524,6 @@ export interface FileRouteTypes {
     | '/workouts'
     | '/admin/exercises'
     | '/admin/foods'
-    | '/admin/payment-settings'
-    | '/admin/payments'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
@@ -510,6 +539,9 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
   id:
     | '__root__'
+    | '/blog'
+    | '/blog/$slug'
+    | '/admin/blog'
     | '/'
     | '/_app'
     | '/about'
@@ -541,8 +573,6 @@ export interface FileRouteTypes {
     | '/_app/workouts'
     | '/admin/exercises'
     | '/admin/foods'
-    | '/admin/payment-settings'
-    | '/admin/payments'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
@@ -568,6 +598,8 @@ export interface RootRouteChildren {
   DeleteAccountRoute: typeof DeleteAccountRoute
   DownloadRoute: typeof DownloadRoute
   FaqRoute: typeof FaqRoute
+  BlogRoute: typeof BlogRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   FeaturesRoute: typeof FeaturesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PricingRoute: typeof PricingRoute
@@ -659,6 +691,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -748,6 +794,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/admin/support'
       preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/settings': {
@@ -931,6 +984,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AdminRouteChildren {
+  AdminBlogRoute: typeof AdminBlogRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
   AdminFoodsRoute: typeof AdminFoodsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -941,6 +995,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBlogRoute: AdminBlogRoute,
   AdminExercisesRoute: AdminExercisesRoute,
   AdminFoodsRoute: AdminFoodsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -962,6 +1017,8 @@ const rootRouteChildren: RootRouteChildren = {
   DeleteAccountRoute: DeleteAccountRoute,
   DownloadRoute: DownloadRoute,
   FaqRoute: FaqRoute,
+  BlogRoute: BlogRoute,
+  BlogSlugRoute: BlogSlugRoute,
   FeaturesRoute: FeaturesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PricingRoute: PricingRoute,

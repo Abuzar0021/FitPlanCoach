@@ -8,6 +8,7 @@ const entries = [
   { path: "/download", changefreq: "weekly", priority: "0.9" },
   { path: "/features", changefreq: "monthly", priority: "0.8" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
+  { path: "/blog", changefreq: "weekly", priority: "0.7" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
   { path: "/faq", changefreq: "monthly", priority: "0.6" },
@@ -23,10 +24,32 @@ export const Route = createFileRoute("/sitemap.xml")({
     handlers: {
       GET: async () => {
         const lastmod = new Date().toISOString().slice(0, 10);
-        const urls = entries
+
+        // Append every published blog post. Degrades gracefully to the static
+        // list if the blog table isn't available yet.
+        let postEntries: Array<{ path: string; changefreq: string; priority: string; lastmod: string }> = [];
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const db: any = supabaseAdmin;
+          const { data } = await db
+            .from("blog_posts")
+            .select("slug,updated_at")
+            .eq("status", "published");
+          postEntries = (data ?? []).map((p: any) => ({
+            path: `/blog/${p.slug}`,
+            changefreq: "monthly",
+            priority: "0.6",
+            lastmod: p.updated_at ? new Date(p.updated_at).toISOString().slice(0, 10) : lastmod,
+          }));
+        } catch {
+          /* keep static sitemap */
+        }
+
+        const all = [...entries.map((e) => ({ ...e, lastmod })), ...postEntries];
+        const urls = all
           .map(
             (e) =>
-              `  <url>\n    <loc>${BASE_URL}${e.path}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>`,
+              `  <url>\n    <loc>${BASE_URL}${e.path}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>`,
           )
           .join("\n");
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;

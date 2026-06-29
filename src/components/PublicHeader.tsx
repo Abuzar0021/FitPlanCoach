@@ -33,6 +33,9 @@ export function PublicHeader() {
             <Link to="/faq" className="text-muted-foreground hover:text-foreground transition hidden md:inline">
               FAQ
             </Link>
+            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition hidden md:inline">
+              Blog
+            </Link>
             <Link to="/auth" className="text-muted-foreground hover:text-foreground transition hidden sm:inline">
               Sign in
             </Link>
