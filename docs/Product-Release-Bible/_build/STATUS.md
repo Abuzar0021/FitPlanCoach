@@ -1,6 +1,6 @@
 # Build Status — FitPlanCoach Product & Release Bible
 
-**Phase:** 1 (inventory) — Phase 0 complete
+**Phase:** 2 (chapter authoring) — Phases 0 & 1 complete
 **Last updated:** 2026-06-29
 
 ## Toolchain (Phase 0)
@@ -23,7 +23,7 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 ## Phases
 
 - [x] **Phase 0** — toolchain + smoke test
-- [ ] **Phase 1** — `00_INVENTORY.md` ground-truth inventory + Feature Matrix
+- [x] **Phase 1** — `00_INVENTORY.md` ground-truth inventory + Feature Matrix
 - [ ] **Phase 2** — author 27 chapters
 - [ ] **Phase 3** — diagrams (only for features that exist)
 - [ ] **Phase 4** — assemble PDF, verify TOC/pagination, report page count
