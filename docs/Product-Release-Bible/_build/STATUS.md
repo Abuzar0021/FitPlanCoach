@@ -1,6 +1,6 @@
 # Build Status — FitPlanCoach Product & Release Bible
 
-**Phase:** 2 (chapter authoring) — Phases 0 & 1 complete
+**Phase:** 5 (QA gate) — Phases 0–4 complete; all 27 chapters authored, full PDF builds (~71 pp)
 **Last updated:** 2026-06-29
 
 ## Toolchain (Phase 0)
@@ -24,10 +24,10 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 
 - [x] **Phase 0** — toolchain + smoke test
 - [x] **Phase 1** — `00_INVENTORY.md` ground-truth inventory + Feature Matrix
-- [ ] **Phase 2** — author 27 chapters
-- [ ] **Phase 3** — diagrams (only for features that exist)
-- [ ] **Phase 4** — assemble PDF, verify TOC/pagination, report page count
-- [ ] **Phase 5** — QA gate vs Definition of Done → `QA_REPORT.md`
+- [x] **Phase 2** — author 27 chapters
+- [x] **Phase 3** — diagrams (27 mermaid diagrams, one+ per chapter, all render)
+- [x] **Phase 4** — assemble PDF (~71 pp, linked TOC + page numbers)
+- [ ] **Phase 5** — QA gate vs Definition of Done → `QA_REPORT.md` (in progress)
 
 ## Chapters (Phase 2)
 
@@ -51,13 +51,13 @@ PDF image XObject. Build is reproducible: `cd _build && npm install && npm run b
 - [x] 18 Media Library
 - [x] 19 SEO
 - [x] 20 Security
-- [ ] 21 Accessibility
-- [ ] 22 Performance
-- [ ] 23 Testing
-- [ ] 24 Deployment
-- [ ] 25 Launch Checklist
-- [ ] 26 Future Roadmap
-- [ ] 27 Definition of Done
+- [x] 21 Accessibility
+- [x] 22 Performance
+- [x] 23 Testing
+- [x] 24 Deployment
+- [x] 25 Launch Checklist
+- [x] 26 Future Roadmap
+- [x] 27 Definition of Done
 
 ## Planned-item drive (per user directive)
 
