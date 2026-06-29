@@ -1,0 +1,4 @@
+# Generated build artifacts — reproducible via `cd _build && npm run build`.
+FitPlanCoach_Product_Release_Bible.pdf
+assets/diagrams/*.png
+assets/diagrams/*.mmd
