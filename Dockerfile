@@ -17,7 +17,12 @@
 ###############################################################################
 
 # ---------- Stage 1: build ----------
-FROM node:22-bookworm-slim AS builder
+# Node 22 LTS, FULL image (not slim): @tanstack/react-start requires Node
+# >=22.12 (Node 22 "Jod" is an LTS line), and the full image ships the toolchain
+# (python3/make/g++) that dependency file-tracing needs — avoiding the
+# @vercel/nft / native-build errors. The real stability fix is the lockfile +
+# npm ci below; the Node version was never the cause of the build failure.
+FROM node:22-bookworm AS builder
 WORKDIR /app
 
 # Force the Node server preset (overrides the default Cloudflare preset).
@@ -37,12 +42,14 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_SUPABASE_PROJECT_ID=$VITE_SUPABASE_PROJECT_ID \
     VITE_PLAY_STORE_URL=$VITE_PLAY_STORE_URL
 
-# Install dependencies first (better layer caching). We use npm against the
-# public registry: the committed bun.lock points at Lovable's private registry,
-# which is not reachable from a generic VPS. All deps (incl. @lovable.dev/*) are
-# published on the public npm registry.
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+# Deterministic install from the committed lockfile (this is the fix for the
+# "npm run build fails with @vercel/nft / ESM-CJS" loop: without a lock, npm
+# pulled newer, incompatible transitive versions). `npm ci` installs the EXACT
+# versions that are verified to build. We use npm (not bun) because the committed
+# bun.lock targets Lovable's private registry, unreachable from a generic VPS;
+# all deps (incl. @lovable.dev/*) are on the public npm registry.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
 # Build the SSR app → .output (node-server preset).
 COPY . .
@@ -51,6 +58,8 @@ RUN npm run build \
     && echo "Build OK: .output/server/index.mjs present"
 
 # ---------- Stage 2: runtime ----------
+# Node 22 LTS slim — runs the self-contained .output (no build pipeline, no
+# node_modules, no Nitro build step at runtime; just a plain Node HTTP server).
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 
