@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { signUpUser, confirmUserByEmail } from "@/lib/auth.functions";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +43,8 @@ function AuthPage() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const navigate = useNavigate();
+  const doSignUp = useServerFn(signUpUser);
+  const doConfirm = useServerFn(confirmUserByEmail);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -57,27 +61,34 @@ function AuthPage() {
           toast.error("Password must be at least 8 characters");
           return;
         }
-        const { data, error } = await supabase.auth.signUp({
+        // Create the user already email-confirmed (server-side, service role), so
+        // no verification email is needed and the account works immediately.
+        const res = await doSignUp({ data: { email: cleanEmail, password, name: name.trim() } });
+        if (!res.ok) {
+          if (res.reason === "exists") {
+            toast.error("That email is already registered — try signing in.");
+            setMode("signin");
+            return;
+          }
+          throw new Error(res.message || "Could not create your account. Please try again.");
+        }
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { name: name.trim() },
-          },
         });
-        if (error) throw error;
-        // Auto-confirm is enabled; signUp returns a session. Fall back to signIn if not.
-        if (!data.session) {
-          const { error: signInErr } = await supabase.auth.signInWithPassword({
-            email: cleanEmail,
-            password,
-          });
-          if (signInErr) throw signInErr;
-        }
+        if (signInErr) throw signInErr;
         toast.success("Welcome to FitPlanCoach!");
         navigate({ to: "/dashboard" });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        let { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        // Legacy accounts created before auto-confirm fail with "Email not
+        // confirmed". The correct password was accepted, so confirm + retry once.
+        if (error && /not confirmed|confirm/i.test(error.message)) {
+          const c = await doConfirm({ data: { email: cleanEmail } });
+          if (c.ok) {
+            ({ error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password }));
+          }
+        }
         if (error) {
           const next = attempts + 1;
           setAttempts(next);
@@ -206,7 +217,7 @@ function AuthPage() {
               </div>
               {mode === "signup" && (
                 <p className="text-[11px] text-muted-foreground">
-                  At least 8 characters. We'll send a verification email.
+                  At least 8 characters. Your account is ready right away.
                 </p>
               )}
             </div>
