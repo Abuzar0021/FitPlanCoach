@@ -10,17 +10,20 @@ ports 80 / 443 / 3000.
 
 ---
 
-## 0. TL;DR
+## 0. TL;DR (deterministic — nothing is assumed)
 
 ```bash
 # on the VPS, in the project directory
 cp .env.docker.example .env.docker      # then edit with real values
 nano .env.docker
-docker compose --env-file .env.docker up -d --build
-curl -I http://127.0.0.1:8080/robots.txt   # expect HTTP/1.1 200
+
+bash deploy.sh        # builds, starts, and HARD-STOPS unless the app answers curl
+bash verify.sh        # re-checks; prints "DEPLOYMENT READY / URL: http://localhost:<port>"
+bash deploy/caddy-setup.sh   # detects your Caddy mode + real port, prints the exact block
 ```
 
-Then point your **existing** Caddy/Nginx at `127.0.0.1:8080` (see §5).
+Each script DETECTS the real port from the running container — no 3000-vs-8080
+guessing. Only after `verify.sh` says READY do you touch DNS (§7).
 
 ---
 
@@ -113,11 +116,15 @@ unless-stopped` means it comes back automatically after a crash or VPS reboot.
 You already run a proxy on 80/443. **Do not start a new one.** Add a site to the
 one you have; a reload is graceful and does not interrupt OmniStack.
 
-**Caddy** (auto-HTTPS):
+**Caddy** (auto-HTTPS) — let the script detect your setup and print exact lines:
 ```bash
-cat deploy/Caddyfile.snippet >> /etc/caddy/Caddyfile   # edit domain first
-sudo caddy reload --config /etc/caddy/Caddyfile        # or: systemctl reload caddy
+bash deploy/caddy-setup.sh
 ```
+It detects whether Caddy is a **system service** or a **Docker container**, reads
+the app's **real port**, and for Docker Caddy verifies (or tells you how to make)
+a shared network — then prints the precise `reverse_proxy` block and reload
+command. It does not edit your Caddy for you (safer for OmniStack); you paste the
+block it prints.
 
 **Nginx** (+ certbot):
 ```bash
@@ -131,15 +138,16 @@ Point the domain's DNS A/AAAA records at the VPS IP beforehand.
 
 ---
 
-## 6. Verify (exact commands)
+## 6. Verify (one command, deterministic)
 
 ```bash
-docker compose --env-file .env.docker ps          # State = Up, Health = healthy
-docker inspect --format '{{.State.Health.Status}}' fitplancoach   # -> healthy
-curl -I http://127.0.0.1:8080/robots.txt          # -> HTTP/1.1 200
-curl -s http://127.0.0.1:8080/ | head -c 200      # -> SSR HTML
-docker compose --env-file .env.docker logs --tail=50    # "Listening on ..."
+bash verify.sh
 ```
+It detects the container's internal port + the published host port from the live
+container, curls `http://localhost:<host-port>`, and prints either
+`DEPLOYMENT READY / URL: http://localhost:<port>` (exit 0) or `NOT READY` with the
+reason (exit 1). `deploy.sh` runs this same gate automatically and refuses to
+finish unless it passes.
 
 Checklist this satisfies: Docker build succeeds · container starts · Nitro
 server starts · server listens · env loads · no missing deps/runtime files/assets
