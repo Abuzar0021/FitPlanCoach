@@ -1,15 +1,40 @@
-# FitPlanCoach — add this block to your EXISTING Caddyfile, then reload Caddy
-# gracefully (this does NOT interrupt OmniStack):
+# FitPlanCoach — reverse proxy for your EXISTING Caddy (coexists with OmniStack).
+# Caddy provisions + renews HTTPS automatically once DNS points the domain here.
 #
-#   caddy reload --config /etc/caddy/Caddyfile      # or: systemctl reload caddy
+# FIRST find out whether your Caddy is a system service or a Docker container:
+#   docker ps --format '{{.Names}} {{.Image}}' | grep -i caddy   # prints a line => Docker Caddy
+#   systemctl is-active caddy                                     # "active"     => system Caddy
 #
-# Caddy provisions and renews HTTPS automatically (Let's Encrypt). Replace the
-# domain and the port if you changed HOST_PORT.
+# Use the matching block below. Reloading Caddy is graceful — OmniStack stays up.
+# ---------------------------------------------------------------------------
 
-fitplancoach.com, www.fitplancoach.com {
-	encode zstd gzip
-	reverse_proxy 127.0.0.1:8080 {
-		header_up X-Forwarded-Proto {scheme}
-		header_up X-Forwarded-For {remote_host}
-	}
-}
+# ============================================================
+# CASE A — SYSTEM Caddy (a caddy service on the host)
+# ============================================================
+# The app is published on the host at 127.0.0.1:8080, so Caddy reaches it there.
+# Append to /etc/caddy/Caddyfile, then:  sudo systemctl reload caddy
+#
+# fitplancoach.com, www.fitplancoach.com {
+# 	reverse_proxy 127.0.0.1:8080
+# }
+
+
+# ============================================================
+# CASE B — DOCKER Caddy (caddy runs as a container)  ← most common with OmniStack
+# ============================================================
+# IMPORTANT: inside the Caddy container, 127.0.0.1 is the CONTAINER, not the host,
+# so 127.0.0.1:8080 will NOT work. Instead put both containers on one network and
+# proxy to the container name + its INTERNAL port (3000). This is the #1 gotcha.
+#
+# 1) Find the network your Caddy container is on (replace caddy_container_name):
+#      docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' caddy_container_name
+# 2) Attach FitPlanCoach to that same network (no rebuild needed):
+#      docker network connect <that_network> fitplancoach
+# 3) Add this block to the Caddyfile your Caddy container uses, then reload it:
+#      docker exec caddy_container_name caddy reload --config /etc/caddy/Caddyfile
+#
+# fitplancoach.com, www.fitplancoach.com {
+# 	reverse_proxy fitplancoach:3000
+# }
+#
+# (container name = fitplancoach, internal port = 3000 — NOT 8080, NOT 127.0.0.1)
