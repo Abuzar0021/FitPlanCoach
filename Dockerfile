@@ -27,7 +27,12 @@ WORKDIR /app
 
 # Force the Node server preset (overrides the default Cloudflare preset).
 ENV NITRO_PRESET=node-server
-ENV NODE_ENV=production
+# IMPORTANT: do NOT set NODE_ENV=production in the BUILD stage. It makes npm omit
+# devDependencies, and Vite + its plugins (@vitejs/plugin-react, vite-tsconfig-
+# paths, @lovable.dev/vite-tanstack-config, @tailwindcss/vite, typescript, etc.)
+# are devDependencies — omitting them is what causes the "Could not resolve ...
+# in vite.config.ts" build failure. NODE_ENV=production is set in the runtime
+# stage only.
 
 # Public-facing, build-time-inlined config. Provide real values via compose
 # build args (docker-compose passes them from your --env-file). Empty defaults
@@ -49,7 +54,9 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
 # bun.lock targets Lovable's private registry, unreachable from a generic VPS;
 # all deps (incl. @lovable.dev/*) are on the public npm registry.
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# --include=dev guarantees the build tools (devDependencies) install even if the
+# base image or environment sets NODE_ENV=production.
+RUN npm ci --include=dev --no-audit --no-fund
 
 # Build the SSR app → .output (node-server preset).
 COPY . .
