@@ -62,11 +62,20 @@ services:
         max-size: "10m"
         max-file: "5"
 
-    # Dedicated network — does not attach to or alter any existing network.
+    # Dedicated network + OmniStack's Caddy network (so the existing Caddy
+    # container can reverse-proxy to this app by name: fitplancoach:3000).
     networks:
       - fitplancoach_net
+      - omnistack_default
 
 networks:
   fitplancoach_net:
     name: fitplancoach_net
     driver: bridge
+  # OmniStack's existing Caddy network. Marked external so compose JOINS the
+  # already-running network instead of creating it — this keeps the reverse-proxy
+  # link alive across `docker compose up -d --build` (no manual `docker network
+  # connect` needed after updates). If you ever deploy WITHOUT OmniStack present,
+  # delete this block AND the "- omnistack_default" line above.
+  omnistack_default:
+    external: true
