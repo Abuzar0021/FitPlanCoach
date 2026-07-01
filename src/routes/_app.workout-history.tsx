@@ -54,7 +54,15 @@ function WorkoutHistory() {
         .limit(1000),
     ]).then(([s, sl]) => {
       setSessions((s.data ?? []) as Session[]);
-      setSets((sl.data ?? []) as SetLog[]);
+      // weight_kg is NUMERIC → arrives as a string. Coerce it, or the PR
+      // "heaviest set" comparison below does a lexicographic string compare
+      // ("100" > "90" is false) and reports the wrong personal record.
+      setSets(
+        ((sl.data ?? []) as any[]).map((r) => ({
+          ...r,
+          weight_kg: r.weight_kg == null ? null : Number(r.weight_kg),
+        })) as SetLog[],
+      );
     });
   }, [user]);
 

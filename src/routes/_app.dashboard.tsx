@@ -232,8 +232,11 @@ function Dashboard() {
         calories: number;
         protein: number;
       }>) {
-        byCat[row.meal_category].calories += row.calories;
-        byCat[row.meal_category].protein += row.protein;
+        // NUMERIC columns come back as strings from PostgREST — coerce, or
+        // `+=` string-concatenates and the "kcal left" ring / logged totals
+        // are wrong the moment anything is logged.
+        byCat[row.meal_category].calories += Number(row.calories);
+        byCat[row.meal_category].protein += Number(row.protein);
       }
       setLoggedToday(byCat);
       const sessionDates = new Set((weekSessions ?? []).map((s: any) => s.performed_on));
