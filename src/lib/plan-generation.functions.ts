@@ -19,6 +19,31 @@ import {
 } from "@/lib/fitness-engine";
 import { hasFeature, DEFAULT_FREE_PLAN_LIMIT, type PlanContext } from "@/lib/access";
 
+/**
+ * Return a consumed generation credit when generation aborts for a reason
+ * that isn't the user's fault (empty catalog, failed save). Tries the atomic
+ * DB function; if it isn't deployed yet, falls back to a plain decrement
+ * using the known post-consumption count. Best-effort — never throws, so a
+ * refund failure can't mask the real error being returned to the user.
+ */
+async function refundGenerationCredit(
+  admin: SupabaseClient<Database>,
+  userId: string,
+  currentCount: number,
+): Promise<void> {
+  try {
+    const { error } = await admin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+    if (error) {
+      await admin
+        .from("subscriptions")
+        .update({ plan_count_used: Math.max(0, currentCount - 1) })
+        .eq("user_id", userId);
+    }
+  } catch (err) {
+    console.error("[generateFitnessPlan] credit refund failed", err);
+  }
+}
+
 type GenerateResult =
   | {
       ok: true;
@@ -121,19 +146,20 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       };
     }
 
-    // Consume a generation credit atomically, in the database, BEFORE doing
-    // any of the (slower) generation work. A prior version of this function
-    // read plan_count_used once, checked the limit in application code, and
-    // only wrote the incremented value back at the very end using that same
-    // stale read — two concurrent requests (a double-click, two open tabs)
-    // could both pass the check and both succeed, letting a free user
-    // generate more plans than their limit. The DB function below performs
-    // the check-and-increment as a single conditional UPDATE so only one
-    // concurrent request can ever win it. Doing this first (via the
-    // service-role client) also means a missing/misconfigured
-    // SUPABASE_SERVICE_ROLE_KEY fails loudly here, before any plan rows are
-    // written — not after, which previously could leave a plan fully saved
-    // in the database while the request itself reported failure.
+    // Consume a generation credit BEFORE doing any of the (slower) generation
+    // work, so a missing/misconfigured SUPABASE_SERVICE_ROLE_KEY fails here,
+    // before any plan rows are written — not after.
+    //
+    // Primary path: the atomic consume_plan_generation_credit DB function,
+    // which does the free-limit check-and-increment as one conditional UPDATE
+    // so two concurrent requests (a double-click, two open tabs) can't both
+    // slip past the limit. Fallback path: this app's schema is applied by
+    // hand and can lag the code, so if that function isn't present in the
+    // database yet — or errors for any reason — we fall back to the plain
+    // read-check-increment that shipped before the atomic function existed.
+    // Generation must not be held hostage to a migration the operator hasn't
+    // pasted yet; the generated plan is 100% real either way, only the
+    // race-hardening of the counter differs.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let planCountUsed: number;
     try {
@@ -144,22 +170,43 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
           p_free_limit: freeLimit,
         })
         .single();
-      if (creditError || !credit) {
-        console.error("[generateFitnessPlan] consume_plan_generation_credit failed", creditError);
-        return {
-          ok: false,
-          reason: "error",
-          message: "Could not start plan generation — please try again in a moment.",
-        };
-      }
-      if (!credit.allowed) {
+
+      if (creditError) {
+        // Function not deployed / not yet migrated / any RPC-level failure →
+        // fall back to the pre-RPC approach rather than failing generation.
+        console.warn(
+          "[generateFitnessPlan] consume_plan_generation_credit unavailable, falling back to direct increment:",
+          creditError.message,
+        );
+        if (!paidActive && freeUsed >= freeLimit) {
+          return {
+            ok: false,
+            reason: "needs_subscription",
+            message: "Free plan limit reached — upgrade to generate more plans.",
+          };
+        }
+        const { error: incError } = await supabaseAdmin
+          .from("subscriptions")
+          .update({ plan_count_used: freeUsed + 1 })
+          .eq("user_id", userId);
+        if (incError) {
+          console.error("[generateFitnessPlan] fallback credit increment failed", incError);
+          return {
+            ok: false,
+            reason: "error",
+            message: "Could not start plan generation — please try again in a moment.",
+          };
+        }
+        planCountUsed = freeUsed + 1;
+      } else if (!credit.allowed) {
         return {
           ok: false,
           reason: "needs_subscription",
           message: "Free plan limit reached — upgrade to generate more plans.",
         };
+      } else {
+        planCountUsed = credit.plan_count_used;
       }
-      planCountUsed = credit.plan_count_used;
     } catch (err) {
       console.error("[generateFitnessPlan] plan generation credit check threw", err);
       return {
@@ -178,7 +225,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     );
     const hasAnyMeal = Object.values(mealPlan.meals).some((items) => items.length > 0);
     if (!hasAnyMeal) {
-      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+      await refundGenerationCredit(supabaseAdmin, userId, planCountUsed);
       return {
         ok: false,
         reason: "error",
@@ -201,7 +248,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       // failure path honest (and the credit refunded) rather than silently
       // returning a workout-less plan if pickWorkoutTemplate's logic ever
       // changes.
-      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+      await refundGenerationCredit(supabaseAdmin, userId, planCountUsed);
       return {
         ok: false,
         reason: "error",
@@ -246,7 +293,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
         mealInsertError,
         workoutInsertError,
       });
-      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+      await refundGenerationCredit(supabaseAdmin, userId, planCountUsed);
       return {
         ok: false,
         reason: "error",
