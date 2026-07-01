@@ -1,5 +1,87 @@
 -- FitPlanCoach — full database schema (all migrations concatenated in order).
--- Paste this whole file into your NEW Supabase project's SQL Editor and Run.
+-- Paste this whole file into your Supabase project's SQL Editor and Run.
+-- Safe to run more than once (starts with a RESET block that drops its own
+-- objects first) — e.g. after clearing tables by hand and needing a clean
+-- re-apply. It never touches auth.users, so real accounts are preserved.
+
+-- =====================================================================
+-- RESET (safe to re-run): drops everything this script creates first,
+-- so pasting this whole file always works even on a partially-deleted
+-- or already-populated project. Your auth.users (actual accounts) are
+-- NEVER touched — only the public schema objects listed below.
+-- =====================================================================
+drop function if exists
+  public.claim_first_admin,
+  public.delete_email,
+  public.enqueue_email,
+  public.handle_new_user,
+  public.has_active_subscription,
+  public.has_role,
+  public.is_owner,
+  public.move_to_dlq,
+  public.notify_payment_status,
+  public.notify_ticket_reply,
+  public.notify_ticket_status,
+  public.plan_type_from_price,
+  public.read_email_batch,
+  public.send_welcome_email,
+  public.sync_feature_vote_count,
+  public.transfer_ownership,
+  public.update_updated_at_column
+  cascade;
+
+drop table if exists
+  public.achievements,
+  public.analytics_events,
+  public.app_settings,
+  public.billing_history,
+  public.blog_posts,
+  public.email_send_log,
+  public.email_send_state,
+  public.email_unsubscribe_tokens,
+  public.exercises,
+  public.feature_request_comments,
+  public.feature_request_votes,
+  public.feature_requests,
+  public.foods,
+  public.meal_plans,
+  public.media_assets,
+  public.notifications,
+  public.payment_approvals,
+  public.payment_settings,
+  public.payment_submissions,
+  public.profiles,
+  public.progress_entries,
+  public.subscriptions,
+  public.support_ticket_messages,
+  public.support_tickets,
+  public.suppressed_emails,
+  public.user_achievements,
+  public.user_roles,
+  public.webhook_events,
+  public.workout_plans,
+  public.workout_sessions,
+  public.workout_templates
+  cascade;
+
+drop type if exists
+  public.activity_level,
+  public.app_role,
+  public.billing_interval_kind,
+  public.blog_status,
+  public.budget_level,
+  public.difficulty_level,
+  public.feature_category,
+  public.feature_status,
+  public.fitness_goal,
+  public.gender,
+  public.meal_category,
+  public.payment_method_kind,
+  public.payment_submission_status,
+  public.subscription_plan,
+  public.subscription_status,
+  public.ticket_status
+  cascade;
 
 -- =====================================================================
 -- 20260622150818_dadbdba9-a9c8-4a38-8258-a709110c2c3a.sql
