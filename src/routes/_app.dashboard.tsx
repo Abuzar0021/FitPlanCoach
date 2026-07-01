@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MobileShell } from "@/components/MobileShell";
@@ -243,9 +243,17 @@ function Dashboard() {
   }, [user, navigate]);
 
   const generateFn = useServerFn(generateFitnessPlan);
+  // Synchronous guard against a rapid double-click/double-tap firing two
+  // requests in the same event-loop tick, before React has re-rendered the
+  // button as disabled=busy. The server-side credit check is the real
+  // safety net (see consume_plan_generation_credit), but this avoids
+  // wasting a redundant request — and a confusing double "New plan
+  // generated" toast — on the common case.
+  const generatingRef = useRef(false);
 
   async function generate() {
-    if (!user || !profile) return;
+    if (!user || !profile || generatingRef.current) return;
+    generatingRef.current = true;
     setBusy(true);
     try {
       const result = await generateFn({ data: {} as any });
@@ -258,17 +266,23 @@ function Dashboard() {
         toast.error(result.message);
         return;
       }
+      const savedPlan = { ...result.plan, created_at: new Date().toISOString() };
       try {
-        localStorage.setItem("myfp:last_meal_plan", JSON.stringify(result.plan));
+        localStorage.setItem("myfp:last_meal_plan", JSON.stringify(savedPlan));
       } catch {
         /* localStorage unavailable (private mode/quota) — non-critical */
       }
       toast.success("New plan generated");
-      setMealPlan(result.plan as any);
+      setMealPlan(savedPlan as any);
+      // Keep the workout preview in sync too — without this the "Today's
+      // Session" card kept showing the previous plan's workout until a full
+      // page reload, even though the new one was already saved.
+      setWorkoutDays(result.workout_schedule as WorkoutDay[]);
       setSub((s) => (s ? { ...s, plan_count_used: result.plan_count_used } : s));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate plan");
     } finally {
+      generatingRef.current = false;
       setBusy(false);
     }
   }

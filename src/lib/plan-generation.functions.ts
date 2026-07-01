@@ -23,7 +23,12 @@ type GenerateResult =
   | {
       ok: true;
       plan: ReturnType<typeof generateMealPlan>;
-      workout: { id: string; name: string } | null;
+      workout: { id: string; name: string };
+      // The actual per-day schedule just saved to workout_plans — returned
+      // so the dashboard can update its "Today's Session" preview
+      // immediately instead of showing the previous plan's workout until
+      // the next full page load.
+      workout_schedule: Array<{ day: string; focus: string; items: Array<{ name: string }> }>;
       plan_type: string;
       plan_count_used: number;
     }
@@ -67,6 +72,12 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
         (periodEndMs === null || periodEndMs > now)) ||
         (["canceled", "cancelled"].includes(status) && periodEndMs !== null && periodEndMs > now));
 
+    // Fast, non-authoritative pre-check using the value already fetched
+    // above — lets an obviously-over-limit user fail immediately without
+    // paying for the foods/templates queries below. This is NOT the real
+    // gate: consume_plan_generation_credit (further down) re-checks the
+    // limit atomically in the database and is what actually prevents a
+    // free user from exceeding it under concurrent requests.
     const freeUsed = sub?.plan_count_used ?? 0;
     if (!paidActive && freeUsed >= freeLimit) {
       return {
@@ -101,6 +112,62 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
         message: "No foods are configured yet — an admin needs to add some in /admin/foods.",
       };
     }
+    if (!templates || templates.length === 0) {
+      return {
+        ok: false,
+        reason: "error",
+        message:
+          "No workout templates are configured yet — an admin needs to add some in /admin/workouts.",
+      };
+    }
+
+    // Consume a generation credit atomically, in the database, BEFORE doing
+    // any of the (slower) generation work. A prior version of this function
+    // read plan_count_used once, checked the limit in application code, and
+    // only wrote the incremented value back at the very end using that same
+    // stale read — two concurrent requests (a double-click, two open tabs)
+    // could both pass the check and both succeed, letting a free user
+    // generate more plans than their limit. The DB function below performs
+    // the check-and-increment as a single conditional UPDATE so only one
+    // concurrent request can ever win it. Doing this first (via the
+    // service-role client) also means a missing/misconfigured
+    // SUPABASE_SERVICE_ROLE_KEY fails loudly here, before any plan rows are
+    // written — not after, which previously could leave a plan fully saved
+    // in the database while the request itself reported failure.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let planCountUsed: number;
+    try {
+      const { data: credit, error: creditError } = await supabaseAdmin
+        .rpc("consume_plan_generation_credit", {
+          p_user_id: userId,
+          p_unlimited: paidActive,
+          p_free_limit: freeLimit,
+        })
+        .single();
+      if (creditError || !credit) {
+        console.error("[generateFitnessPlan] consume_plan_generation_credit failed", creditError);
+        return {
+          ok: false,
+          reason: "error",
+          message: "Could not start plan generation — please try again in a moment.",
+        };
+      }
+      if (!credit.allowed) {
+        return {
+          ok: false,
+          reason: "needs_subscription",
+          message: "Free plan limit reached — upgrade to generate more plans.",
+        };
+      }
+      planCountUsed = credit.plan_count_used;
+    } catch (err) {
+      console.error("[generateFitnessPlan] plan generation credit check threw", err);
+      return {
+        ok: false,
+        reason: "error",
+        message: "Plan generation is temporarily unavailable — please try again in a moment.",
+      };
+    }
 
     const mealPlan = generateMealPlan(
       stats,
@@ -111,6 +178,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     );
     const hasAnyMeal = Object.values(mealPlan.meals).some((items) => items.length > 0);
     if (!hasAnyMeal) {
+      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
       return {
         ok: false,
         reason: "error",
@@ -128,13 +196,24 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
         | "advanced"
         | undefined,
     );
-    const workoutSchedule = workout
-      ? adaptScheduleForHome(
-          workout.schedule as Array<{ day: string; focus: string; items: Array<{ name: string }> }>,
-          (profile.workout_location ?? "gym") as "gym" | "home",
-          (profile.available_equipment ?? []) as Equipment[],
-        )
-      : null;
+    if (!workout) {
+      // Unreachable given the templates.length guard above, but keep the
+      // failure path honest (and the credit refunded) rather than silently
+      // returning a workout-less plan if pickWorkoutTemplate's logic ever
+      // changes.
+      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+      return {
+        ok: false,
+        reason: "error",
+        message:
+          "No workout templates match your goal yet — an admin needs to add some in /admin/workouts.",
+      };
+    }
+    const workoutSchedule = adaptScheduleForHome(
+      workout.schedule as Array<{ day: string; focus: string; items: Array<{ name: string }> }>,
+      (profile.workout_location ?? "gym") as "gym" | "home",
+      (profile.available_equipment ?? []) as Equipment[],
+    );
 
     await supabase
       .from("meal_plans")
@@ -147,7 +226,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .eq("is_active", true);
 
-    await supabase.from("meal_plans").insert({
+    const { error: mealInsertError } = await supabase.from("meal_plans").insert({
       user_id: userId,
       calories_target: mealPlan.calories_target,
       protein_target: mealPlan.protein_target,
@@ -155,18 +234,27 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       fat_target: mealPlan.fat_target,
       meals: mealPlan.meals as any,
     });
-    if (workout && workoutSchedule) {
-      await supabase
-        .from("workout_plans")
-        .insert({ user_id: userId, template_id: workout.id, schedule: workoutSchedule as any });
+    const { error: workoutInsertError } = await supabase
+      .from("workout_plans")
+      .insert({ user_id: userId, template_id: workout.id, schedule: workoutSchedule as any });
+
+    // Persistence must actually succeed — returning "ok: true" for a plan
+    // that failed to save is exactly the "generation succeeds but nothing
+    // shows up" symptom this function used to be able to produce silently.
+    if (mealInsertError || workoutInsertError) {
+      console.error("[generateFitnessPlan] failed to save generated plan", {
+        mealInsertError,
+        workoutInsertError,
+      });
+      await supabaseAdmin.rpc("refund_plan_generation_credit", { p_user_id: userId });
+      return {
+        ok: false,
+        reason: "error",
+        message: "Could not save your new plan — please try again.",
+      };
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
-      .from("subscriptions")
-      .update({ plan_count_used: freeUsed + 1 })
-      .eq("user_id", userId);
-
+    // Best-effort analytics — never blocks or fails the user-facing result.
     await supabase.from("analytics_events").insert({
       user_id: userId,
       event: "plan_generated",
@@ -176,7 +264,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     // First-ever plan → send the one-time welcome email. Best-effort and
     // server-only: sendAppEmail skips silently if LOVABLE_API_KEY is unset and
     // never throws, so it can't break plan generation.
-    if (freeUsed === 0 && profile.email) {
+    if (planCountUsed === 1 && profile.email) {
       const { sendAppEmail } = await import("@/lib/email-send.server");
       await sendAppEmail({
         templateName: "welcome",
@@ -189,9 +277,10 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     return {
       ok: true,
       plan: mealPlan,
-      workout: workout ? { id: workout.id, name: workout.name } : null,
+      workout: { id: workout.id, name: workout.name },
+      workout_schedule: workoutSchedule,
       plan_type: planType,
-      plan_count_used: freeUsed + 1,
+      plan_count_used: planCountUsed,
     };
   });
 

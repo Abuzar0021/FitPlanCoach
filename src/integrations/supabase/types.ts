@@ -1187,6 +1187,13 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      consume_plan_generation_credit: {
+        Args: { p_free_limit: number; p_unlimited: boolean; p_user_id: string };
+        Returns: {
+          allowed: boolean;
+          plan_count_used: number;
+        }[];
+      };
       delete_email: {
         Args: { message_id: number; queue_name: string };
         Returns: boolean;
@@ -1227,6 +1234,10 @@ export type Database = {
           msg_id: number;
           read_ct: number;
         }[];
+      };
+      refund_plan_generation_credit: {
+        Args: { p_user_id: string };
+        Returns: undefined;
       };
       transfer_ownership: { Args: { _new_owner: string }; Returns: boolean };
     };
