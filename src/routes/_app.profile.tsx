@@ -80,6 +80,12 @@ function Profile() {
       db.from("achievements").select("*").order("sort_order"),
       db.from("user_achievements").select("achievement_id").eq("user_id", user.id),
     ]);
+    if (!p || !p.onboarded) {
+      // No row at all, or never finished onboarding — send them to the flow
+      // that creates/repairs it, instead of spinning on the skeleton forever.
+      navigate({ to: "/onboarding" });
+      return;
+    }
     setProfile(p);
     setSub(s);
     setAllAchievements(ach ?? []);

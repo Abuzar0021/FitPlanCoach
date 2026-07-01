@@ -1,11 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { usePlan } from "@/hooks/use-plan";
 import { MobileShell } from "@/components/MobileShell";
 import { Button } from "@/components/ui/button";
-import { Utensils } from "lucide-react";
-import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
+import { toast } from "sonner";
+import { Utensils, RefreshCw, Loader2 } from "lucide-react";
+import { EmptyState, PlanScreenSkeleton, ProBadge } from "@/components/app-ui";
+import { swapMealItem } from "@/lib/plan-generation.functions";
 
 export const Route = createFileRoute("/_app/meals")({
   head: () => ({
@@ -31,17 +35,52 @@ export const Route = createFileRoute("/_app/meals")({
 
 type Meals = Record<
   "breakfast" | "lunch" | "dinner" | "snack",
-  Array<{ name: string; grams: number; calories: number; protein: number }>
+  Array<{ food_id: string; name: string; grams: number; calories: number; protein: number }>
 >;
+
+type Category = "breakfast" | "lunch" | "dinner" | "snack";
 
 function Meals() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { has } = usePlan();
+  const canCustomize = has("full_customization");
+  const doSwap = useServerFn(swapMealItem);
   const [plan, setPlan] = useState<{
     calories_target: number;
     protein_target: number;
     meals: Meals;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [swapping, setSwapping] = useState<string | null>(null);
+
+  async function swap(category: Category, index: number) {
+    if (!canCustomize) {
+      toast.info("Swapping meal items is a Pro feature.");
+      navigate({ to: "/subscription" });
+      return;
+    }
+    const key = `${category}:${index}`;
+    setSwapping(key);
+    try {
+      const res = await doSwap({ data: { category, index } });
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
+      setPlan((p) => {
+        if (!p) return p;
+        const items = [...p.meals[category]];
+        items[index] = res.item;
+        return { ...p, meals: { ...p.meals, [category]: items } };
+      });
+      toast.success(`Swapped to ${res.item.name}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not swap this item");
+    } finally {
+      setSwapping(null);
+    }
+  }
 
   useEffect(() => {
     if (!user) return;
@@ -154,24 +193,47 @@ function Meals() {
               {items.length === 0 && (
                 <div className="p-4 text-sm text-muted-foreground">No items</div>
               )}
-              {items.map((m, i) => (
-                <div key={i} className="p-4 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{m.name}</div>
-                    <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                      {m.grams}g
+              {items.map((m, i) => {
+                const key = `${cat}:${i}`;
+                const isSwapping = swapping === key;
+                return (
+                  <div key={i} className="p-4 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{m.name}</div>
+                      <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                        {m.grams}g
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right">
+                        <div className="text-sm font-display tabular-nums">
+                          {m.calories}{" "}
+                          <span className="text-[10px] text-muted-foreground">kcal</span>
+                        </div>
+                        <div className="text-[10px] uppercase tracking-widest font-bold text-primary tabular-nums">
+                          {m.protein}g protein
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => swap(cat, i)}
+                        disabled={isSwapping}
+                        aria-label={`Swap ${m.name}`}
+                        title={canCustomize ? "Swap this item" : "Swap this item — Pro feature"}
+                        className="size-9 rounded-xl bg-muted border border-border inline-flex items-center justify-center hover:bg-muted/70 transition disabled:opacity-50 relative shrink-0"
+                      >
+                        {isSwapping ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="size-4" />
+                        )}
+                        {!canCustomize && (
+                          <ProBadge className="absolute -top-2 -right-2 px-1 py-0" />
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-display tabular-nums">
-                      {m.calories} <span className="text-[10px] text-muted-foreground">kcal</span>
-                    </div>
-                    <div className="text-[10px] uppercase tracking-widest font-bold text-primary tabular-nums">
-                      {m.protein}g protein
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         );

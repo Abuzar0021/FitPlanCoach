@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { calorieTargets, type CalorieRules, DEFAULT_RULES } from "@/lib/fitness-engine";
-import { canGeneratePlan, type PlanContext, type PlanType } from "@/lib/access";
+import { canGeneratePlan, hasFeature, type PlanContext, type PlanType } from "@/lib/access";
 import { generateFitnessPlan } from "@/lib/plan-generation.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -71,7 +71,12 @@ type Profile = {
   avatar_url?: string | null;
 };
 
-type MealPlanRow = { calories_target: number; protein_target: number; meals: any };
+type MealPlanRow = {
+  calories_target: number;
+  protein_target: number;
+  meals: any;
+  created_at: string;
+};
 type WorkoutDay = {
   day: string;
   focus: string;
@@ -131,7 +136,7 @@ function Dashboard() {
           .maybeSingle(),
         supabase
           .from("meal_plans")
-          .select("calories_target,protein_target,meals")
+          .select("calories_target,protein_target,meals,created_at")
           .eq("user_id", user.id)
           .eq("is_active", true)
           .order("created_at", { ascending: false })
@@ -157,7 +162,11 @@ function Dashboard() {
           .order("recorded_at", { ascending: false })
           .limit(7),
       ]);
-      if (p && !p.onboarded) {
+      if (!p || !p.onboarded) {
+        // No row at all (e.g. the signup trigger's row was lost) or genuinely
+        // not onboarded yet — either way, onboarding is what creates/repairs
+        // it. Without this, a missing row left `profile` state null forever
+        // with no redirect, so the dashboard just spun on its skeleton.
         navigate({ to: "/onboarding" });
         return;
       }
@@ -251,6 +260,11 @@ function Dashboard() {
     free_plan_limit: freeLimit,
   };
   const canGenerate = canGeneratePlan(planCtx);
+  const planAgeDays = mealPlan
+    ? Math.floor((Date.now() - new Date(mealPlan.created_at).getTime()) / 86400000)
+    : null;
+  const weeklyRefreshReady =
+    hasFeature(planCtx, "weekly_regen") && planAgeDays !== null && planAgeDays >= 7;
 
   // Today's consumption (sum from meal plan if exists)
   const consumedCals = mealPlan
@@ -398,12 +412,31 @@ function Dashboard() {
               </div>
             </div>
           </div>
+          {weeklyRefreshReady && (
+            <div className="mt-5 rounded-xl bg-primary/10 border border-primary/30 px-4 py-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                  Weekly refresh ready
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  It's been {planAgeDays} days — a Pro perk, refresh your plan for the week ahead.
+                </p>
+              </div>
+              <Crown className="size-5 text-primary shrink-0" />
+            </div>
+          )}
           <Button
             onClick={generate}
             disabled={busy}
             className="w-full mt-5 h-12 font-bold uppercase tracking-wider rounded-xl"
           >
-            {busy ? "Generating…" : mealPlan ? "Generate New Plan" : "Generate My First Plan"}
+            {busy
+              ? "Generating…"
+              : weeklyRefreshReady
+                ? "Refresh My Plan For This Week"
+                : mealPlan
+                  ? "Generate New Plan"
+                  : "Generate My First Plan"}
           </Button>
           {!canGenerate && (
             <p className="text-[11px] text-warning mt-2 text-center">

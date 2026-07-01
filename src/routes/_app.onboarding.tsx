@@ -88,9 +88,15 @@ function Onboarding() {
   async function finish() {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
+    // Upsert, not update: the signup trigger normally creates this row, but if
+    // it's missing for any reason (e.g. manual data reset), update() would
+    // silently match zero rows and report success — leaving the user stuck in
+    // a loop where the dashboard never finds a profile. Upsert always leaves a
+    // real row behind.
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: user.id,
+        email: user.email ?? null,
         name: form.name,
         age: Number(form.age),
         gender: form.gender,
@@ -101,14 +107,23 @@ function Onboarding() {
         goal: form.goal,
         budget_level: form.budget_level,
         onboarded: true,
-      })
-      .eq("id", user.id);
+      },
+      { onConflict: "id" },
+    );
     if (error) {
       console.error(error);
       setSaving(false);
       toast.error("We couldn't save your details. Please try again.");
       return;
     }
+    // Same self-heal as above: ensure a subscriptions row exists (normally
+    // created by the signup trigger) without clobbering an existing plan.
+    await supabase
+      .from("subscriptions")
+      .upsert(
+        { user_id: user.id, plan_type: "free", status: "active" },
+        { onConflict: "user_id", ignoreDuplicates: true },
+      );
     await supabase.from("analytics_events").insert({ user_id: user.id, event: "onboarded" });
     toast.success("You're all set — let's build your plan.");
     navigate({ to: "/dashboard" });

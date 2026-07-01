@@ -1,14 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   generateMealPlan,
   pickWorkoutTemplate,
+  pickFoods,
+  portionFood,
+  MEAL_CATEGORY_SPLIT,
   type Food,
   type WorkoutTemplate,
   type CalorieRules,
   DEFAULT_RULES,
   type UserStats,
 } from "@/lib/fitness-engine";
+import { hasFeature, type PlanContext } from "@/lib/access";
 
 type GenerateResult =
   | {
@@ -149,4 +154,98 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       plan_type: planType,
       plan_count_used: freeUsed + 1,
     };
+  });
+
+type MealCategory = "breakfast" | "lunch" | "dinner" | "snack";
+type MealsShape = Record<MealCategory, Array<{ food_id: string }>>;
+
+type SwapResult =
+  | { ok: true; item: ReturnType<typeof portionFood> }
+  | { ok: false; reason: "needs_subscription" | "no_alternatives" | "not_found"; message: string };
+
+/**
+ * Pro-only: swap a single meal item for a different food from the same
+ * category/country/budget pool. Real "full customization" — the entitlement
+ * check happens here, server-side, not just in the UI, so it can't be
+ * bypassed by a free user calling this directly.
+ */
+export const swapMealItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        category: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+        index: z.number().int().min(0).max(1),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }): Promise<SwapResult> => {
+    const { supabase, userId } = context;
+
+    const [{ data: sub }, { data: profile }, { data: plan }] = await Promise.all([
+      supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles").select("country,budget_level").eq("id", userId).maybeSingle(),
+      supabase
+        .from("meal_plans")
+        .select("id,calories_target,meals")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const planCtx = (sub ?? { plan_type: "free" }) as PlanContext;
+    if (!hasFeature(planCtx, "full_customization")) {
+      return {
+        ok: false,
+        reason: "needs_subscription",
+        message: "Swapping meal items is a Pro feature.",
+      };
+    }
+    if (!profile || !plan) {
+      return { ok: false, reason: "not_found", message: "No active meal plan found." };
+    }
+
+    const meals = plan.meals as unknown as MealsShape;
+    const items = meals[data.category] ?? [];
+    const current = items[data.index];
+    if (!current) {
+      return { ok: false, reason: "not_found", message: "That meal item no longer exists." };
+    }
+
+    const { data: foods } = await supabase.from("foods").select("*").eq("enabled", true);
+    const pool = pickFoods(
+      (foods ?? []) as unknown as Food[],
+      data.category,
+      profile.country ?? "global",
+      (profile.budget_level ?? "medium") as "low" | "medium" | "high",
+    );
+    const usedIds = new Set(items.map((i) => i.food_id));
+    const alternatives = pool.filter((f) => !usedIds.has(f.id));
+    if (alternatives.length === 0) {
+      return {
+        ok: false,
+        reason: "no_alternatives",
+        message: "No other options available for this meal right now.",
+      };
+    }
+
+    const chosen = alternatives[Math.floor(Math.random() * alternatives.length)];
+    const catCals = plan.calories_target * MEAL_CATEGORY_SPLIT[data.category];
+    const perItemCals = catCals / items.length;
+    const newItem = portionFood(chosen, perItemCals);
+
+    const updatedMeals = { ...meals, [data.category]: [...items] };
+    updatedMeals[data.category][data.index] = newItem;
+
+    const { error } = await supabase
+      .from("meal_plans")
+      .update({ meals: updatedMeals as any })
+      .eq("id", plan.id);
+    if (error) {
+      return { ok: false, reason: "not_found", message: "Could not save the swap." };
+    }
+
+    return { ok: true, item: newItem };
   });

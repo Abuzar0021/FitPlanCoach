@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
 import { useSupportEmail } from "@/lib/site-config.functions";
-import { Mail, ShieldCheck, CreditCard } from "lucide-react";
+import { Mail, ShieldCheck, CreditCard, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const supportEmail = useSupportEmail();
+  const { user, loading } = useAuth();
 
   const channels = [
     {
@@ -54,11 +57,42 @@ function ContactPage() {
           Contact us
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Real humans at FitPlanCoach read every message. Pick the right inbox below for the fastest
-          response.
+          The fastest way to reach us is a tracked support ticket — it goes straight to our team and
+          you'll see replies in-app.
         </p>
 
-        <div className="mt-10 space-y-4 reveal">
+        {/* Primary path: real support ticket, tracked in-app */}
+        <div className="mt-8 surface-card p-6 border-primary/30 bg-primary/5">
+          <div className="flex items-start gap-4">
+            <div className="size-11 rounded-xl bg-primary/15 border border-primary/30 inline-flex items-center justify-center shrink-0">
+              <LifeBuoy className="size-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-display uppercase italic text-lg">Open a support ticket</div>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                Signed-in tickets are tracked, reach our team directly, and you get replies right in
+                the app under Profile → Support.
+              </p>
+              {!loading && (
+                <Link
+                  to={user ? "/support" : "/auth"}
+                  className="inline-flex mt-4"
+                  search={user ? undefined : { redirect: "/support" }}
+                >
+                  <Button className="font-bold uppercase tracking-wider h-11 px-6">
+                    {user ? "Open a ticket" : "Sign in to open a ticket"}
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Fallback: direct email by topic */}
+        <h2 className="mt-10 mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Or email us directly
+        </h2>
+        <div className="space-y-4 reveal">
           {channels.map((c) => (
             <a
               key={c.email + c.label}
@@ -77,7 +111,7 @@ function ContactPage() {
           ))}
         </div>
 
-        <div className="mt-10 surface-card p-6">
+        <div className="mt-4 surface-card p-6">
           <h2 className="font-display uppercase italic text-lg">Manage your subscription</h2>
           <p className="text-sm text-muted-foreground mt-2">
             Update billing, cancel, or view payment history from your{" "}
@@ -89,17 +123,6 @@ function ContactPage() {
               {supportEmail}
             </a>{" "}
             and we'll handle it for you.
-          </p>
-        </div>
-
-        <div className="mt-4 surface-card p-6">
-          <h2 className="font-display uppercase italic text-lg">Already have an account?</h2>
-          <p className="text-sm text-muted-foreground mt-2">
-            Open a tracked support ticket from your{" "}
-            <Link to="/support" className="underline text-foreground">
-              support page
-            </Link>{" "}
-            for the fastest reply.
           </p>
         </div>
       </main>

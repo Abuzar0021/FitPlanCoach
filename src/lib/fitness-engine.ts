@@ -67,7 +67,7 @@ export interface MealPlan {
 
 const MEAL_SPLIT = { breakfast: 0.25, lunch: 0.35, dinner: 0.3, snack: 0.1 } as const;
 
-function pickFoods(
+export function pickFoods(
   foods: Food[],
   category: keyof typeof MEAL_SPLIT,
   country: string,
@@ -83,6 +83,16 @@ function pickFoods(
   if (globalBudget.length >= 2) return globalBudget;
   return byCat.filter((f) => f.country === "global");
 }
+
+/** Portion a single food to hit a calorie target — same math generateMealPlan uses per item. */
+export function portionFood(f: Food, targetCals: number): MealItem {
+  const grams = Math.max(20, Math.round((targetCals / f.calories_per_100g) * 100));
+  const calories = Math.round((grams * f.calories_per_100g) / 100);
+  const protein = Math.round((grams * f.protein_per_100g) / 100);
+  return { food_id: f.id, name: f.name, grams, calories, protein };
+}
+
+export const MEAL_CATEGORY_SPLIT = MEAL_SPLIT;
 
 export function generateMealPlan(
   stats: UserStats,
@@ -104,12 +114,10 @@ export function generateMealPlan(
     const chosen = pool.slice(0, Math.min(2, pool.length));
     const perItemCals = catCals / chosen.length;
     for (const f of chosen) {
-      const grams = Math.max(20, Math.round((perItemCals / f.calories_per_100g) * 100));
-      const cals = Math.round((grams * f.calories_per_100g) / 100);
-      const p = Math.round((grams * f.protein_per_100g) / 100);
-      meals[cat].push({ food_id: f.id, name: f.name, grams, calories: cals, protein: p });
-      totalCals += cals;
-      totalProtein += p;
+      const item = portionFood(f, perItemCals);
+      meals[cat].push(item);
+      totalCals += item.calories;
+      totalProtein += item.protein;
     }
   }
 
