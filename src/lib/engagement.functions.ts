@@ -2,7 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// Server-side "today" is the container's UTC clock, not the user's actual
+// local day — a US evening workout would silently log against "tomorrow".
+// The client always sends its own local date (localDateKey()); this UTC
+// fallback only covers callers that predate that param.
 const ISO_DAY = () => new Date().toISOString().slice(0, 10);
+const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const logWorkoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -12,6 +17,7 @@ export const logWorkoutSession = createServerFn({ method: "POST" })
         focus: z.string().max(80).optional(),
         duration_min: z.number().int().min(1).max(600).optional(),
         notes: z.string().max(500).optional(),
+        localDate: z.string().regex(LOCAL_DATE_RE).optional(),
       })
       .parse(d ?? {}),
   )
@@ -19,7 +25,7 @@ export const logWorkoutSession = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const db: any = supabaseAdmin;
     const uid = context.userId;
-    const today = ISO_DAY();
+    const today = data.localDate ?? ISO_DAY();
 
     await db.from("workout_sessions").insert({
       user_id: uid,

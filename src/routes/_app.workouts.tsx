@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { logWorkoutSession } from "@/lib/engagement.functions";
+import { localDateKey } from "@/lib/date";
 import { toast } from "sonner";
 import { CheckCircle2, Flame, Dumbbell } from "lucide-react";
 import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
@@ -70,7 +71,11 @@ function Workouts() {
     setLogging(true);
     try {
       const res = await logFn({
-        data: { focus, duration_min: items ? Math.max(20, items * 7) : undefined },
+        data: {
+          focus,
+          duration_min: items ? Math.max(20, items * 7) : undefined,
+          localDate: localDateKey(),
+        },
       });
       setStreak(res.streak_current);
       toast.success(
