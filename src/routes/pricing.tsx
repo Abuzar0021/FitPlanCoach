@@ -66,17 +66,17 @@ export const Route = createFileRoute("/pricing")({
 });
 
 const FREE_PERKS = [
-  "1 personalized plan",
+  "3 personalized AI plan generations",
   "Weight & progress tracking",
   "Workout & meal preview",
   "Basic dashboard",
 ];
 
 const PRO_PERKS = [
-  "Unlimited plan regeneration",
+  "Unlimited AI-generated plans",
   "Weekly meal & workout refresh",
-  "Full progress charts & streaks",
-  "Achievements & badges",
+  "Full meal customization — swap any item",
+  "Advanced progress charts & analytics",
   "Priority support",
   "Cancel anytime in Google Play",
 ];

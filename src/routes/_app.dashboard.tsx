@@ -425,27 +425,46 @@ function Dashboard() {
               <Crown className="size-5 text-primary shrink-0" />
             </div>
           )}
-          <Button
-            onClick={generate}
-            disabled={busy}
-            className="w-full mt-5 h-12 font-bold uppercase tracking-wider rounded-xl"
-          >
-            {busy
-              ? "Generating…"
-              : weeklyRefreshReady
-                ? "Refresh My Plan For This Week"
-                : mealPlan
-                  ? "Generate New Plan"
-                  : "Generate My First Plan"}
-          </Button>
-          {!canGenerate && (
-            <p className="text-[11px] text-warning mt-2 text-center">
-              Free limit reached —{" "}
-              <Link to="/subscription" className="underline font-semibold">
-                upgrade
-              </Link>{" "}
-              for unlimited plans.
-            </p>
+          {canGenerate ? (
+            <>
+              <Button
+                onClick={generate}
+                disabled={busy}
+                className="w-full mt-5 h-12 font-bold uppercase tracking-wider rounded-xl"
+              >
+                {busy
+                  ? "Generating…"
+                  : weeklyRefreshReady
+                    ? "Refresh My Plan For This Week"
+                    : mealPlan
+                      ? "Generate New Plan"
+                      : "Generate My First Plan"}
+              </Button>
+              {planType === "free" && (
+                <p className="text-[11px] text-muted-foreground mt-2 text-center">
+                  You have {Math.max(0, freeLimit - (sub?.plan_count_used ?? 0))} of {freeLimit} AI
+                  generations remaining.
+                </p>
+              )}
+            </>
+          ) : (
+            <Link to="/subscription" className="block mt-5">
+              <div className="w-full rounded-2xl bg-gradient-to-r from-primary to-accent p-4 text-primary-foreground shadow-[var(--shadow-lime)]">
+                <div className="flex items-center gap-2 mb-1">
+                  <Crown className="size-4" />
+                  <span className="text-xs font-bold uppercase tracking-widest">
+                    Free generations used up
+                  </span>
+                </div>
+                <p className="text-sm font-semibold">
+                  You've used all {freeLimit} free AI plans. Go Pro for unlimited generations,
+                  weekly refreshes, and full customization.
+                </p>
+                <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest bg-background/20 rounded-full px-3 py-1.5">
+                  Upgrade to Pro <ChevronRight className="size-3.5" />
+                </div>
+              </div>
+            </Link>
           )}
         </section>
 

@@ -7,6 +7,9 @@
 export type PlanType = "free" | "pro" | "premium" | "elite";
 export type BillingInterval = "monthly" | "annual" | null;
 
+/** Admin-configurable via /admin/settings ("free_plan_limit" in app_settings). */
+export const DEFAULT_FREE_PLAN_LIMIT = 3;
+
 export type Feature =
   | "unlimited_plans"
   | "weekly_regen"
@@ -69,7 +72,7 @@ export function hasFeature(p: PlanContext, feature: Feature): boolean {
 export function canGeneratePlan(p: PlanContext): boolean {
   if (hasFeature(p, "unlimited_plans")) return true;
   const used = p.plan_count_used ?? 0;
-  const limit = p.free_plan_limit ?? 1;
+  const limit = p.free_plan_limit ?? DEFAULT_FREE_PLAN_LIMIT;
   return used < limit;
 }
 

@@ -15,7 +15,7 @@ import {
   type UserStats,
   type Equipment,
 } from "@/lib/fitness-engine";
-import { hasFeature, type PlanContext } from "@/lib/access";
+import { hasFeature, DEFAULT_FREE_PLAN_LIMIT, type PlanContext } from "@/lib/access";
 
 type GenerateResult =
   | {
@@ -51,7 +51,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     const freeLimit =
       ((settings ?? []).find((s: any) => s.key === "free_plan_limit")?.value as
         | number
-        | undefined) ?? 1;
+        | undefined) ?? DEFAULT_FREE_PLAN_LIMIT;
 
     // SERVER-SIDE ENTITLEMENT GATE — single source of truth.
     const planType = (sub?.plan_type ?? "free") as "free" | "pro" | "premium" | "elite";

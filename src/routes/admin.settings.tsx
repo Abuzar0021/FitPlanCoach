@@ -13,6 +13,7 @@ import {
   type Announcement,
   type AnalyticsConfig,
 } from "@/lib/site-config";
+import { DEFAULT_FREE_PLAN_LIMIT } from "@/lib/access";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "Settings — Admin" }] }),
@@ -34,7 +35,7 @@ function SettingsAdmin() {
     goal_adjust: { lose_fat: -500, build_muscle: 300, maintain: 0 },
     protein_per_kg: 2,
   });
-  const [freeLimit, setFreeLimit] = useState(1);
+  const [freeLimit, setFreeLimit] = useState(DEFAULT_FREE_PLAN_LIMIT);
   const [supportEmail, setSupportEmail] = useState(DEFAULT_SITE_CONFIG.support_email);
   const [social, setSocial] = useState<SocialLinks>(DEFAULT_SITE_CONFIG.social);
   const [announcement, setAnnouncement] = useState<Announcement>(DEFAULT_SITE_CONFIG.announcement);
