@@ -26,6 +26,17 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+#variable_conflict use_column
+-- RETURNS TABLE(..., plan_count_used INT) implicitly declares
+-- `plan_count_used` as a PL/pgSQL variable in this function's scope. Without
+-- this pragma, every bare `plan_count_used` reference below (the SET/WHERE
+-- clauses) is ambiguous between that variable and the subscriptions column
+-- of the same name, and PL/pgSQL's default (`error`) makes the function
+-- throw on every single call: "column reference \"plan_count_used\" is
+-- ambiguous". `use_column` makes bare references resolve to the table
+-- column, which is what every reference here actually means. Confirmed by
+-- reproducing the ambiguity error against a real Postgres 16 instance and
+-- confirming this pragma resolves it before shipping.
 DECLARE
   v_count INT;
 BEGIN
