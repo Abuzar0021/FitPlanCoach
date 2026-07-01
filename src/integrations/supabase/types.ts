@@ -713,28 +713,79 @@ export type Database = {
       };
       progress_entries: {
         Row: {
+          arm_cm: number | null;
+          body_fat_pct: number | null;
+          chest_cm: number | null;
+          created_at: string;
+          hips_cm: number | null;
+          id: string;
+          neck_cm: number | null;
+          note: string | null;
+          recorded_at: string;
+          shoulder_cm: number | null;
+          thigh_cm: number | null;
+          user_id: string;
+          waist_cm: number | null;
+          weight_kg: number;
+        };
+        Insert: {
+          arm_cm?: number | null;
+          body_fat_pct?: number | null;
+          chest_cm?: number | null;
+          created_at?: string;
+          hips_cm?: number | null;
+          id?: string;
+          neck_cm?: number | null;
+          note?: string | null;
+          recorded_at?: string;
+          shoulder_cm?: number | null;
+          thigh_cm?: number | null;
+          user_id: string;
+          waist_cm?: number | null;
+          weight_kg: number;
+        };
+        Update: {
+          arm_cm?: number | null;
+          body_fat_pct?: number | null;
+          chest_cm?: number | null;
+          created_at?: string;
+          hips_cm?: number | null;
+          id?: string;
+          neck_cm?: number | null;
+          note?: string | null;
+          recorded_at?: string;
+          shoulder_cm?: number | null;
+          thigh_cm?: number | null;
+          user_id?: string;
+          waist_cm?: number | null;
+          weight_kg?: number;
+        };
+        Relationships: [];
+      };
+      progress_photos: {
+        Row: {
           created_at: string;
           id: string;
+          image_path: string;
           note: string | null;
           recorded_at: string;
           user_id: string;
-          weight_kg: number;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          image_path: string;
           note?: string | null;
           recorded_at?: string;
           user_id: string;
-          weight_kg: number;
         };
         Update: {
           created_at?: string;
           id?: string;
+          image_path?: string;
           note?: string | null;
           recorded_at?: string;
           user_id?: string;
-          weight_kg?: number;
         };
         Relationships: [];
       };
