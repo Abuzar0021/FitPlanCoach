@@ -82,6 +82,9 @@ function Subscription() {
         await refresh();
       } else if (res.reason === "unavailable_on_web") {
         toast.info("Premium is purchased inside the Android app via Google Play.");
+      } else if (res.reason === "cancelled") {
+        // User backed out of the Google Play payment sheet — not an error,
+        // say nothing rather than showing a scary "failed" toast.
       } else {
         toast.error(res.message ?? "Purchase could not be completed.");
       }
