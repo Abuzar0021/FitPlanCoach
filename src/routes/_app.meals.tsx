@@ -133,6 +133,9 @@ function Meals() {
       </MobileShell>
     );
 
+  // Plans generated before macro tracking shipped won't have carbs/fat on
+  // their stored items — fall back to 0 rather than propagating NaN through
+  // every total and progress bar on this page.
   const totalCals = Object.values(plan.meals)
     .flat()
     .reduce((a, m) => a + m.calories, 0);
@@ -141,10 +144,10 @@ function Meals() {
     .reduce((a, m) => a + m.protein, 0);
   const totalCarbs = Object.values(plan.meals)
     .flat()
-    .reduce((a, m) => a + m.carbs, 0);
+    .reduce((a, m) => a + (m.carbs ?? 0), 0);
   const totalFat = Object.values(plan.meals)
     .flat()
-    .reduce((a, m) => a + m.fat, 0);
+    .reduce((a, m) => a + (m.fat ?? 0), 0);
 
   const macroRows: Array<{
     label: string;
@@ -225,7 +228,7 @@ function Meals() {
                   <div className="min-w-0">
                     <div className="font-medium truncate">{m.name}</div>
                     <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                      {m.grams}g · {m.carbs}c · {m.fat}f
+                      {m.grams}g · {m.carbs ?? 0}c · {m.fat ?? 0}f
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
