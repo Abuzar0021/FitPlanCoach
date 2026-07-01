@@ -541,12 +541,14 @@ export type Database = {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"] | null;
           age: number | null;
+          available_equipment: string[];
           avatar_url: string | null;
           banned: boolean;
           budget_level: Database["public"]["Enums"]["budget_level"] | null;
           country: string | null;
           created_at: string;
           email: string | null;
+          experience_level: string | null;
           gender: Database["public"]["Enums"]["gender"] | null;
           goal: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm: number | null;
@@ -559,16 +561,19 @@ export type Database = {
           streak_longest: number;
           updated_at: string;
           weight_kg: number | null;
+          workout_location: string;
         };
         Insert: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null;
           age?: number | null;
+          available_equipment?: string[];
           avatar_url?: string | null;
           banned?: boolean;
           budget_level?: Database["public"]["Enums"]["budget_level"] | null;
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          experience_level?: string | null;
           gender?: Database["public"]["Enums"]["gender"] | null;
           goal?: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm?: number | null;
@@ -581,16 +586,19 @@ export type Database = {
           streak_longest?: number;
           updated_at?: string;
           weight_kg?: number | null;
+          workout_location?: string;
         };
         Update: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null;
           age?: number | null;
+          available_equipment?: string[];
           avatar_url?: string | null;
           banned?: boolean;
           budget_level?: Database["public"]["Enums"]["budget_level"] | null;
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          experience_level?: string | null;
           gender?: Database["public"]["Enums"]["gender"] | null;
           goal?: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm?: number | null;
@@ -603,6 +611,7 @@ export type Database = {
           streak_longest?: number;
           updated_at?: string;
           weight_kg?: number | null;
+          workout_location?: string;
         };
         Relationships: [];
       };

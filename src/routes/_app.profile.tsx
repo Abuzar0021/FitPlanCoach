@@ -327,7 +327,7 @@ function Profile() {
         <Button
           variant="outline"
           className="w-full justify-start h-12"
-          onClick={() => navigate({ to: "/onboarding" })}
+          onClick={() => navigate({ to: "/onboarding", search: { edit: true } })}
         >
           <Settings className="size-4 mr-2" /> Edit fitness details
         </Button>

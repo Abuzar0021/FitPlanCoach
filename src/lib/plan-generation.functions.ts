@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   generateMealPlan,
   pickWorkoutTemplate,
+  adaptScheduleForHome,
   pickFoods,
   portionFood,
   MEAL_CATEGORY_SPLIT,
@@ -12,6 +13,7 @@ import {
   type CalorieRules,
   DEFAULT_RULES,
   type UserStats,
+  type Equipment,
 } from "@/lib/fitness-engine";
 import { hasFeature, type PlanContext } from "@/lib/access";
 
@@ -118,7 +120,19 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       stats.goal,
       stats.activity_level,
       (templates ?? []) as unknown as WorkoutTemplate[],
+      (profile.experience_level ?? undefined) as
+        | "beginner"
+        | "intermediate"
+        | "advanced"
+        | undefined,
     );
+    const workoutSchedule = workout
+      ? adaptScheduleForHome(
+          workout.schedule as Array<{ day: string; focus: string; items: Array<{ name: string }> }>,
+          (profile.workout_location ?? "gym") as "gym" | "home",
+          (profile.available_equipment ?? []) as Equipment[],
+        )
+      : null;
 
     await supabase
       .from("meal_plans")
@@ -137,10 +151,10 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       protein_target: mealPlan.protein_target,
       meals: mealPlan.meals as any,
     });
-    if (workout) {
+    if (workout && workoutSchedule) {
       await supabase
         .from("workout_plans")
-        .insert({ user_id: userId, template_id: workout.id, schedule: workout.schedule as any });
+        .insert({ user_id: userId, template_id: workout.id, schedule: workoutSchedule as any });
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
