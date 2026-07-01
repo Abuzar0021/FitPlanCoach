@@ -9,6 +9,13 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const ISO_DAY = () => new Date().toISOString().slice(0, 10);
 const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+const SetLog = z.object({
+  exercise_name: z.string().min(1).max(120),
+  set_number: z.number().int().min(1).max(50),
+  reps: z.number().int().min(0).max(1000).optional(),
+  weight_kg: z.number().min(0).max(1000).optional(),
+});
+
 export const logWorkoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
@@ -18,6 +25,8 @@ export const logWorkoutSession = createServerFn({ method: "POST" })
         duration_min: z.number().int().min(1).max(600).optional(),
         notes: z.string().max(500).optional(),
         localDate: z.string().regex(LOCAL_DATE_RE).optional(),
+        sets: z.array(SetLog).max(200).optional(),
+        planned_sets: z.number().int().min(0).max(500).optional(),
       })
       .parse(d ?? {}),
   )
@@ -26,14 +35,65 @@ export const logWorkoutSession = createServerFn({ method: "POST" })
     const db: any = supabaseAdmin;
     const uid = context.userId;
     const today = data.localDate ?? ISO_DAY();
+    const loggedSets = data.sets ?? [];
 
-    await db.from("workout_sessions").insert({
-      user_id: uid,
-      performed_on: today,
-      focus: data.focus ?? null,
-      duration_min: data.duration_min ?? null,
-      notes: data.notes ?? null,
-    });
+    // Personal records: compare each newly-logged weight against this
+    // user's best-ever weight for that exercise BEFORE this session.
+    const exerciseNames = [...new Set(loggedSets.map((s) => s.exercise_name))];
+    const priorBest = new Map<string, number>();
+    if (exerciseNames.length) {
+      const { data: history } = await db
+        .from("workout_set_logs")
+        .select("exercise_name, weight_kg")
+        .eq("user_id", uid)
+        .in("exercise_name", exerciseNames)
+        .not("weight_kg", "is", null);
+      for (const row of (history ?? []) as Array<{ exercise_name: string; weight_kg: number }>) {
+        const prev = priorBest.get(row.exercise_name) ?? 0;
+        if (row.weight_kg > prev) priorBest.set(row.exercise_name, row.weight_kg);
+      }
+    }
+    const prs = new Set<string>();
+    for (const s of loggedSets) {
+      if (s.weight_kg == null) continue;
+      const prev = priorBest.get(s.exercise_name);
+      if (prev === undefined || s.weight_kg > prev) {
+        prs.add(s.exercise_name);
+        priorBest.set(s.exercise_name, s.weight_kg); // so a later, bigger set in the SAME session still counts once
+      }
+    }
+
+    const { data: session } = await db
+      .from("workout_sessions")
+      .insert({
+        user_id: uid,
+        performed_on: today,
+        focus: data.focus ?? null,
+        duration_min: data.duration_min ?? null,
+        notes: data.notes ?? null,
+        planned_sets: data.planned_sets ?? null,
+      })
+      .select("id")
+      .single();
+
+    if (session?.id && loggedSets.length) {
+      await db.from("workout_set_logs").insert(
+        loggedSets.map((s) => ({
+          session_id: session.id,
+          user_id: uid,
+          exercise_name: s.exercise_name,
+          set_number: s.set_number,
+          reps: s.reps ?? null,
+          weight_kg: s.weight_kg ?? null,
+        })),
+      );
+    }
+
+    const completionPct = data.planned_sets
+      ? Math.min(100, Math.round((loggedSets.length / data.planned_sets) * 100))
+      : loggedSets.length > 0
+        ? 100
+        : null;
 
     const { data: prof } = await db
       .from("profiles")
@@ -91,7 +151,15 @@ export const logWorkoutSession = createServerFn({ method: "POST" })
       }
     }
 
-    return { ok: true, streak_current: current, streak_longest: longest, unlocked: fresh };
+    return {
+      ok: true,
+      session_id: session?.id ?? null,
+      streak_current: current,
+      streak_longest: longest,
+      unlocked: fresh,
+      prs: [...prs],
+      completion_pct: completionPct,
+    };
   });
 
 export const markNotificationsRead = createServerFn({ method: "POST" })

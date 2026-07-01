@@ -41,6 +41,7 @@ import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppWorkoutsRouteImport } from './routes/_app.workouts'
+import { Route as AppWorkoutHistoryRouteImport } from './routes/_app.workout-history'
 import { Route as AppSupportRouteImport } from './routes/_app.support'
 import { Route as AppSubscriptionRouteImport } from './routes/_app.subscription'
 import { Route as AppProgressRouteImport } from './routes/_app.progress'
@@ -218,6 +219,11 @@ const AppWorkoutsRoute = AppWorkoutsRouteImport.update({
   path: '/workouts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWorkoutHistoryRoute = AppWorkoutHistoryRouteImport.update({
+  id: '/workout-history',
+  path: '/workout-history',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSupportRoute = AppSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -337,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/workout-history': typeof AppWorkoutHistoryRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -386,6 +393,7 @@ export interface FileRoutesByTo {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/workout-history': typeof AppWorkoutHistoryRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -438,6 +446,7 @@ export interface FileRoutesById {
   '/_app/progress': typeof AppProgressRoute
   '/_app/subscription': typeof AppSubscriptionRoute
   '/_app/support': typeof AppSupportRoute
+  '/_app/workout-history': typeof AppWorkoutHistoryRoute
   '/_app/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -490,6 +499,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/workout-history'
     | '/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -539,6 +549,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/workout-history'
     | '/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '/_app/progress'
     | '/_app/subscription'
     | '/_app/support'
+    | '/_app/workout-history'
     | '/_app/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -868,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkoutsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/workout-history': {
+      id: '/_app/workout-history'
+      path: '/workout-history'
+      fullPath: '/workout-history'
+      preLoaderRoute: typeof AppWorkoutHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/support': {
       id: '/_app/support'
       path: '/support'
@@ -1001,6 +1020,7 @@ interface AppRouteChildren {
   AppProgressRoute: typeof AppProgressRoute
   AppSubscriptionRoute: typeof AppSubscriptionRoute
   AppSupportRoute: typeof AppSupportRoute
+  AppWorkoutHistoryRoute: typeof AppWorkoutHistoryRoute
   AppWorkoutsRoute: typeof AppWorkoutsRoute
 }
 
@@ -1015,6 +1035,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProgressRoute: AppProgressRoute,
   AppSubscriptionRoute: AppSubscriptionRoute,
   AppSupportRoute: AppSupportRoute,
+  AppWorkoutHistoryRoute: AppWorkoutHistoryRoute,
   AppWorkoutsRoute: AppWorkoutsRoute,
 }
 
