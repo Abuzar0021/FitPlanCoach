@@ -982,6 +982,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      water_logs: {
+        Row: {
+          amount_ml: number;
+          created_at: string;
+          id: string;
+          logged_date: string;
+          user_id: string;
+        };
+        Insert: {
+          amount_ml: number;
+          created_at?: string;
+          id?: string;
+          logged_date: string;
+          user_id: string;
+        };
+        Update: {
+          amount_ml?: number;
+          created_at?: string;
+          id?: string;
+          logged_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       webhook_events: {
         Row: {
           error_message: string | null;
@@ -1064,6 +1088,7 @@ export type Database = {
           id: string;
           notes: string | null;
           performed_on: string;
+          planned_sets: number | null;
           user_id: string;
         };
         Insert: {
@@ -1073,6 +1098,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           performed_on?: string;
+          planned_sets?: number | null;
           user_id: string;
         };
         Update: {
@@ -1082,7 +1108,44 @@ export type Database = {
           id?: string;
           notes?: string | null;
           performed_on?: string;
+          planned_sets?: number | null;
           user_id?: string;
+        };
+        Relationships: [];
+      };
+      workout_set_logs: {
+        Row: {
+          created_at: string;
+          exercise_name: string;
+          id: string;
+          notes: string | null;
+          reps: number | null;
+          session_id: string;
+          set_number: number;
+          user_id: string;
+          weight_kg: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          exercise_name: string;
+          id?: string;
+          notes?: string | null;
+          reps?: number | null;
+          session_id: string;
+          set_number: number;
+          user_id: string;
+          weight_kg?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          exercise_name?: string;
+          id?: string;
+          notes?: string | null;
+          reps?: number | null;
+          session_id?: string;
+          set_number?: number;
+          user_id?: string;
+          weight_kg?: number | null;
         };
         Relationships: [];
       };
