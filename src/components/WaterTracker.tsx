@@ -7,7 +7,15 @@ import { Droplet, Undo2 } from "lucide-react";
 
 const QUICK_ADDS = [250, 500] as const;
 
-export function WaterTracker({ userId, weightKg }: { userId: string; weightKg: number | null }) {
+export function WaterTracker({
+  userId,
+  weightKg,
+  onTotalChange,
+}: {
+  userId: string;
+  weightKg: number | null;
+  onTotalChange?: (totalMl: number) => void;
+}) {
   const [totalMl, setTotalMl] = useState<number | null>(null);
   const [lastId, setLastId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,8 +29,10 @@ export function WaterTracker({ userId, weightKg }: { userId: string; weightKg: n
       .eq("logged_date", localDateKey())
       .order("created_at", { ascending: false });
     const rows = (data ?? []) as Array<{ id: string; amount_ml: number }>;
-    setTotalMl(rows.reduce((a, r) => a + r.amount_ml, 0));
+    const total = rows.reduce((a, r) => a + r.amount_ml, 0);
+    setTotalMl(total);
     setLastId(rows[0]?.id ?? null);
+    onTotalChange?.(total);
   }
 
   useEffect(() => {
@@ -38,7 +48,11 @@ export function WaterTracker({ userId, weightKg }: { userId: string; weightKg: n
         .select("id")
         .single();
       if (error) throw error;
-      setTotalMl((t) => (t ?? 0) + ml);
+      setTotalMl((t) => {
+        const next = (t ?? 0) + ml;
+        onTotalChange?.(next);
+        return next;
+      });
       setLastId(data.id);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not log water");

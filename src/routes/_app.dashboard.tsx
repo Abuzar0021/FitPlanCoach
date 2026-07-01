@@ -23,6 +23,8 @@ import {
   Scale,
   RefreshCw,
   CalendarCheck,
+  CheckCircle2,
+  ListChecks,
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { calorieTargets, type CalorieRules, DEFAULT_RULES } from "@/lib/fitness-engine";
@@ -34,7 +36,9 @@ import { WelcomeChecklist } from "@/components/WelcomeChecklist";
 import { DashboardSkeleton } from "@/components/app-ui";
 import { DailyTip } from "@/components/DailyTip";
 import { WaterTracker } from "@/components/WaterTracker";
-import { localDateKey } from "@/lib/date";
+import { localDateKey, daysBetweenKeys } from "@/lib/date";
+import { waterTargetMl } from "@/lib/water";
+import { computeNudges } from "@/lib/nudges";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -129,6 +133,9 @@ function Dashboard() {
     snack: { calories: 0, protein: 0 },
   });
   const [weekWorkoutCount, setWeekWorkoutCount] = useState(0);
+  const [workoutDoneToday, setWorkoutDoneToday] = useState(false);
+  const [lastWeighInDate, setLastWeighInDate] = useState<string | null>(null);
+  const [waterMl, setWaterMl] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -203,6 +210,9 @@ function Dashboard() {
       setMealPlan((mp as any) ?? null);
       setWorkoutDays((wp?.schedule as WorkoutDay[] | null) ?? null);
       setLatestWeights(((weights ?? []) as any[]).map((w) => Number(w.weight_kg)).reverse());
+      setLastWeighInDate(
+        (weights?.[0] as { recorded_at: string } | undefined)?.recorded_at ?? null,
+      );
       const cr = settings?.find((s) => s.key === "calorie_rules")?.value as
         | CalorieRules
         | undefined;
@@ -226,7 +236,9 @@ function Dashboard() {
         byCat[row.meal_category].protein += row.protein;
       }
       setLoggedToday(byCat);
-      setWeekWorkoutCount(new Set((weekSessions ?? []).map((s: any) => s.performed_on)).size);
+      const sessionDates = new Set((weekSessions ?? []).map((s: any) => s.performed_on));
+      setWeekWorkoutCount(sessionDates.size);
+      setWorkoutDoneToday(sessionDates.has(today));
     })();
   }, [user, navigate]);
 
@@ -349,6 +361,17 @@ function Dashboard() {
     day: "numeric",
   });
 
+  const nudges = workoutDays
+    ? computeNudges({
+        isRestDay,
+        workoutDoneToday,
+        foodLoggedToday: hasLoggedAnything,
+        waterMl,
+        waterTargetMl: waterTargetMl(profile.weight_kg ?? null),
+        daysSinceWeighIn: lastWeighInDate ? daysBetweenKeys(lastWeighInDate, localDateKey()) : null,
+      })
+    : [];
+
   return (
     <>
       <MobileShell>
@@ -401,6 +424,32 @@ function Dashboard() {
             </div>
             <Trophy className="size-4 text-muted-foreground" />
           </div>
+        )}
+
+        {nudges.length > 0 ? (
+          <div className="surface-card p-4 mb-4">
+            <p className="label-overline mb-2.5 flex items-center gap-1.5">
+              <ListChecks className="size-3.5 text-primary" /> Still to do today
+            </p>
+            <div className="space-y-1.5">
+              {nudges.map((n) => (
+                <Link
+                  key={n.id}
+                  to={n.href}
+                  className="flex items-center justify-between gap-2 text-sm py-1 hover:text-primary transition"
+                >
+                  <span>{n.label}</span>
+                  <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : (
+          workoutDays && (
+            <div className="surface-card p-4 mb-4 flex items-center gap-2.5 text-sm text-primary">
+              <CheckCircle2 className="size-4 shrink-0" /> All caught up for today — nice work.
+            </div>
+          )
         )}
 
         <WelcomeChecklist
@@ -578,7 +627,13 @@ function Dashboard() {
 
         {/* Water + this week */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          {user && <WaterTracker userId={user.id} weightKg={profile.weight_kg ?? null} />}
+          {user && (
+            <WaterTracker
+              userId={user.id}
+              weightKg={profile.weight_kg ?? null}
+              onTotalChange={setWaterMl}
+            />
+          )}
           <div className="metric-card">
             <p className="label-overline inline-flex items-center gap-1">
               <CalendarCheck className="size-3 text-primary" /> This week
