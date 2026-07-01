@@ -86,6 +86,18 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       supabase.from("workout_templates").select("*").eq("enabled", true),
     ]);
 
+    // Fail honestly instead of silently reporting "ok: true" with an empty
+    // plan — an empty foods/templates catalog previously produced a
+    // "successful" plan with zero meals and no workout, which looked exactly
+    // like generation was broken.
+    if (!foods || foods.length === 0) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "No foods are configured yet — an admin needs to add some in /admin/foods.",
+      };
+    }
+
     const mealPlan = generateMealPlan(
       stats,
       profile.country ?? "global",
@@ -93,6 +105,15 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       (foods ?? []) as unknown as Food[],
       rules,
     );
+    const hasAnyMeal = Object.values(mealPlan.meals).some((items) => items.length > 0);
+    if (!hasAnyMeal) {
+      return {
+        ok: false,
+        reason: "error",
+        message:
+          "No foods match your country/budget combination yet — an admin needs to add some in /admin/foods.",
+      };
+    }
     const workout = pickWorkoutTemplate(
       stats.goal,
       stats.activity_level,
