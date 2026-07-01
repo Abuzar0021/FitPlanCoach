@@ -2,17 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import { Trash2, Mail, ShieldCheck, Clock } from "lucide-react";
 
-const SUPPORT_EMAIL = "abuzarelahi01@gmail.com";
-const MAILTO =
-  `mailto:${SUPPORT_EMAIL}` +
-  `?subject=${encodeURIComponent("Account deletion request")}` +
-  `&body=${encodeURIComponent(
-    "Please delete my FitPlanCoach account and all associated data.\n\n" +
-      "Account email (send from this address): \n" +
-      "Reason (optional): \n",
-  )}`;
+function buildMailto(email: string): string {
+  return (
+    `mailto:${email}` +
+    `?subject=${encodeURIComponent("Account deletion request")}` +
+    `&body=${encodeURIComponent(
+      "Please delete my FitPlanCoach account and all associated data.\n\n" +
+        "Account email (send from this address): \n" +
+        "Reason (optional): \n",
+    )}`
+  );
+}
 
 export const Route = createFileRoute("/delete-account")({
   head: () => ({
@@ -40,6 +43,8 @@ const DELETED = [
 ];
 
 function DeleteAccountPage() {
+  const supportEmail = useSupportEmail();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -97,15 +102,15 @@ function DeleteAccountPage() {
           <p className="mt-2 text-xs font-semibold text-destructive">
             This is permanent and cannot be undone.
           </p>
-          <a href={MAILTO} className="inline-flex mt-5">
+          <a href={buildMailto(supportEmail)} className="inline-flex mt-5">
             <Button size="lg" className="font-bold uppercase tracking-wider h-12 px-7">
               <Mail className="size-4 mr-2" /> Email a deletion request
             </Button>
           </a>
           <p className="mt-4 text-xs text-muted-foreground">
             Or email{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-foreground underline">
-              {SUPPORT_EMAIL}
+            <a href={`mailto:${supportEmail}`} className="text-foreground underline">
+              {supportEmail}
             </a>{" "}
             directly. Signed-in users can also start this from Profile → Delete account.
           </p>

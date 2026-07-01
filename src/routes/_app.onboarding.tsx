@@ -1,5 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +18,15 @@ import {
   Dumbbell,
   Minus,
   Check,
+  Building2,
+  Home,
+  Sprout,
+  BicepsFlexed,
+  Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/onboarding")({
+  validateSearch: z.object({ edit: z.boolean().optional() }),
   head: () => ({ meta: [{ title: "Welcome — FitPlanCoach" }] }),
   component: Onboarding,
 });
@@ -34,6 +41,9 @@ type Form = {
   activity_level: "sedentary" | "light" | "moderate" | "active";
   goal: "lose_fat" | "build_muscle" | "maintain";
   budget_level: "low" | "medium" | "high";
+  workout_location: "gym" | "home";
+  available_equipment: ("dumbbells" | "bands")[];
+  experience_level: "beginner" | "intermediate" | "advanced";
 };
 
 const ACTIVITY = [
@@ -55,9 +65,31 @@ const BUDGETS = [
   { v: "high", l: "High" },
 ] as const;
 
+const LOCATIONS = [
+  { v: "gym", l: "Gym", d: "Full equipment — barbells, machines, cables", icon: Building2 },
+  { v: "home", l: "Home", d: "Bodyweight, dumbbells, and/or bands", icon: Home },
+] as const;
+
+const EQUIPMENT_OPTIONS = [
+  { v: "dumbbells", l: "Dumbbells" },
+  { v: "bands", l: "Resistance bands" },
+] as const;
+
+const EXPERIENCE = [
+  { v: "beginner", l: "Beginner", d: "New to structured training", icon: Sprout },
+  {
+    v: "intermediate",
+    l: "Intermediate",
+    d: "Training consistently for 6+ months",
+    icon: BicepsFlexed,
+  },
+  { v: "advanced", l: "Advanced", d: "Years of consistent, structured training", icon: Trophy },
+] as const;
+
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { edit } = useSearch({ from: "/_app/onboarding" });
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Form>({
@@ -70,27 +102,60 @@ function Onboarding() {
     activity_level: "moderate",
     goal: "lose_fat",
     budget_level: "medium",
+    workout_location: "gym",
+    available_equipment: [],
+    experience_level: "beginner",
   });
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("name,onboarded")
+      .select("*")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.onboarded) navigate({ to: "/dashboard" });
-        if (data?.name) setForm((f) => ({ ...f, name: data.name! }));
+        if (!data) return;
+        // Only bounce already-onboarded users away when they land here
+        // organically (e.g. a stale bookmark) — not when they came from
+        // Profile -> "Edit fitness details", which needs this same form.
+        if (data.onboarded && !edit) {
+          navigate({ to: "/dashboard" });
+          return;
+        }
+        setForm((f) => ({
+          ...f,
+          name: data.name ?? f.name,
+          age: data.age != null ? String(data.age) : f.age,
+          gender: data.gender ?? f.gender,
+          height_cm: data.height_cm != null ? String(data.height_cm) : f.height_cm,
+          weight_kg: data.weight_kg != null ? String(data.weight_kg) : f.weight_kg,
+          country: data.country ?? f.country,
+          activity_level: data.activity_level ?? f.activity_level,
+          goal: data.goal ?? f.goal,
+          budget_level: data.budget_level ?? f.budget_level,
+          workout_location: (data.workout_location as "gym" | "home") ?? f.workout_location,
+          available_equipment:
+            (data.available_equipment as ("dumbbells" | "bands")[] | null) ?? f.available_equipment,
+          experience_level:
+            (data.experience_level as "beginner" | "intermediate" | "advanced" | null) ??
+            f.experience_level,
+        }));
       });
-  }, [user, navigate]);
+  }, [user, navigate, edit]);
 
   async function finish() {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
+    // Upsert, not update: the signup trigger normally creates this row, but if
+    // it's missing for any reason (e.g. manual data reset), update() would
+    // silently match zero rows and report success — leaving the user stuck in
+    // a loop where the dashboard never finds a profile. Upsert always leaves a
+    // real row behind.
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: user.id,
+        email: user.email ?? null,
         name: form.name,
         age: Number(form.age),
         gender: form.gender,
@@ -100,17 +165,38 @@ function Onboarding() {
         activity_level: form.activity_level,
         goal: form.goal,
         budget_level: form.budget_level,
+        workout_location: form.workout_location,
+        available_equipment: form.workout_location === "home" ? form.available_equipment : [],
+        experience_level: form.experience_level,
         onboarded: true,
-      })
-      .eq("id", user.id);
+        // Editing existing details should refresh the plan to match on the
+        // next dashboard visit (same mechanism a tier change already uses).
+        ...(edit ? { needs_plan_regeneration: true } : {}),
+      },
+      { onConflict: "id" },
+    );
     if (error) {
       console.error(error);
       setSaving(false);
       toast.error("We couldn't save your details. Please try again.");
       return;
     }
-    await supabase.from("analytics_events").insert({ user_id: user.id, event: "onboarded" });
-    toast.success("You're all set — let's build your plan.");
+    // Same self-heal as above: ensure a subscriptions row exists (normally
+    // created by the signup trigger) without clobbering an existing plan.
+    await supabase
+      .from("subscriptions")
+      .upsert(
+        { user_id: user.id, plan_type: "free", status: "active" },
+        { onConflict: "user_id", ignoreDuplicates: true },
+      );
+    await supabase
+      .from("analytics_events")
+      .insert({ user_id: user.id, event: edit ? "profile_edited" : "onboarded" });
+    toast.success(
+      edit
+        ? "Saved — your next plan will reflect these changes."
+        : "You're all set — let's build your plan.",
+    );
     navigate({ to: "/dashboard" });
   }
 
@@ -220,6 +306,105 @@ function Onboarding() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold">{a.l}</div>
                   <div className="text-xs text-muted-foreground">{a.d}</div>
+                </div>
+                {active && <Check className="size-5 text-primary shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      ),
+      canNext: true,
+    },
+    {
+      title: "Where do you work out?",
+      subtitle: "We'll only ever suggest exercises that match what you actually have.",
+      body: (
+        <div className="space-y-4">
+          <div className="space-y-2.5">
+            {LOCATIONS.map((loc) => {
+              const active = form.workout_location === loc.v;
+              const Icon = loc.icon;
+              return (
+                <button
+                  key={loc.v}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setForm({ ...form, workout_location: loc.v })}
+                  className={`w-full text-left p-4 rounded-2xl border transition-colors flex items-center gap-3 ${active ? "border-primary bg-primary/10" : "border-border hover:border-border-strong"}`}
+                >
+                  <div
+                    className={`size-9 rounded-xl inline-flex items-center justify-center shrink-0 ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}
+                  >
+                    <Icon className="size-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold">{loc.l}</div>
+                    <div className="text-xs text-muted-foreground">{loc.d}</div>
+                  </div>
+                  {active && <Check className="size-5 text-primary shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+          {form.workout_location === "home" && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              <Label>What do you have at home? (optional)</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {EQUIPMENT_OPTIONS.map((eq) => {
+                  const on = form.available_equipment.includes(eq.v);
+                  return (
+                    <button
+                      key={eq.v}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          available_equipment: on
+                            ? f.available_equipment.filter((x) => x !== eq.v)
+                            : [...f.available_equipment, eq.v],
+                        }))
+                      }
+                      className={`py-3 rounded-xl border text-sm font-semibold transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-border-strong"}`}
+                    >
+                      {eq.l}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Nothing selected? You'll get pure bodyweight workouts — no equipment needed.
+              </p>
+            </div>
+          )}
+        </div>
+      ),
+      canNext: true,
+    },
+    {
+      title: "Your experience level",
+      subtitle: "This sets your sets, reps, rest time, and exercise complexity.",
+      body: (
+        <div className="space-y-2.5">
+          {EXPERIENCE.map((e) => {
+            const active = form.experience_level === e.v;
+            const Icon = e.icon;
+            return (
+              <button
+                key={e.v}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setForm({ ...form, experience_level: e.v })}
+                className={`w-full text-left p-4 rounded-2xl border transition-colors flex items-center gap-3 ${active ? "border-primary bg-primary/10" : "border-border hover:border-border-strong"}`}
+              >
+                <div
+                  className={`size-9 rounded-xl inline-flex items-center justify-center shrink-0 ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}
+                >
+                  <Icon className="size-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold">{e.l}</div>
+                  <div className="text-xs text-muted-foreground">{e.d}</div>
                 </div>
                 {active && <Check className="size-5 text-primary shrink-0" />}
               </button>
@@ -342,7 +527,7 @@ function Onboarding() {
             onClick={finish}
             disabled={saving}
           >
-            {saving ? "Building…" : "Build my plan"}
+            {saving ? "Saving…" : edit ? "Save changes" : "Build my plan"}
           </Button>
         )}
       </div>

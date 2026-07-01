@@ -541,12 +541,14 @@ export type Database = {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"] | null;
           age: number | null;
+          available_equipment: string[];
           avatar_url: string | null;
           banned: boolean;
           budget_level: Database["public"]["Enums"]["budget_level"] | null;
           country: string | null;
           created_at: string;
           email: string | null;
+          experience_level: string | null;
           gender: Database["public"]["Enums"]["gender"] | null;
           goal: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm: number | null;
@@ -559,16 +561,19 @@ export type Database = {
           streak_longest: number;
           updated_at: string;
           weight_kg: number | null;
+          workout_location: string;
         };
         Insert: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null;
           age?: number | null;
+          available_equipment?: string[];
           avatar_url?: string | null;
           banned?: boolean;
           budget_level?: Database["public"]["Enums"]["budget_level"] | null;
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          experience_level?: string | null;
           gender?: Database["public"]["Enums"]["gender"] | null;
           goal?: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm?: number | null;
@@ -581,16 +586,19 @@ export type Database = {
           streak_longest?: number;
           updated_at?: string;
           weight_kg?: number | null;
+          workout_location?: string;
         };
         Update: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null;
           age?: number | null;
+          available_equipment?: string[];
           avatar_url?: string | null;
           banned?: boolean;
           budget_level?: Database["public"]["Enums"]["budget_level"] | null;
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          experience_level?: string | null;
           gender?: Database["public"]["Enums"]["gender"] | null;
           goal?: Database["public"]["Enums"]["fitness_goal"] | null;
           height_cm?: number | null;
@@ -603,6 +611,7 @@ export type Database = {
           streak_longest?: number;
           updated_at?: string;
           weight_kg?: number | null;
+          workout_location?: string;
         };
         Relationships: [];
       };
@@ -637,22 +646,12 @@ export type Database = {
         Row: {
           billing_interval: string | null;
           cancel_at_period_end: boolean;
-          cancelled_at: string | null;
           current_period_end: string | null;
           current_period_start: string | null;
           ends_at: string | null;
-          environment: string;
           expiry_date: string | null;
-          lemonsqueezy_customer_id: string | null;
-          lemonsqueezy_order_id: string | null;
-          lemonsqueezy_subscription_id: string | null;
-          paddle_customer_id: string | null;
-          paddle_subscription_id: string | null;
-          payment_method: string | null;
           plan_count_used: number;
           plan_type: Database["public"]["Enums"]["subscription_plan"];
-          price_id: string | null;
-          product_id: string | null;
           provider: string | null;
           provider_ref: string | null;
           renews_at: string | null;
@@ -663,22 +662,12 @@ export type Database = {
         Insert: {
           billing_interval?: string | null;
           cancel_at_period_end?: boolean;
-          cancelled_at?: string | null;
           current_period_end?: string | null;
           current_period_start?: string | null;
           ends_at?: string | null;
-          environment?: string;
           expiry_date?: string | null;
-          lemonsqueezy_customer_id?: string | null;
-          lemonsqueezy_order_id?: string | null;
-          lemonsqueezy_subscription_id?: string | null;
-          paddle_customer_id?: string | null;
-          paddle_subscription_id?: string | null;
-          payment_method?: string | null;
           plan_count_used?: number;
           plan_type?: Database["public"]["Enums"]["subscription_plan"];
-          price_id?: string | null;
-          product_id?: string | null;
           provider?: string | null;
           provider_ref?: string | null;
           renews_at?: string | null;
@@ -689,22 +678,12 @@ export type Database = {
         Update: {
           billing_interval?: string | null;
           cancel_at_period_end?: boolean;
-          cancelled_at?: string | null;
           current_period_end?: string | null;
           current_period_start?: string | null;
           ends_at?: string | null;
-          environment?: string;
           expiry_date?: string | null;
-          lemonsqueezy_customer_id?: string | null;
-          lemonsqueezy_order_id?: string | null;
-          lemonsqueezy_subscription_id?: string | null;
-          paddle_customer_id?: string | null;
-          paddle_subscription_id?: string | null;
-          payment_method?: string | null;
           plan_count_used?: number;
           plan_type?: Database["public"]["Enums"]["subscription_plan"];
-          price_id?: string | null;
-          product_id?: string | null;
           provider?: string | null;
           provider_ref?: string | null;
           renews_at?: string | null;
@@ -1053,17 +1032,7 @@ export type Database = {
       payment_method_kind: "qris" | "paypal" | "bank_transfer" | "lemon_squeezy";
       payment_submission_status: "pending" | "approved" | "rejected" | "expired";
       subscription_plan: "free" | "pro" | "premium" | "elite";
-      subscription_status:
-        | "active"
-        | "expired"
-        | "cancelled"
-        | "past_due"
-        | "trialing"
-        | "incomplete"
-        | "incomplete_expired"
-        | "unpaid"
-        | "paused"
-        | "canceled";
+      subscription_status: "active" | "expired" | "cancelled" | "past_due";
       ticket_status: "open" | "in_progress" | "waiting_user" | "resolved" | "closed";
     };
     CompositeTypes: {

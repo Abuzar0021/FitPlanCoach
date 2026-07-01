@@ -2,10 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 // Server-side auth helpers that use the service-role key (configured in the
-// container env) so signup/login work WITHOUT access to the Supabase Auth
-// dashboard. The project is Lovable-managed, so toggling "Confirm email" in the
-// dashboard isn't readily available — instead we create users already
-// email-confirmed, and confirm legacy unconfirmed users on demand.
+// container env) to create users already email-confirmed and to confirm
+// legacy unconfirmed users on demand, so signup/login work without relying on
+// the dashboard's "Confirm email" toggle.
 
 /**
  * Create a new user that is already email-confirmed (no verification email
@@ -43,6 +42,7 @@ export const signUpUser = createServerFn({ method: "POST" })
       if (/already|exists|registered|duplicate/i.test(msg)) {
         return { ok: false as const, reason: "exists" as const };
       }
+      console.error("[signUpUser] createUser failed:", JSON.stringify(error));
       return { ok: false as const, reason: "error" as const, message: msg };
     }
     return { ok: true as const };
@@ -76,7 +76,11 @@ export const confirmUserByEmail = createServerFn({ method: "POST" })
     for (let page = 1; page <= 20 && !found; page++) {
       const { data: list, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
       const users = list?.users ?? [];
-      if (error || users.length === 0) break;
+      if (error) {
+        console.error("[confirmUserByEmail] listUsers failed:", JSON.stringify(error));
+        break;
+      }
+      if (users.length === 0) break;
       found = users.find((u) => (u.email ?? "").toLowerCase() === email);
       if (users.length < 200) break;
     }
@@ -85,5 +89,6 @@ export const confirmUserByEmail = createServerFn({ method: "POST" })
     const { error: upErr } = await admin.auth.admin.updateUserById(found.id, {
       email_confirm: true,
     });
+    if (upErr) console.error("[confirmUserByEmail] updateUserById failed:", JSON.stringify(upErr));
     return { ok: !upErr };
   });

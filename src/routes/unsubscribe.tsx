@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/unsubscribe")({
@@ -19,6 +20,7 @@ type State = "loading" | "valid" | "invalid" | "already" | "confirming" | "done"
 function UnsubscribePage() {
   const [state, setState] = useState<State>("loading");
   const [token, setToken] = useState<string | null>(null);
+  const supportEmail = useSupportEmail();
 
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("token");
@@ -101,8 +103,8 @@ function UnsubscribePage() {
               <h1 className="text-2xl font-display uppercase italic mb-2">You're unsubscribed</h1>
               <p className="text-sm text-muted-foreground">
                 We won't email you anymore. Change your mind? Reach{" "}
-                <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">
-                  abuzarelahi01@gmail.com
+                <a href={`mailto:${supportEmail}`} className="text-primary underline">
+                  {supportEmail}
                 </a>
                 .
               </p>
@@ -121,8 +123,8 @@ function UnsubscribePage() {
               <h1 className="text-2xl font-display uppercase italic mb-2">Link not valid</h1>
               <p className="text-sm text-muted-foreground">
                 This unsubscribe link is invalid or expired. Email{" "}
-                <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">
-                  abuzarelahi01@gmail.com
+                <a href={`mailto:${supportEmail}`} className="text-primary underline">
+                  {supportEmail}
                 </a>{" "}
                 and we'll unsubscribe you manually.
               </p>

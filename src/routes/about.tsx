@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import { Target, Users, Shield, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -88,16 +90,16 @@ function AboutPage() {
             <div>
               <dt className="inline font-semibold text-foreground">Support:</dt>{" "}
               <dd className="inline">
-                <a className="underline" href="mailto:abuzarelahi01@gmail.com">
-                  abuzarelahi01@gmail.com
+                <a className="underline" href={`mailto:${supportEmail}`}>
+                  {supportEmail}
                 </a>
               </dd>
             </div>
             <div>
               <dt className="inline font-semibold text-foreground">Privacy:</dt>{" "}
               <dd className="inline">
-                <a className="underline" href="mailto:abuzarelahi01@gmail.com">
-                  abuzarelahi01@gmail.com
+                <a className="underline" href={`mailto:${supportEmail}`}>
+                  {supportEmail}
                 </a>
               </dd>
             </div>

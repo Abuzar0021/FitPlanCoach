@@ -29,10 +29,11 @@ type SubRow = PlanContext & {
 };
 
 const PRO_PERKS = [
-  "Unlimited plan regeneration",
+  "Unlimited AI-generated plans",
   "Weekly meal & workout refresh",
-  "Full progress charts & streaks",
-  "Achievements & priority support",
+  "Full meal customization — swap any item",
+  "Advanced progress charts & analytics",
+  "Priority support",
 ];
 
 function fmtDate(d?: string | null) {

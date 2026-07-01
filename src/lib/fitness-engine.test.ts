@@ -13,6 +13,8 @@ import {
   calorieTargets,
   generateMealPlan,
   pickWorkoutTemplate,
+  adaptScheduleForHome,
+  HOME_SUBSTITUTIONS,
   DEFAULT_RULES,
   type UserStats,
   type Food,
@@ -199,4 +201,51 @@ test("pickWorkoutTemplate — maintain can borrow a lose_fat template", () => {
 
 test("pickWorkoutTemplate — returns null when no templates exist", () => {
   assert.equal(pickWorkoutTemplate("lose_fat", "moderate", []), null);
+});
+
+test("pickWorkoutTemplate — explicit level overrides activity-derived guess", () => {
+  // sedentary would normally map to beginner (t1); an explicit "advanced"
+  // choice should win instead.
+  const t = pickWorkoutTemplate("lose_fat", "sedentary", templates, "advanced");
+  assert.equal(t?.id, "t2");
+});
+
+test("adaptScheduleForHome — no-op for gym users", () => {
+  const schedule = [{ day: "Mon", items: [{ name: "Barbell Back Squat" }] }];
+  const out = adaptScheduleForHome(schedule, "gym", ["dumbbells"]);
+  assert.equal(out[0].items[0].name, "Barbell Back Squat");
+});
+
+test("adaptScheduleForHome — substitutes to dumbbell when owned", () => {
+  const schedule = [{ day: "Mon", items: [{ name: "Barbell Back Squat" }] }];
+  const out = adaptScheduleForHome(schedule, "home", ["dumbbells"]);
+  assert.equal(out[0].items[0].name, "Goblet Squat");
+});
+
+test("adaptScheduleForHome — falls back to bodyweight when no equipment owned", () => {
+  const schedule = [{ day: "Mon", items: [{ name: "Barbell Bench Press" }] }];
+  const out = adaptScheduleForHome(schedule, "home", []);
+  assert.equal(out[0].items[0].name, "Push-Up");
+});
+
+test("adaptScheduleForHome — never recommends equipment the user doesn't have", () => {
+  const gymOnlyNames = new Set(
+    Object.keys(HOME_SUBSTITUTIONS).flatMap((k) => {
+      const sub = HOME_SUBSTITUTIONS[k];
+      return [sub.dumbbell, sub.band].filter(Boolean) as string[];
+    }),
+  );
+  const schedule = [
+    { day: "Mon", items: Object.keys(HOME_SUBSTITUTIONS).map((name) => ({ name })) },
+  ];
+  const out = adaptScheduleForHome(schedule, "home", []);
+  for (const item of out[0].items) {
+    assert.ok(!gymOnlyNames.has(item.name), `${item.name} requires equipment the user lacks`);
+  }
+});
+
+test("adaptScheduleForHome — leaves already home-friendly exercises untouched", () => {
+  const schedule = [{ day: "Mon", items: [{ name: "Push-Up" }] }];
+  const out = adaptScheduleForHome(schedule, "home", []);
+  assert.equal(out[0].items[0].name, "Push-Up");
 });

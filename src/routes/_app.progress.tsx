@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Flame } from "lucide-react";
 import { PlanScreenSkeleton, LockedFeature, ProBadge } from "@/components/app-ui";
 import { usePlan } from "@/hooks/use-plan";
+import { localDateKey } from "@/lib/date";
 
 export const Route = createFileRoute("/_app/progress")({
   head: () => ({ meta: [{ title: "Progress — FitPlanCoach" }] }),
@@ -54,7 +55,7 @@ function Progress() {
         .from("workout_sessions")
         .select("performed_on")
         .eq("user_id", user.id)
-        .gte("performed_on", new Date(Date.now() - 56 * 86400000).toISOString().slice(0, 10)),
+        .gte("performed_on", localDateKey(new Date(Date.now() - 56 * 86400000))),
       db.from("profiles").select("streak_current,streak_longest").eq("id", user.id).maybeSingle(),
     ]);
     setEntries((data ?? []) as Entry[]);
@@ -76,7 +77,10 @@ function Progress() {
     }
     const { error } = await supabase
       .from("progress_entries")
-      .insert({ user_id: user.id, weight_kg: w });
+      // recorded_at defaults to the DB server's CURRENT_DATE (UTC in
+      // production) — pass the user's actual local day explicitly so a late
+      // evening entry doesn't land on tomorrow's date.
+      .insert({ user_id: user.id, weight_kg: w, recorded_at: localDateKey() });
     if (error) {
       console.error(error);
       toast.error("We couldn't save that entry. Please try again.");

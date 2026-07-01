@@ -8,6 +8,8 @@
 // Tips are hand-written and specific on purpose; generic "drink water, stay
 // motivated" filler is deliberately avoided.
 
+import { localDateKey } from "@/lib/date";
+
 export type TipCategory =
   | "workout"
   | "nutrition"
@@ -254,6 +256,6 @@ export function pickDailyTip(ctx: TipContext = {}): Tip | null {
   const fresh = eligible.filter((t) => !seen.includes(t.id));
   const pool = fresh.length > 0 ? fresh : eligible;
 
-  const key = `${new Date().toISOString().slice(0, 10)}|${tod}`;
+  const key = `${localDateKey()}|${tod}`;
   return pool[dayHash(key) % pool.length];
 }

@@ -3,6 +3,7 @@ import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
 import { Button } from "@/components/ui/button";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import { Check, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/pricing")({
@@ -65,22 +66,23 @@ export const Route = createFileRoute("/pricing")({
 });
 
 const FREE_PERKS = [
-  "1 personalized plan",
+  "3 personalized AI plan generations",
   "Weight & progress tracking",
   "Workout & meal preview",
   "Basic dashboard",
 ];
 
 const PRO_PERKS = [
-  "Unlimited plan regeneration",
+  "Unlimited AI-generated plans",
   "Weekly meal & workout refresh",
-  "Full progress charts & streaks",
-  "Achievements & badges",
+  "Full meal customization — swap any item",
+  "Advanced progress charts & analytics",
   "Priority support",
   "Cancel anytime in Google Play",
 ];
 
 function PricingPage() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -181,8 +183,8 @@ function PricingPage() {
           <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
             Manage or cancel your subscription anytime in Google Play. Refunds follow Google Play's
             refund policy — request one from your account, or email{" "}
-            <a href="mailto:abuzarelahi01@gmail.com" className="text-primary underline">
-              abuzarelahi01@gmail.com
+            <a href={`mailto:${supportEmail}`} className="text-primary underline">
+              {supportEmail}
             </a>{" "}
             and we'll help.
           </p>

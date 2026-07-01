@@ -32,6 +32,7 @@ import { restorePurchases } from "@/lib/billing";
 import { APP_VERSION } from "@/lib/app-config";
 import { planLabel, isPro as isProPlan, type PlanContext } from "@/lib/access";
 import { flagFor, countryLabel } from "@/lib/countries";
+import { compressImage } from "@/lib/image";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Profile — FitPlanCoach" }] }),
@@ -80,6 +81,12 @@ function Profile() {
       db.from("achievements").select("*").order("sort_order"),
       db.from("user_achievements").select("achievement_id").eq("user_id", user.id),
     ]);
+    if (!p || !p.onboarded) {
+      // No row at all, or never finished onboarding — send them to the flow
+      // that creates/repairs it, instead of spinning on the skeleton forever.
+      navigate({ to: "/onboarding" });
+      return;
+    }
     setProfile(p);
     setSub(s);
     setAllAchievements(ach ?? []);
@@ -106,17 +113,19 @@ function Profile() {
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    if (file.size > 3 * 1024 * 1024) {
-      toast.error("Max 3MB");
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Max 8MB");
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("avatars")
-        .upload(path, file, { upsert: true, cacheControl: "3600" });
+      const compressed = await compressImage(file);
+      const path = `${user.id}/avatar-${Date.now()}.jpg`;
+      const { error } = await supabase.storage.from("avatars").upload(path, compressed, {
+        upsert: true,
+        cacheControl: "3600",
+        contentType: "image/jpeg",
+      });
       if (error) throw error;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       await updateFn({ data: { avatar_url: pub.publicUrl } });
@@ -127,6 +136,20 @@ function Profile() {
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function removeAvatar() {
+    if (!user) return;
+    setUploading(true);
+    try {
+      await updateFn({ data: { avatar_url: null } });
+      toast.success("Photo removed");
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not remove photo");
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -187,7 +210,7 @@ function Profile() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               className="absolute -bottom-1 -right-1 size-8 rounded-xl bg-primary text-primary-foreground inline-flex items-center justify-center shadow border-2 border-background disabled:opacity-50"
-              aria-label="Upload avatar"
+              aria-label={profile.avatar_url ? "Replace avatar" : "Upload avatar"}
             >
               <Camera className="size-3.5" />
             </button>
@@ -216,6 +239,15 @@ function Profile() {
                 </span>
               )}
             </div>
+            {profile.avatar_url && (
+              <button
+                onClick={removeAvatar}
+                disabled={uploading}
+                className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-destructive disabled:opacity-50"
+              >
+                Remove photo
+              </button>
+            )}
           </div>
         </div>
 
@@ -321,7 +353,7 @@ function Profile() {
         <Button
           variant="outline"
           className="w-full justify-start h-12"
-          onClick={() => navigate({ to: "/onboarding" })}
+          onClick={() => navigate({ to: "/onboarding", search: { edit: true } })}
         >
           <Settings className="size-4 mr-2" /> Edit fitness details
         </Button>

@@ -67,7 +67,7 @@ export interface MealPlan {
 
 const MEAL_SPLIT = { breakfast: 0.25, lunch: 0.35, dinner: 0.3, snack: 0.1 } as const;
 
-function pickFoods(
+export function pickFoods(
   foods: Food[],
   category: keyof typeof MEAL_SPLIT,
   country: string,
@@ -83,6 +83,16 @@ function pickFoods(
   if (globalBudget.length >= 2) return globalBudget;
   return byCat.filter((f) => f.country === "global");
 }
+
+/** Portion a single food to hit a calorie target — same math generateMealPlan uses per item. */
+export function portionFood(f: Food, targetCals: number): MealItem {
+  const grams = Math.max(20, Math.round((targetCals / f.calories_per_100g) * 100));
+  const calories = Math.round((grams * f.calories_per_100g) / 100);
+  const protein = Math.round((grams * f.protein_per_100g) / 100);
+  return { food_id: f.id, name: f.name, grams, calories, protein };
+}
+
+export const MEAL_CATEGORY_SPLIT = MEAL_SPLIT;
 
 export function generateMealPlan(
   stats: UserStats,
@@ -104,12 +114,10 @@ export function generateMealPlan(
     const chosen = pool.slice(0, Math.min(2, pool.length));
     const perItemCals = catCals / chosen.length;
     for (const f of chosen) {
-      const grams = Math.max(20, Math.round((perItemCals / f.calories_per_100g) * 100));
-      const cals = Math.round((grams * f.calories_per_100g) / 100);
-      const p = Math.round((grams * f.protein_per_100g) / 100);
-      meals[cat].push({ food_id: f.id, name: f.name, grams, calories: cals, protein: p });
-      totalCals += cals;
-      totalProtein += p;
+      const item = portionFood(f, perItemCals);
+      meals[cat].push(item);
+      totalCals += item.calories;
+      totalProtein += item.protein;
     }
   }
 
@@ -134,13 +142,17 @@ export function pickWorkoutTemplate(
   goal: Goal,
   activity: ActivityLevel,
   templates: WorkoutTemplate[],
+  explicitLevel?: "beginner" | "intermediate" | "advanced",
 ): WorkoutTemplate | null {
+  // An explicit experience-level choice (set during onboarding) always wins
+  // over the activity-derived guess.
   const level =
-    activity === "sedentary" || activity === "light"
+    explicitLevel ??
+    (activity === "sedentary" || activity === "light"
       ? "beginner"
       : activity === "moderate"
         ? "intermediate"
-        : "advanced";
+        : "advanced");
   // Treat lose_fat templates as flexible for maintain
   const goalMatch = templates.filter(
     (t) => t.goal === goal || (goal === "maintain" && t.goal === "lose_fat"),
@@ -148,4 +160,87 @@ export function pickWorkoutTemplate(
   const exact = goalMatch.find((t) => t.level === level);
   if (exact) return exact;
   return goalMatch[0] ?? templates[0] ?? null;
+}
+
+// --- Home-equipment substitution ---
+export type Equipment = "dumbbells" | "bands";
+
+/**
+ * name -> home-friendly alternatives, ordered by what's checked first
+ * (dumbbell, then band, then plain bodyweight). Exercises not listed here
+ * are assumed to already be home/bodyweight-friendly as-is (e.g. Push-Up,
+ * Plank, Glute Bridge).
+ */
+export const HOME_SUBSTITUTIONS: Record<
+  string,
+  { dumbbell?: string; band?: string; bodyweight: string }
+> = {
+  "Barbell Back Squat": { dumbbell: "Goblet Squat", bodyweight: "Jump Squat" },
+  "Front Squat": { dumbbell: "Goblet Squat", bodyweight: "Bulgarian Split Squat" },
+  "Leg Press": { dumbbell: "Goblet Squat", bodyweight: "Bodyweight Squat" },
+  "Romanian Deadlift": {
+    dumbbell: "Dumbbell Romanian Deadlift",
+    band: "Band Deadlift",
+    bodyweight: "Single-Leg Glute Bridge",
+  },
+  Deadlift: {
+    dumbbell: "Dumbbell Deadlift",
+    band: "Band Deadlift",
+    bodyweight: "Glute Bridge",
+  },
+  "Leg Curl": { band: "Band Leg Curl", bodyweight: "Glute Bridge March" },
+  "Leg Extension": { band: "Band Leg Extension", bodyweight: "Wall Sit" },
+  "Hip Thrust": { dumbbell: "Dumbbell Hip Thrust", bodyweight: "Glute Bridge" },
+  "Standing Calf Raise": { bodyweight: "Calf Raise" },
+  "Seated Calf Raise": { bodyweight: "Single-Leg Calf Raise" },
+  "Barbell Bench Press": { dumbbell: "Dumbbell Bench Press", bodyweight: "Push-Up" },
+  "Incline Dumbbell Press": { dumbbell: "Incline Dumbbell Press", bodyweight: "Decline Push-Up" },
+  "Cable Fly": { band: "Band Chest Fly", bodyweight: "Wide Push-Up" },
+  "Overhead Press": { dumbbell: "Dumbbell Shoulder Press", bodyweight: "Pike Push-Up" },
+  "Arnold Press": { dumbbell: "Arnold Press", bodyweight: "Pike Push-Up" },
+  "Push Press": { dumbbell: "Dumbbell Push Press", bodyweight: "Pike Push-Up" },
+  "Lateral Raise": {
+    dumbbell: "Lateral Raise",
+    band: "Band Lateral Raise",
+    bodyweight: "Plank Shoulder Tap",
+  },
+  "Barbell Row": { dumbbell: "Dumbbell Row", band: "Band Row", bodyweight: "Superman Row" },
+  "Seated Row": { dumbbell: "Dumbbell Row", band: "Band Row", bodyweight: "Superman Row" },
+  "Seated Cable Row": { dumbbell: "Dumbbell Row", band: "Band Row", bodyweight: "Superman Row" },
+  "Lat Pulldown": { band: "Band Pulldown", bodyweight: "Superman Row" },
+  "Pull-Up": { band: "Band Pulldown", bodyweight: "Superman Row" },
+  "Chin-Up": { band: "Band Pulldown", bodyweight: "Superman Row" },
+  "Pull-Up (assisted if needed)": { band: "Band Pulldown", bodyweight: "Superman Row" },
+  "Pull-Up (weighted if possible)": { band: "Band Pulldown", bodyweight: "Superman Row" },
+  "Face Pull": { band: "Band Face Pull", dumbbell: "Rear Delt Fly", bodyweight: "Prone Y-Raise" },
+  "Barbell Curl": { dumbbell: "Dumbbell Curl", band: "Band Curl", bodyweight: "Towel Curl" },
+  "Triceps Pushdown": { band: "Band Triceps Extension", bodyweight: "Triceps Dip" },
+  "Hanging Knee Raise": { bodyweight: "Lying Leg Raise" },
+};
+
+/**
+ * Adapt a workout schedule for home training: swap any item requiring
+ * equipment the user doesn't have for a real alternative that works the same
+ * muscles, preferring dumbbells/bands (if owned) over plain bodyweight.
+ * Never recommends equipment the user doesn't have. No-op for gym users.
+ */
+export function adaptScheduleForHome<
+  T extends { items: Array<{ name: string; [k: string]: unknown }> },
+>(schedule: T[], location: "gym" | "home", equipment: Equipment[]): T[] {
+  if (location !== "home") return schedule;
+  const has = new Set(equipment);
+  return schedule.map((day) => ({
+    ...day,
+    items: day.items.map((item) => {
+      const sub = HOME_SUBSTITUTIONS[item.name];
+      if (!sub) return item; // already home-friendly as-is
+      const name =
+        has.has("dumbbells") && sub.dumbbell
+          ? sub.dumbbell
+          : has.has("bands") && sub.band
+            ? sub.band
+            : sub.bodyweight;
+      return { ...item, name };
+    }),
+  }));
 }

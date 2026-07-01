@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
+import { useSupportEmail } from "@/lib/site-config.functions";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/terms")({
 });
 
 function Terms() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -117,9 +119,8 @@ function Terms() {
 
         <h2>10. Contact</h2>
         <p>
-          Questions about these Terms:{" "}
-          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>. For billing, manage
-          your subscription in Google Play or email us.
+          Questions about these Terms: <a href={`mailto:${supportEmail}`}>{supportEmail}</a>. For
+          billing, manage your subscription in Google Play or email us.
         </p>
       </main>
 

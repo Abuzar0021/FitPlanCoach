@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
+import { useSupportEmail } from "@/lib/site-config.functions";
 
 export const Route = createFileRoute("/refunds")({
   head: () => ({
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/refunds")({
 });
 
 function Refunds() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -58,9 +60,8 @@ function Refunds() {
             .
           </li>
           <li>
-            If you need a hand, email us at{" "}
-            <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a> and we'll help you
-            through it.
+            If you need a hand, email us at <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}
+            and we'll help you through it.
           </li>
         </ol>
         <p>
@@ -77,7 +78,7 @@ function Refunds() {
         <h2>Questions</h2>
         <p>
           For anything related to refunds or billing, contact{" "}
-          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>. See also our{" "}
+          <a href={`mailto:${supportEmail}`}>{supportEmail}</a>. See also our{" "}
           <Link to="/terms">Terms of Service</Link>.
         </p>
       </main>

@@ -6,6 +6,7 @@ import {
   useRouterState,
   useNavigate,
 } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft } from "lucide-react";
@@ -42,6 +43,16 @@ const NAV = [
 function AdminLayout() {
   const { location } = useRouterState();
   const navigate = useNavigate();
+  const [openTickets, setOpenTickets] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("support_tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open")
+      .then(({ count }) => setOpenTickets(count ?? 0));
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card sticky top-0 z-30">
@@ -70,9 +81,14 @@ function AdminLayout() {
                 key={n.to}
                 to={n.to}
                 aria-current={active ? "page" : undefined}
-                className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 transition ${active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 transition inline-flex items-center gap-1.5 ${active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground hover:text-foreground"}`}
               >
                 {n.label}
+                {n.to === "/admin/support" && openTickets > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                    {openTickets}
+                  </span>
+                )}
               </Link>
             );
           })}

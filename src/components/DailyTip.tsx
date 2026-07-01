@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { Dumbbell, Apple, Droplets, HeartPulse, Moon, Sparkles, Brain, X } from "lucide-react";
 import { pickDailyTip, markTipSeen, type Tip, type TipCategory, type TipContext } from "@/lib/tips";
 import { cn } from "@/lib/utils";
+import { localDateKey } from "@/lib/date";
 
 const ICONS: Record<TipCategory, LucideIcon> = {
   workout: Dumbbell,
@@ -31,7 +32,7 @@ const LABELS: Record<TipCategory, string> = {
  */
 export function DailyTip({ context, className }: { context?: TipContext; className?: string }) {
   const [tip, setTip] = useState<Tip | null>(null);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const dismissKey = `myfp:tip_dismissed:${today}`;
 
   useEffect(() => {

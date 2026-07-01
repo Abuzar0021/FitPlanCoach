@@ -27,7 +27,18 @@ export const adminResetSubscription = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("subscriptions")
-      .update({ plan_type: "free", status: "active", expiry_date: null, plan_count_used: 0 })
+      .update({
+        plan_type: "free",
+        status: "active",
+        expiry_date: null,
+        plan_count_used: 0,
+        billing_interval: null,
+        current_period_start: null,
+        current_period_end: null,
+        renews_at: null,
+        ends_at: null,
+        cancel_at_period_end: false,
+      })
       .eq("user_id", data.userId);
     if (error) throw error;
     return { ok: true };

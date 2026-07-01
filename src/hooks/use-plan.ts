@@ -10,6 +10,7 @@ import {
   canGeneratePlan,
   planLabel,
   isPro as isProPlan,
+  DEFAULT_FREE_PLAN_LIMIT,
   type PlanContext,
   type Feature,
 } from "@/lib/access";
@@ -48,7 +49,7 @@ export function usePlan(): UsePlan {
         .maybeSingle(),
       db.from("app_settings").select("value").eq("key", "free_plan_limit").maybeSingle(),
     ]);
-    const limit = typeof settings?.value === "number" ? settings.value : 1;
+    const limit = typeof settings?.value === "number" ? settings.value : DEFAULT_FREE_PLAN_LIMIT;
     setPlan({ ...(s ?? FREE), free_plan_limit: limit } as PlanContext);
     setLoading(false);
   }, [user]);

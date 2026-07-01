@@ -1,5 +1,6 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { signUpUser, confirmUserByEmail } from "@/lib/auth.functions";
@@ -11,6 +12,13 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: z.object({
+    // Local path only (defends against open-redirect via a crafted query string).
+    redirect: z
+      .string()
+      .regex(/^\/[^/].*$|^\/$/)
+      .optional(),
+  }),
   head: () => ({
     meta: [
       { title: "Sign in or create your account — FitPlanCoach" },
@@ -43,6 +51,8 @@ function AuthPage() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { redirect } = useSearch({ from: "/auth" });
+  const redirectTo = redirect ?? "/dashboard";
   const doSignUp = useServerFn(signUpUser);
   const doConfirm = useServerFn(confirmUserByEmail);
 
@@ -78,7 +88,7 @@ function AuthPage() {
         });
         if (signInErr) throw signInErr;
         toast.success("Welcome to FitPlanCoach!");
-        navigate({ to: "/dashboard" });
+        navigate({ to: redirectTo });
       } else {
         let { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         // Legacy accounts created before auto-confirm fail with "Email not
@@ -102,7 +112,7 @@ function AuthPage() {
         }
         setAttempts(0);
         toast.success("Welcome back");
-        navigate({ to: "/dashboard" });
+        navigate({ to: redirectTo });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Authentication failed");

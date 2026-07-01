@@ -1,14 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   generateMealPlan,
   pickWorkoutTemplate,
+  adaptScheduleForHome,
+  pickFoods,
+  portionFood,
+  MEAL_CATEGORY_SPLIT,
   type Food,
   type WorkoutTemplate,
   type CalorieRules,
   DEFAULT_RULES,
   type UserStats,
+  type Equipment,
 } from "@/lib/fitness-engine";
+import { hasFeature, DEFAULT_FREE_PLAN_LIMIT, type PlanContext } from "@/lib/access";
 
 type GenerateResult =
   | {
@@ -44,7 +51,7 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
     const freeLimit =
       ((settings ?? []).find((s: any) => s.key === "free_plan_limit")?.value as
         | number
-        | undefined) ?? 1;
+        | undefined) ?? DEFAULT_FREE_PLAN_LIMIT;
 
     // SERVER-SIDE ENTITLEMENT GATE — single source of truth.
     const planType = (sub?.plan_type ?? "free") as "free" | "pro" | "premium" | "elite";
@@ -81,6 +88,18 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       supabase.from("workout_templates").select("*").eq("enabled", true),
     ]);
 
+    // Fail honestly instead of silently reporting "ok: true" with an empty
+    // plan — an empty foods/templates catalog previously produced a
+    // "successful" plan with zero meals and no workout, which looked exactly
+    // like generation was broken.
+    if (!foods || foods.length === 0) {
+      return {
+        ok: false,
+        reason: "error",
+        message: "No foods are configured yet — an admin needs to add some in /admin/foods.",
+      };
+    }
+
     const mealPlan = generateMealPlan(
       stats,
       profile.country ?? "global",
@@ -88,11 +107,32 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       (foods ?? []) as unknown as Food[],
       rules,
     );
+    const hasAnyMeal = Object.values(mealPlan.meals).some((items) => items.length > 0);
+    if (!hasAnyMeal) {
+      return {
+        ok: false,
+        reason: "error",
+        message:
+          "No foods match your country/budget combination yet — an admin needs to add some in /admin/foods.",
+      };
+    }
     const workout = pickWorkoutTemplate(
       stats.goal,
       stats.activity_level,
       (templates ?? []) as unknown as WorkoutTemplate[],
+      (profile.experience_level ?? undefined) as
+        | "beginner"
+        | "intermediate"
+        | "advanced"
+        | undefined,
     );
+    const workoutSchedule = workout
+      ? adaptScheduleForHome(
+          workout.schedule as Array<{ day: string; focus: string; items: Array<{ name: string }> }>,
+          (profile.workout_location ?? "gym") as "gym" | "home",
+          (profile.available_equipment ?? []) as Equipment[],
+        )
+      : null;
 
     await supabase
       .from("meal_plans")
@@ -111,10 +151,10 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       protein_target: mealPlan.protein_target,
       meals: mealPlan.meals as any,
     });
-    if (workout) {
+    if (workout && workoutSchedule) {
       await supabase
         .from("workout_plans")
-        .insert({ user_id: userId, template_id: workout.id, schedule: workout.schedule as any });
+        .insert({ user_id: userId, template_id: workout.id, schedule: workoutSchedule as any });
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -149,4 +189,98 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       plan_type: planType,
       plan_count_used: freeUsed + 1,
     };
+  });
+
+type MealCategory = "breakfast" | "lunch" | "dinner" | "snack";
+type MealsShape = Record<MealCategory, Array<{ food_id: string }>>;
+
+type SwapResult =
+  | { ok: true; item: ReturnType<typeof portionFood> }
+  | { ok: false; reason: "needs_subscription" | "no_alternatives" | "not_found"; message: string };
+
+/**
+ * Pro-only: swap a single meal item for a different food from the same
+ * category/country/budget pool. Real "full customization" — the entitlement
+ * check happens here, server-side, not just in the UI, so it can't be
+ * bypassed by a free user calling this directly.
+ */
+export const swapMealItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        category: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+        index: z.number().int().min(0).max(1),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }): Promise<SwapResult> => {
+    const { supabase, userId } = context;
+
+    const [{ data: sub }, { data: profile }, { data: plan }] = await Promise.all([
+      supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles").select("country,budget_level").eq("id", userId).maybeSingle(),
+      supabase
+        .from("meal_plans")
+        .select("id,calories_target,meals")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const planCtx = (sub ?? { plan_type: "free" }) as PlanContext;
+    if (!hasFeature(planCtx, "full_customization")) {
+      return {
+        ok: false,
+        reason: "needs_subscription",
+        message: "Swapping meal items is a Pro feature.",
+      };
+    }
+    if (!profile || !plan) {
+      return { ok: false, reason: "not_found", message: "No active meal plan found." };
+    }
+
+    const meals = plan.meals as unknown as MealsShape;
+    const items = meals[data.category] ?? [];
+    const current = items[data.index];
+    if (!current) {
+      return { ok: false, reason: "not_found", message: "That meal item no longer exists." };
+    }
+
+    const { data: foods } = await supabase.from("foods").select("*").eq("enabled", true);
+    const pool = pickFoods(
+      (foods ?? []) as unknown as Food[],
+      data.category,
+      profile.country ?? "global",
+      (profile.budget_level ?? "medium") as "low" | "medium" | "high",
+    );
+    const usedIds = new Set(items.map((i) => i.food_id));
+    const alternatives = pool.filter((f) => !usedIds.has(f.id));
+    if (alternatives.length === 0) {
+      return {
+        ok: false,
+        reason: "no_alternatives",
+        message: "No other options available for this meal right now.",
+      };
+    }
+
+    const chosen = alternatives[Math.floor(Math.random() * alternatives.length)];
+    const catCals = plan.calories_target * MEAL_CATEGORY_SPLIT[data.category];
+    const perItemCals = catCals / items.length;
+    const newItem = portionFood(chosen, perItemCals);
+
+    const updatedMeals = { ...meals, [data.category]: [...items] };
+    updatedMeals[data.category][data.index] = newItem;
+
+    const { error } = await supabase
+      .from("meal_plans")
+      .update({ meals: updatedMeals as any })
+      .eq("id", plan.id);
+    if (error) {
+      return { ok: false, reason: "not_found", message: "Could not save the swap." };
+    }
+
+    return { ok: true, item: newItem };
   });
