@@ -11,13 +11,15 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { DEFAULT_SITE_CONFIG } from "@/lib/site-config";
 import type { TemplateEntry } from "./registry";
 
 interface Props {
   name?: string;
+  supportEmail?: string;
 }
 
-const Welcome = ({ name = "Athlete" }: Props) => (
+const Welcome = ({ name = "Athlete", supportEmail = DEFAULT_SITE_CONFIG.support_email }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Welcome to FitPlanCoach — let's build your plan</Preview>
@@ -43,8 +45,8 @@ const Welcome = ({ name = "Athlete" }: Props) => (
         </Section>
         <Text style={text}>
           Stuck? Email{" "}
-          <a href="mailto:abuzarelahi01@gmail.com" style={link}>
-            abuzarelahi01@gmail.com
+          <a href={`mailto:${supportEmail}`} style={link}>
+            {supportEmail}
           </a>{" "}
           — real humans reply within 1–2 business days.
         </Text>

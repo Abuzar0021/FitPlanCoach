@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
+import { useSupportEmail } from "@/lib/site-config.functions";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/privacy")({
 });
 
 function Privacy() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -107,8 +109,7 @@ function Privacy() {
           requests within one month.
         </p>
         <p>
-          To exercise a right, email{" "}
-          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
+          To exercise a right, email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
         </p>
 
         <h2>7. Security</h2>
@@ -135,7 +136,7 @@ function Privacy() {
         <p>
           We may update this Notice from time to time. Material changes will be communicated via the
           Service or by email. For privacy questions, contact{" "}
-          <a href="mailto:abuzarelahi01@gmail.com">abuzarelahi01@gmail.com</a>.
+          <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
         </p>
       </main>
 

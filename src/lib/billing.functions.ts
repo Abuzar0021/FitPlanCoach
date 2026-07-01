@@ -135,7 +135,10 @@ export const verifyPlayPurchase = createServerFn({ method: "POST" })
       const canceled = state === "SUBSCRIPTION_STATE_CANCELED";
       await db
         .from("subscriptions")
-        .update({ status: canceled ? "canceled" : "expired", plan_type: canceled ? "pro" : "free" })
+        .update({
+          status: canceled ? "cancelled" : "expired",
+          plan_type: canceled ? "pro" : "free",
+        })
         .eq("user_id", context.userId);
       return { ok: false as const, reason: "not_active", state };
     }

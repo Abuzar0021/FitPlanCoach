@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import { Mail, ShieldCheck, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
@@ -21,23 +22,25 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const supportEmail = useSupportEmail();
+
   const channels = [
     {
       icon: Mail,
       label: "General support",
-      email: "abuzarelahi01@gmail.com",
+      email: supportEmail,
       desc: "Account help, plan generation, app questions. We reply within 1–2 business days.",
     },
     {
       icon: ShieldCheck,
       label: "Privacy & data requests",
-      email: "abuzarelahi01@gmail.com",
+      email: supportEmail,
       desc: "Access, correction, deletion, or portability requests under GDPR/CCPA.",
     },
     {
       icon: CreditCard,
       label: "Billing & refunds",
-      email: "abuzarelahi01@gmail.com",
+      email: supportEmail,
       desc: "Pro is billed through Google Play. Manage or cancel in your Google Play subscriptions, or email us for help.",
     },
   ];
@@ -82,8 +85,8 @@ function ContactPage() {
               billing page
             </Link>{" "}
             when signed in, or email{" "}
-            <a className="underline text-foreground" href="mailto:abuzarelahi01@gmail.com">
-              abuzarelahi01@gmail.com
+            <a className="underline text-foreground" href={`mailto:${supportEmail}`}>
+              {supportEmail}
             </a>{" "}
             and we'll handle it for you.
           </p>

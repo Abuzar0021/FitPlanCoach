@@ -41,7 +41,7 @@ export interface SiteConfig {
 }
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
-  support_email: "abuzarelahi01@gmail.com",
+  support_email: "support@fitplancoach.com",
   social: { twitter: "", instagram: "", facebook: "", tiktok: "", youtube: "" },
   announcement: { enabled: false, text: "", href: "" },
   analytics: { ga4_id: "", clarity_id: "" },

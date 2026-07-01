@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { GooglePlayButton } from "@/components/GooglePlayButton";
+import { DEFAULT_SITE_CONFIG } from "@/lib/site-config";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { DashboardScreen, WorkoutScreen } from "@/components/AppScreens";
 import { Button } from "@/components/ui/button";
@@ -63,7 +64,7 @@ export const Route = createFileRoute("/")({
           contactPoint: [
             {
               "@type": "ContactPoint",
-              email: "abuzarelahi01@gmail.com",
+              email: DEFAULT_SITE_CONFIG.support_email,
               contactType: "customer support",
             },
           ],

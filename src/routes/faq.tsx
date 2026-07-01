@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicFooter } from "@/components/PublicFooter";
 import { PublicHeader } from "@/components/PublicHeader";
 import { AppCtaBand } from "@/components/AppCtaBand";
+import { useSupportEmail } from "@/lib/site-config.functions";
 import {
   Accordion,
   AccordionContent,
@@ -84,6 +85,7 @@ export const Route = createFileRoute("/faq")({
 });
 
 function FAQPage() {
+  const supportEmail = useSupportEmail();
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -110,8 +112,8 @@ function FAQPage() {
 
         <div className="mt-12 surface-card p-6 text-sm text-muted-foreground">
           Still have questions? Email{" "}
-          <a className="text-foreground underline" href="mailto:abuzarelahi01@gmail.com">
-            abuzarelahi01@gmail.com
+          <a className="text-foreground underline" href={`mailto:${supportEmail}`}>
+            {supportEmail}
           </a>{" "}
           or visit our{" "}
           <Link to="/contact" className="text-foreground underline">
