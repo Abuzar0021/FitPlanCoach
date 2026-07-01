@@ -216,33 +216,48 @@ export type Database = {
       };
       exercises: {
         Row: {
+          breathing_tip: string | null;
+          common_mistakes: string[];
           created_at: string;
           difficulty: Database["public"]["Enums"]["difficulty_level"];
           enabled: boolean;
           equipment: string | null;
           id: string;
+          image_url: string | null;
+          instructions: string[];
           muscle_group: string;
           name: string;
+          safety_tip: string | null;
           updated_at: string;
         };
         Insert: {
+          breathing_tip?: string | null;
+          common_mistakes?: string[];
           created_at?: string;
           difficulty: Database["public"]["Enums"]["difficulty_level"];
           enabled?: boolean;
           equipment?: string | null;
           id?: string;
+          image_url?: string | null;
+          instructions?: string[];
           muscle_group: string;
           name: string;
+          safety_tip?: string | null;
           updated_at?: string;
         };
         Update: {
+          breathing_tip?: string | null;
+          common_mistakes?: string[];
           created_at?: string;
           difficulty?: Database["public"]["Enums"]["difficulty_level"];
           enabled?: boolean;
           equipment?: string | null;
           id?: string;
+          image_url?: string | null;
+          instructions?: string[];
           muscle_group?: string;
           name?: string;
+          safety_tip?: string | null;
           updated_at?: string;
         };
         Relationships: [];

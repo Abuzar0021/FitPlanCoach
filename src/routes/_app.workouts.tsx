@@ -10,6 +10,7 @@ import { localDateKey } from "@/lib/date";
 import { toast } from "sonner";
 import { CheckCircle2, Flame, Dumbbell } from "lucide-react";
 import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
+import { ExerciseDetailSheet } from "@/components/ExerciseDetailSheet";
 
 export const Route = createFileRoute("/_app/workouts")({
   head: () => ({
@@ -43,6 +44,7 @@ function Workouts() {
   const [activeDay, setActiveDay] = useState(0);
   const [logging, setLogging] = useState(false);
   const [streak, setStreak] = useState<number>(0);
+  const [detailFor, setDetailFor] = useState<string | null>(null);
   const logFn = useServerFn(logWorkoutSession);
 
   useEffect(() => {
@@ -153,7 +155,11 @@ function Workouts() {
       </div>
       <div className="surface-card divide-y divide-border overflow-hidden">
         {day.items.map((it, i) => (
-          <div key={i} className="p-4 flex items-center gap-3">
+          <button
+            key={i}
+            onClick={() => setDetailFor(it.name)}
+            className="w-full p-4 flex items-center gap-3 text-left hover:bg-muted/30 transition"
+          >
             <div className="size-9 rounded-lg bg-primary/10 border border-primary/20 inline-flex items-center justify-center text-xs font-display text-primary tabular-nums">
               {i + 1}
             </div>
@@ -163,7 +169,7 @@ function Workouts() {
                 {it.sets} × {it.reps} · rest {it.rest_seconds}s
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       {!day.focus?.toLowerCase().includes("rest") && (
@@ -186,6 +192,11 @@ function Workouts() {
           <Flame className="size-3.5 text-orange-500" /> {streak}-day streak
         </p>
       )}
+      <ExerciseDetailSheet
+        name={detailFor}
+        open={detailFor !== null}
+        onOpenChange={(open) => !open && setDetailFor(null)}
+      />
     </MobileShell>
   );
 }
