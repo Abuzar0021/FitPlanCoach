@@ -41,6 +41,7 @@ import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppWorkoutsRouteImport } from './routes/_app.workouts'
+import { Route as AppWorkoutHistoryRouteImport } from './routes/_app.workout-history'
 import { Route as AppSupportRouteImport } from './routes/_app.support'
 import { Route as AppSubscriptionRouteImport } from './routes/_app.subscription'
 import { Route as AppProgressRouteImport } from './routes/_app.progress'
@@ -48,6 +49,7 @@ import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppOnboardingRouteImport } from './routes/_app.onboarding'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMealsRouteImport } from './routes/_app.meals'
+import { Route as AppFoodDiaryRouteImport } from './routes/_app.food-diary'
 import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
@@ -218,6 +220,11 @@ const AppWorkoutsRoute = AppWorkoutsRouteImport.update({
   path: '/workouts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWorkoutHistoryRoute = AppWorkoutHistoryRouteImport.update({
+  id: '/workout-history',
+  path: '/workout-history',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSupportRoute = AppSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -251,6 +258,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppMealsRoute = AppMealsRouteImport.update({
   id: '/meals',
   path: '/meals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFoodDiaryRoute = AppFoodDiaryRouteImport.update({
+  id: '/food-diary',
+  path: '/food-diary',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFeedbackRoute = AppFeedbackRouteImport.update({
@@ -330,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/feedback': typeof AppFeedbackRoute
+  '/food-diary': typeof AppFoodDiaryRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -337,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/workout-history': typeof AppWorkoutHistoryRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -379,6 +393,7 @@ export interface FileRoutesByTo {
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/feedback': typeof AppFeedbackRoute
+  '/food-diary': typeof AppFoodDiaryRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -386,6 +401,7 @@ export interface FileRoutesByTo {
   '/progress': typeof AppProgressRoute
   '/subscription': typeof AppSubscriptionRoute
   '/support': typeof AppSupportRoute
+  '/workout-history': typeof AppWorkoutHistoryRoute
   '/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -431,6 +447,7 @@ export interface FileRoutesById {
   '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feedback': typeof AppFeedbackRoute
+  '/_app/food-diary': typeof AppFoodDiaryRoute
   '/_app/meals': typeof AppMealsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/onboarding': typeof AppOnboardingRoute
@@ -438,6 +455,7 @@ export interface FileRoutesById {
   '/_app/progress': typeof AppProgressRoute
   '/_app/subscription': typeof AppSubscriptionRoute
   '/_app/support': typeof AppSupportRoute
+  '/_app/workout-history': typeof AppWorkoutHistoryRoute
   '/_app/workouts': typeof AppWorkoutsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -483,6 +501,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/dashboard'
     | '/feedback'
+    | '/food-diary'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -490,6 +509,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/workout-history'
     | '/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -532,6 +552,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/dashboard'
     | '/feedback'
+    | '/food-diary'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -539,6 +560,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/subscription'
     | '/support'
+    | '/workout-history'
     | '/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -583,6 +605,7 @@ export interface FileRouteTypes {
     | '/_app/billing'
     | '/_app/dashboard'
     | '/_app/feedback'
+    | '/_app/food-diary'
     | '/_app/meals'
     | '/_app/notifications'
     | '/_app/onboarding'
@@ -590,6 +613,7 @@ export interface FileRouteTypes {
     | '/_app/progress'
     | '/_app/subscription'
     | '/_app/support'
+    | '/_app/workout-history'
     | '/_app/workouts'
     | '/admin/analytics'
     | '/admin/blog'
@@ -868,6 +892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkoutsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/workout-history': {
+      id: '/_app/workout-history'
+      path: '/workout-history'
+      fullPath: '/workout-history'
+      preLoaderRoute: typeof AppWorkoutHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/support': {
       id: '/_app/support'
       path: '/support'
@@ -915,6 +946,13 @@ declare module '@tanstack/react-router' {
       path: '/meals'
       fullPath: '/meals'
       preLoaderRoute: typeof AppMealsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/food-diary': {
+      id: '/_app/food-diary'
+      path: '/food-diary'
+      fullPath: '/food-diary'
+      preLoaderRoute: typeof AppFoodDiaryRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/feedback': {
@@ -994,6 +1032,7 @@ interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeedbackRoute: typeof AppFeedbackRoute
+  AppFoodDiaryRoute: typeof AppFoodDiaryRoute
   AppMealsRoute: typeof AppMealsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
@@ -1001,6 +1040,7 @@ interface AppRouteChildren {
   AppProgressRoute: typeof AppProgressRoute
   AppSubscriptionRoute: typeof AppSubscriptionRoute
   AppSupportRoute: typeof AppSupportRoute
+  AppWorkoutHistoryRoute: typeof AppWorkoutHistoryRoute
   AppWorkoutsRoute: typeof AppWorkoutsRoute
 }
 
@@ -1008,6 +1048,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppFeedbackRoute: AppFeedbackRoute,
+  AppFoodDiaryRoute: AppFoodDiaryRoute,
   AppMealsRoute: AppMealsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOnboardingRoute: AppOnboardingRoute,
@@ -1015,6 +1056,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProgressRoute: AppProgressRoute,
   AppSubscriptionRoute: AppSubscriptionRoute,
   AppSupportRoute: AppSupportRoute,
+  AppWorkoutHistoryRoute: AppWorkoutHistoryRoute,
   AppWorkoutsRoute: AppWorkoutsRoute,
 }
 

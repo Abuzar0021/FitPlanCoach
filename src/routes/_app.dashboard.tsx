@@ -20,6 +20,11 @@ import {
   Crown,
   Zap,
   Trophy,
+  Scale,
+  RefreshCw,
+  CalendarCheck,
+  CheckCircle2,
+  ListChecks,
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { calorieTargets, type CalorieRules, DEFAULT_RULES } from "@/lib/fitness-engine";
@@ -30,6 +35,10 @@ import { toast } from "sonner";
 import { WelcomeChecklist } from "@/components/WelcomeChecklist";
 import { DashboardSkeleton } from "@/components/app-ui";
 import { DailyTip } from "@/components/DailyTip";
+import { WaterTracker } from "@/components/WaterTracker";
+import { localDateKey, daysBetweenKeys } from "@/lib/date";
+import { waterTargetMl } from "@/lib/water";
+import { computeNudges } from "@/lib/nudges";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -115,10 +124,24 @@ function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [adminCheck, setAdminCheck] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loggedToday, setLoggedToday] = useState<
+    Record<"breakfast" | "lunch" | "dinner" | "snack", { calories: number; protein: number }>
+  >({
+    breakfast: { calories: 0, protein: 0 },
+    lunch: { calories: 0, protein: 0 },
+    dinner: { calories: 0, protein: 0 },
+    snack: { calories: 0, protein: 0 },
+  });
+  const [weekWorkoutCount, setWeekWorkoutCount] = useState(0);
+  const [workoutDoneToday, setWorkoutDoneToday] = useState(false);
+  const [lastWeighInDate, setLastWeighInDate] = useState<string | null>(null);
+  const [waterMl, setWaterMl] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
+      const today = localDateKey();
+      const weekAgo = localDateKey(new Date(Date.now() - 6 * 86400000));
       const [
         { data: p },
         { data: s },
@@ -127,6 +150,8 @@ function Dashboard() {
         { data: settings },
         { data: roles },
         { data: weights },
+        { data: foodLog },
+        { data: weekSessions },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase
@@ -161,6 +186,16 @@ function Dashboard() {
           .eq("user_id", user.id)
           .order("recorded_at", { ascending: false })
           .limit(7),
+        supabase
+          .from("food_log_entries")
+          .select("meal_category,calories,protein")
+          .eq("user_id", user.id)
+          .eq("logged_date", today),
+        supabase
+          .from("workout_sessions")
+          .select("performed_on")
+          .eq("user_id", user.id)
+          .gte("performed_on", weekAgo),
       ]);
       if (!p || !p.onboarded) {
         // No row at all (e.g. the signup trigger's row was lost) or genuinely
@@ -175,6 +210,9 @@ function Dashboard() {
       setMealPlan((mp as any) ?? null);
       setWorkoutDays((wp?.schedule as WorkoutDay[] | null) ?? null);
       setLatestWeights(((weights ?? []) as any[]).map((w) => Number(w.weight_kg)).reverse());
+      setLastWeighInDate(
+        (weights?.[0] as { recorded_at: string } | undefined)?.recorded_at ?? null,
+      );
       const cr = settings?.find((s) => s.key === "calorie_rules")?.value as
         | CalorieRules
         | undefined;
@@ -183,6 +221,24 @@ function Dashboard() {
       if (typeof fl === "number") setFreeLimit(fl);
       setIsAdmin((roles ?? []).some((r: any) => r.role === "admin" || r.role === "owner"));
       setAdminCheck(true);
+      const byCat = {
+        breakfast: { calories: 0, protein: 0 },
+        lunch: { calories: 0, protein: 0 },
+        dinner: { calories: 0, protein: 0 },
+        snack: { calories: 0, protein: 0 },
+      };
+      for (const row of (foodLog ?? []) as Array<{
+        meal_category: keyof typeof byCat;
+        calories: number;
+        protein: number;
+      }>) {
+        byCat[row.meal_category].calories += row.calories;
+        byCat[row.meal_category].protein += row.protein;
+      }
+      setLoggedToday(byCat);
+      const sessionDates = new Set((weekSessions ?? []).map((s: any) => s.performed_on));
+      setWeekWorkoutCount(sessionDates.size);
+      setWorkoutDoneToday(sessionDates.has(today));
     })();
   }, [user, navigate]);
 
@@ -266,19 +322,18 @@ function Dashboard() {
   const weeklyRefreshReady =
     hasFeature(planCtx, "weekly_regen") && planAgeDays !== null && planAgeDays >= 7;
 
-  // Today's consumption (sum from meal plan if exists)
-  const consumedCals = mealPlan
-    ? Object.values(mealPlan.meals ?? {})
-        .flat()
-        .reduce((a: number, m: any) => a + (m?.calories ?? 0), 0)
-    : 0;
-  const consumedProtein = mealPlan
-    ? Object.values(mealPlan.meals ?? {})
-        .flat()
-        .reduce((a: number, m: any) => a + (m?.protein ?? 0), 0)
-    : 0;
+  // Today's real consumption — from what the user actually logged in the
+  // food diary, not the static generated plan (which never changes through
+  // the day regardless of what was actually eaten).
+  const loggedTotals = Object.values(loggedToday).reduce(
+    (a, m) => ({ calories: a.calories + m.calories, protein: a.protein + m.protein }),
+    { calories: 0, protein: 0 },
+  );
+  const consumedCals = loggedTotals.calories;
+  const consumedProtein = loggedTotals.protein;
+  const hasLoggedAnything = consumedCals > 0;
   const remainingCals = Math.max(0, targets.calories - consumedCals);
-  const calProgress = mealPlan ? Math.min(1, consumedCals / targets.calories) : 0;
+  const calProgress = Math.min(1, consumedCals / targets.calories);
 
   // Weight trend
   const weightTrend =
@@ -305,6 +360,17 @@ function Dashboard() {
     month: "short",
     day: "numeric",
   });
+
+  const nudges = workoutDays
+    ? computeNudges({
+        isRestDay,
+        workoutDoneToday,
+        foodLoggedToday: hasLoggedAnything,
+        waterMl,
+        waterTargetMl: waterTargetMl(profile.weight_kg ?? null),
+        daysSinceWeighIn: lastWeighInDate ? daysBetweenKeys(lastWeighInDate, localDateKey()) : null,
+      })
+    : [];
 
   return (
     <>
@@ -360,6 +426,32 @@ function Dashboard() {
           </div>
         )}
 
+        {nudges.length > 0 ? (
+          <div className="surface-card p-4 mb-4">
+            <p className="label-overline mb-2.5 flex items-center gap-1.5">
+              <ListChecks className="size-3.5 text-primary" /> Still to do today
+            </p>
+            <div className="space-y-1.5">
+              {nudges.map((n) => (
+                <Link
+                  key={n.id}
+                  to={n.href}
+                  className="flex items-center justify-between gap-2 text-sm py-1 hover:text-primary transition"
+                >
+                  <span>{n.label}</span>
+                  <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : (
+          workoutDays && (
+            <div className="surface-card p-4 mb-4 flex items-center gap-2.5 text-sm text-primary">
+              <CheckCircle2 className="size-4 shrink-0" /> All caught up for today — nice work.
+            </div>
+          )
+        )}
+
         <WelcomeChecklist
           hasProfile={!!(profile.weight_kg && profile.height_cm && profile.goal)}
           hasPlan={!!mealPlan}
@@ -382,9 +474,13 @@ function Dashboard() {
               progressClassName="text-primary"
             >
               <span className="text-2xl font-display tabular-nums">
-                {remainingCals.toLocaleString()}
+                {hasLoggedAnything
+                  ? remainingCals.toLocaleString()
+                  : targets.calories.toLocaleString()}
               </span>
-              <span className="label-overline mt-0.5">kcal left</span>
+              <span className="label-overline mt-0.5">
+                {hasLoggedAnything ? "kcal left" : "kcal target"}
+              </span>
             </ProgressRing>
             <div className="flex-1 min-w-0 space-y-3.5">
               <StatBar
@@ -488,6 +584,73 @@ function Dashboard() {
           )}
         </div>
 
+        {/* Quick actions */}
+        <div className="grid grid-cols-4 gap-2.5 mb-5">
+          <Link
+            to="/food-diary"
+            className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:border-border-strong transition"
+          >
+            <Utensils className="size-4 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              Log food
+            </span>
+          </Link>
+          <Link
+            to="/workouts"
+            className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:border-border-strong transition"
+          >
+            <Dumbbell className="size-4 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              Train
+            </span>
+          </Link>
+          <Link
+            to="/progress"
+            className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:border-border-strong transition"
+          >
+            <Scale className="size-4 text-primary" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              Weigh in
+            </span>
+          </Link>
+          <button
+            onClick={generate}
+            disabled={busy || !canGenerate}
+            className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:border-border-strong transition disabled:opacity-40"
+          >
+            <RefreshCw className={`size-4 text-primary ${busy ? "animate-spin" : ""}`} />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              Refresh plan
+            </span>
+          </button>
+        </div>
+
+        {/* Water + this week */}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {user && (
+            <WaterTracker
+              userId={user.id}
+              weightKg={profile.weight_kg ?? null}
+              onTotalChange={setWaterMl}
+            />
+          )}
+          <div className="metric-card">
+            <p className="label-overline inline-flex items-center gap-1">
+              <CalendarCheck className="size-3 text-primary" /> This week
+            </p>
+            <p className="text-lg font-display tabular-nums mt-0.5">
+              {weekWorkoutCount}
+              <span className="text-[10px] text-muted-foreground ml-1">/ 7 days trained</span>
+            </p>
+            <div className="h-1.5 bg-muted rounded-full mt-2 overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full"
+                style={{ width: `${Math.min(100, (weekWorkoutCount / 7) * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Today's session */}
         <div className="flex justify-between items-end mb-3">
           <h3 className="font-display text-lg uppercase italic tracking-wide">Today's Session</h3>
@@ -530,32 +693,27 @@ function Dashboard() {
           </div>
         </Link>
 
-        {/* Today's meals summary */}
+        {/* Today's real food diary summary — what was actually logged, not
+            what the generated plan assumes. */}
         <div className="flex justify-between items-end mb-3">
-          <h3 className="font-display text-lg uppercase italic tracking-wide">Meal Log</h3>
+          <h3 className="font-display text-lg uppercase italic tracking-wide">Logged Today</h3>
           <Link
-            to="/meals"
+            to="/food-diary"
             className="text-[11px] font-bold uppercase tracking-widest text-primary"
           >
-            View all
+            Open diary
           </Link>
         </div>
         <div className="space-y-2.5 mb-5">
           {(["breakfast", "lunch", "dinner", "snack"] as const).map((cat) => {
-            const items = (mealPlan?.meals?.[cat] ?? []) as Array<{
-              name: string;
-              calories: number;
-              protein: number;
-            }>;
-            const totalCal = items.reduce((a, m) => a + m.calories, 0);
-            const totalP = items.reduce((a, m) => a + m.protein, 0);
+            const totals = loggedToday[cat];
             const emoji =
               cat === "breakfast" ? "🍳" : cat === "lunch" ? "🥗" : cat === "dinner" ? "🍲" : "🍎";
-            const empty = items.length === 0;
+            const empty = totals.calories === 0;
             return (
               <Link
                 key={cat}
-                to="/meals"
+                to="/food-diary"
                 className="flex items-center gap-3 bg-card/60 border border-border p-3 rounded-2xl hover:border-border-strong transition"
               >
                 <div className="size-11 shrink-0 rounded-xl bg-muted inline-flex items-center justify-center text-xl">
@@ -564,7 +722,9 @@ function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold capitalize truncate">{cat}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    {empty ? "—" : `${totalCal} kcal · ${totalP}g protein`}
+                    {empty
+                      ? "Nothing logged yet"
+                      : `${totals.calories} kcal · ${totals.protein}g protein`}
                   </p>
                 </div>
                 <ChevronRight className="size-4 text-muted-foreground" />

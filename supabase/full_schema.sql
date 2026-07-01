@@ -1923,3 +1923,216 @@ DROP POLICY IF EXISTS "avatars_delete_own" ON storage.objects;
 CREATE POLICY "avatars_delete_own" ON storage.objects
   FOR DELETE TO authenticated
   USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text);
+
+-- =====================================================================
+-- 20260702150000_exercise_instructions.sql
+-- =====================================================================
+
+-- Real exercise instructions so users never need to search elsewhere for
+-- proper form: step-by-step cues, common mistakes, a breathing pattern, a
+-- safety note, and a slot for a demonstration image once generated.
+alter table public.exercises
+  add column if not exists instructions text[] not null default '{}',
+  add column if not exists common_mistakes text[] not null default '{}',
+  add column if not exists breathing_tip text,
+  add column if not exists safety_tip text,
+  add column if not exists image_url text;
+
+
+-- =========================================================
+-- 20260702160000_workout_set_logs.sql
+-- =========================================================
+-- Real workout tracking: per-set weight/reps, not just a session summary.
+-- Personal records are computed on read (MAX weight_kg per exercise per
+-- user) rather than cached, so they're always correct with no trigger to
+-- maintain.
+--
+-- This table postdates the RESET block at the top of full_schema.sql. It
+-- uses CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting
+-- the accumulated full_schema.sql for a later round never wipes rows a
+-- user has already logged here — only a fresh project gets the table
+-- created; an existing one is left untouched.
+CREATE TABLE IF NOT EXISTS public.workout_set_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id uuid NOT NULL REFERENCES public.workout_sessions(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  exercise_name text NOT NULL,
+  set_number int NOT NULL,
+  reps int,
+  weight_kg numeric,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS workout_set_logs_user_exercise_idx
+  ON public.workout_set_logs (user_id, exercise_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS workout_set_logs_session_idx ON public.workout_set_logs (session_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.workout_set_logs TO authenticated;
+GRANT ALL ON public.workout_set_logs TO service_role;
+ALTER TABLE public.workout_set_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own set logs" ON public.workout_set_logs;
+CREATE POLICY "own set logs" ON public.workout_set_logs FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (user_id = auth.uid());
+
+-- A completion percentage needs to know how many sets the session's plan
+-- called for, alongside what was actually logged.
+ALTER TABLE public.workout_sessions
+  ADD COLUMN IF NOT EXISTS planned_sets int;
+
+-- =========================================================
+-- 20260702170000_nutrition_macros_and_diary.sql
+-- =========================================================
+-- Real macro tracking (carbs/fat, not just calories/protein) plus a full
+-- food logging diary so users can log what they actually ate, not just
+-- follow the generated plan.
+ALTER TABLE public.foods
+  ADD COLUMN IF NOT EXISTS carbs_per_100g NUMERIC NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS fat_per_100g NUMERIC NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS fiber_per_100g NUMERIC NOT NULL DEFAULT 0;
+
+ALTER TABLE public.meal_plans
+  ADD COLUMN IF NOT EXISTS carbs_target NUMERIC,
+  ADD COLUMN IF NOT EXISTS fat_target NUMERIC;
+
+-- These tables postdate the RESET block at the top of full_schema.sql. They
+-- use CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting the
+-- accumulated full_schema.sql for a later round never wipes a user's
+-- already-logged food diary entries or favorites.
+CREATE TABLE IF NOT EXISTS public.food_log_entries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  logged_date date NOT NULL,
+  meal_category public.meal_category NOT NULL,
+  food_id uuid REFERENCES public.foods(id) ON DELETE SET NULL,
+  name text NOT NULL,
+  grams numeric NOT NULL,
+  calories numeric NOT NULL,
+  protein numeric NOT NULL,
+  carbs numeric NOT NULL,
+  fat numeric NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS food_log_entries_user_date_idx
+  ON public.food_log_entries (user_id, logged_date);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.food_log_entries TO authenticated;
+GRANT ALL ON public.food_log_entries TO service_role;
+ALTER TABLE public.food_log_entries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own food log entries" ON public.food_log_entries;
+CREATE POLICY "own food log entries" ON public.food_log_entries FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (user_id = auth.uid());
+
+CREATE TABLE IF NOT EXISTS public.food_favorites (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  food_id uuid NOT NULL REFERENCES public.foods(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (user_id, food_id)
+);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.food_favorites TO authenticated;
+GRANT ALL ON public.food_favorites TO service_role;
+ALTER TABLE public.food_favorites ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own food favorites" ON public.food_favorites;
+CREATE POLICY "own food favorites" ON public.food_favorites FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (user_id = auth.uid());
+
+-- =========================================================
+-- 20260702180000_progress_measurements_and_photos.sql
+-- =========================================================
+-- Progress tracking beyond weight: body measurements per entry, plus a
+-- private progress-photo gallery. All measurement columns are nullable —
+-- a user might log just weight most days and full measurements occasionally.
+ALTER TABLE public.progress_entries
+  ADD COLUMN IF NOT EXISTS body_fat_pct NUMERIC,
+  ADD COLUMN IF NOT EXISTS chest_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS waist_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS hips_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS arm_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS thigh_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS neck_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS shoulder_cm NUMERIC;
+
+-- This table postdates the RESET block at the top of full_schema.sql. It
+-- uses CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting
+-- the accumulated full_schema.sql for a later round never wipes a user's
+-- already-uploaded progress photos.
+CREATE TABLE IF NOT EXISTS public.progress_photos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  -- Storage object path (bucket is private), not a public URL — signed URLs
+  -- are generated on read, scoped to the owner by RLS.
+  image_path text NOT NULL,
+  recorded_at date NOT NULL DEFAULT CURRENT_DATE,
+  note text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS progress_photos_user_date_idx
+  ON public.progress_photos (user_id, recorded_at DESC);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.progress_photos TO authenticated;
+GRANT ALL ON public.progress_photos TO service_role;
+ALTER TABLE public.progress_photos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own progress photos" ON public.progress_photos;
+CREATE POLICY "own progress photos" ON public.progress_photos FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (user_id = auth.uid());
+
+-- Progress photos are sensitive body photos — unlike the public "avatars"
+-- bucket, this one stays private. Only the owner can read/write/delete
+-- their own files, enforced by the "<user_id>/..." path prefix.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('progress-photos', 'progress-photos', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "progress_photos_read_own" ON storage.objects;
+CREATE POLICY "progress_photos_read_own" ON storage.objects
+  FOR SELECT TO authenticated
+  USING (
+    bucket_id = 'progress-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+DROP POLICY IF EXISTS "progress_photos_insert_own" ON storage.objects;
+CREATE POLICY "progress_photos_insert_own" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'progress-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+DROP POLICY IF EXISTS "progress_photos_delete_own" ON storage.objects;
+CREATE POLICY "progress_photos_delete_own" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (
+    bucket_id = 'progress-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- =========================================================
+-- 20260702190000_water_logs.sql
+-- =========================================================
+-- Water intake tracking for the dashboard's daily hydration widget.
+-- This table postdates the RESET block at the top of full_schema.sql. It
+-- uses CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting
+-- the accumulated full_schema.sql for a later round never wipes a user's
+-- already-logged water entries.
+CREATE TABLE IF NOT EXISTS public.water_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  logged_date date NOT NULL,
+  amount_ml int NOT NULL CHECK (amount_ml > 0 AND amount_ml <= 5000),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS water_logs_user_date_idx ON public.water_logs (user_id, logged_date);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.water_logs TO authenticated;
+GRANT ALL ON public.water_logs TO service_role;
+ALTER TABLE public.water_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own water logs" ON public.water_logs;
+CREATE POLICY "own water logs" ON public.water_logs FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (user_id = auth.uid());

@@ -216,33 +216,48 @@ export type Database = {
       };
       exercises: {
         Row: {
+          breathing_tip: string | null;
+          common_mistakes: string[];
           created_at: string;
           difficulty: Database["public"]["Enums"]["difficulty_level"];
           enabled: boolean;
           equipment: string | null;
           id: string;
+          image_url: string | null;
+          instructions: string[];
           muscle_group: string;
           name: string;
+          safety_tip: string | null;
           updated_at: string;
         };
         Insert: {
+          breathing_tip?: string | null;
+          common_mistakes?: string[];
           created_at?: string;
           difficulty: Database["public"]["Enums"]["difficulty_level"];
           enabled?: boolean;
           equipment?: string | null;
           id?: string;
+          image_url?: string | null;
+          instructions?: string[];
           muscle_group: string;
           name: string;
+          safety_tip?: string | null;
           updated_at?: string;
         };
         Update: {
+          breathing_tip?: string | null;
+          common_mistakes?: string[];
           created_at?: string;
           difficulty?: Database["public"]["Enums"]["difficulty_level"];
           enabled?: boolean;
           equipment?: string | null;
           id?: string;
+          image_url?: string | null;
+          instructions?: string[];
           muscle_group?: string;
           name?: string;
+          safety_tip?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -251,10 +266,13 @@ export type Database = {
         Row: {
           budget_level: Database["public"]["Enums"]["budget_level"];
           calories_per_100g: number;
+          carbs_per_100g: number;
           category: Database["public"]["Enums"]["meal_category"];
           country: string;
           created_at: string;
           enabled: boolean;
+          fat_per_100g: number;
+          fiber_per_100g: number;
           id: string;
           name: string;
           protein_per_100g: number;
@@ -263,10 +281,13 @@ export type Database = {
         Insert: {
           budget_level: Database["public"]["Enums"]["budget_level"];
           calories_per_100g: number;
+          carbs_per_100g?: number;
           category: Database["public"]["Enums"]["meal_category"];
           country?: string;
           created_at?: string;
           enabled?: boolean;
+          fat_per_100g?: number;
+          fiber_per_100g?: number;
           id?: string;
           name: string;
           protein_per_100g: number;
@@ -275,10 +296,13 @@ export type Database = {
         Update: {
           budget_level?: Database["public"]["Enums"]["budget_level"];
           calories_per_100g?: number;
+          carbs_per_100g?: number;
           category?: Database["public"]["Enums"]["meal_category"];
           country?: string;
           created_at?: string;
           enabled?: boolean;
+          fat_per_100g?: number;
+          fiber_per_100g?: number;
           id?: string;
           name?: string;
           protein_per_100g?: number;
@@ -286,10 +310,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      food_log_entries: {
+        Row: {
+          calories: number;
+          carbs: number;
+          created_at: string;
+          fat: number;
+          food_id: string | null;
+          grams: number;
+          id: string;
+          logged_date: string;
+          meal_category: Database["public"]["Enums"]["meal_category"];
+          name: string;
+          protein: number;
+          user_id: string;
+        };
+        Insert: {
+          calories: number;
+          carbs: number;
+          created_at?: string;
+          fat: number;
+          food_id?: string | null;
+          grams: number;
+          id?: string;
+          logged_date: string;
+          meal_category: Database["public"]["Enums"]["meal_category"];
+          name: string;
+          protein: number;
+          user_id: string;
+        };
+        Update: {
+          calories?: number;
+          carbs?: number;
+          created_at?: string;
+          fat?: number;
+          food_id?: string | null;
+          grams?: number;
+          id?: string;
+          logged_date?: string;
+          meal_category?: Database["public"]["Enums"]["meal_category"];
+          name?: string;
+          protein?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      food_favorites: {
+        Row: {
+          created_at: string;
+          food_id: string;
+          id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          food_id: string;
+          id?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          food_id?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       meal_plans: {
         Row: {
           calories_target: number;
+          carbs_target: number | null;
           created_at: string;
+          fat_target: number | null;
           id: string;
           is_active: boolean;
           meals: Json;
@@ -298,7 +390,9 @@ export type Database = {
         };
         Insert: {
           calories_target: number;
+          carbs_target?: number | null;
           created_at?: string;
+          fat_target?: number | null;
           id?: string;
           is_active?: boolean;
           meals: Json;
@@ -307,7 +401,9 @@ export type Database = {
         };
         Update: {
           calories_target?: number;
+          carbs_target?: number | null;
           created_at?: string;
+          fat_target?: number | null;
           id?: string;
           is_active?: boolean;
           meals?: Json;
@@ -617,28 +713,79 @@ export type Database = {
       };
       progress_entries: {
         Row: {
+          arm_cm: number | null;
+          body_fat_pct: number | null;
+          chest_cm: number | null;
+          created_at: string;
+          hips_cm: number | null;
+          id: string;
+          neck_cm: number | null;
+          note: string | null;
+          recorded_at: string;
+          shoulder_cm: number | null;
+          thigh_cm: number | null;
+          user_id: string;
+          waist_cm: number | null;
+          weight_kg: number;
+        };
+        Insert: {
+          arm_cm?: number | null;
+          body_fat_pct?: number | null;
+          chest_cm?: number | null;
+          created_at?: string;
+          hips_cm?: number | null;
+          id?: string;
+          neck_cm?: number | null;
+          note?: string | null;
+          recorded_at?: string;
+          shoulder_cm?: number | null;
+          thigh_cm?: number | null;
+          user_id: string;
+          waist_cm?: number | null;
+          weight_kg: number;
+        };
+        Update: {
+          arm_cm?: number | null;
+          body_fat_pct?: number | null;
+          chest_cm?: number | null;
+          created_at?: string;
+          hips_cm?: number | null;
+          id?: string;
+          neck_cm?: number | null;
+          note?: string | null;
+          recorded_at?: string;
+          shoulder_cm?: number | null;
+          thigh_cm?: number | null;
+          user_id?: string;
+          waist_cm?: number | null;
+          weight_kg?: number;
+        };
+        Relationships: [];
+      };
+      progress_photos: {
+        Row: {
           created_at: string;
           id: string;
+          image_path: string;
           note: string | null;
           recorded_at: string;
           user_id: string;
-          weight_kg: number;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          image_path: string;
           note?: string | null;
           recorded_at?: string;
           user_id: string;
-          weight_kg: number;
         };
         Update: {
           created_at?: string;
           id?: string;
+          image_path?: string;
           note?: string | null;
           recorded_at?: string;
           user_id?: string;
-          weight_kg?: number;
         };
         Relationships: [];
       };
@@ -835,6 +982,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      water_logs: {
+        Row: {
+          amount_ml: number;
+          created_at: string;
+          id: string;
+          logged_date: string;
+          user_id: string;
+        };
+        Insert: {
+          amount_ml: number;
+          created_at?: string;
+          id?: string;
+          logged_date: string;
+          user_id: string;
+        };
+        Update: {
+          amount_ml?: number;
+          created_at?: string;
+          id?: string;
+          logged_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       webhook_events: {
         Row: {
           error_message: string | null;
@@ -917,6 +1088,7 @@ export type Database = {
           id: string;
           notes: string | null;
           performed_on: string;
+          planned_sets: number | null;
           user_id: string;
         };
         Insert: {
@@ -926,6 +1098,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           performed_on?: string;
+          planned_sets?: number | null;
           user_id: string;
         };
         Update: {
@@ -935,7 +1108,44 @@ export type Database = {
           id?: string;
           notes?: string | null;
           performed_on?: string;
+          planned_sets?: number | null;
           user_id?: string;
+        };
+        Relationships: [];
+      };
+      workout_set_logs: {
+        Row: {
+          created_at: string;
+          exercise_name: string;
+          id: string;
+          notes: string | null;
+          reps: number | null;
+          session_id: string;
+          set_number: number;
+          user_id: string;
+          weight_kg: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          exercise_name: string;
+          id?: string;
+          notes?: string | null;
+          reps?: number | null;
+          session_id: string;
+          set_number: number;
+          user_id: string;
+          weight_kg?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          exercise_name?: string;
+          id?: string;
+          notes?: string | null;
+          reps?: number | null;
+          session_id?: string;
+          set_number?: number;
+          user_id?: string;
+          weight_kg?: number | null;
         };
         Relationships: [];
       };

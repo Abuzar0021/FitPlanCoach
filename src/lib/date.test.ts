@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { localDateKey, daysBetweenKeys } from "./date.ts";
+import { localDateKey, daysBetweenKeys, shiftDateKey } from "./date.ts";
 
 test("localDateKey — formats as YYYY-MM-DD using local date parts", () => {
   const d = new Date(2026, 0, 5); // Jan 5, 2026, local time — month is 0-indexed
@@ -26,4 +26,17 @@ test("daysBetweenKeys — handles month boundaries", () => {
 
 test("daysBetweenKeys — negative when b is before a", () => {
   assert.equal(daysBetweenKeys("2026-06-16", "2026-06-15"), -1);
+});
+
+test("shiftDateKey — +1 day advances the calendar date", () => {
+  assert.equal(shiftDateKey("2026-06-15", 1), "2026-06-16");
+});
+
+test("shiftDateKey — -1 day goes back a date", () => {
+  assert.equal(shiftDateKey("2026-06-15", -1), "2026-06-14");
+});
+
+test("shiftDateKey — handles month/year boundaries", () => {
+  assert.equal(shiftDateKey("2026-12-31", 1), "2027-01-01");
+  assert.equal(shiftDateKey("2026-01-01", -1), "2025-12-31");
 });
