@@ -74,11 +74,21 @@ bash verify.sh
    ```
 3. Reload the site — you now have the **/admin** console.
 
-## 9. Add starter content (so plans generate)
-Your new database starts empty, so the meal/workout catalogs have no data yet.
-Add foods, exercises, and workout templates in **/admin** (Foods, Exercises,
-Workouts), or ask Claude for a `seed.sql` starter pack to paste into the SQL
-Editor.
+## 9. Starter content (already included)
+The `full_schema.sql` you pasted in step 2 **already includes** the starter
+catalog — 36 foods, 9 workout templates, and 72 exercises with full
+instructions — so AI plan generation works immediately. You don't need to add
+anything by hand.
+
+**Important:** the top of `full_schema.sql` has a RESET block that DROPS the
+foods/exercises/workout_templates tables, and the seed at the BOTTOM refills
+them in the same paste. So always paste the **entire** file. If you ever run
+only part of it (or an older copy without the seed), the catalog will be empty
+and generation will fail with *"No foods are configured yet."* To refill the
+catalog on its own without touching anything else, paste `supabase/seed.sql`.
+
+You can still add/edit foods, exercises, and workout templates anytime in
+**/admin** (Foods, Exercises, Workouts).
 
 ---
 
