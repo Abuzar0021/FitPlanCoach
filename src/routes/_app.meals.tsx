@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { usePlan } from "@/hooks/use-plan";
 import { MobileShell } from "@/components/MobileShell";
 import { Button } from "@/components/ui/button";
-import { Utensils, RefreshCw, BookOpen } from "lucide-react";
+import { Utensils, RefreshCw, BookOpen, PieChart } from "lucide-react";
 import { EmptyState, PlanScreenSkeleton, ProBadge } from "@/components/app-ui";
 import { MealAlternativesSheet } from "@/components/MealAlternativesSheet";
+import { FeatureTip } from "@/components/FeatureTip";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/meals")({
@@ -178,6 +179,12 @@ function Meals() {
     <MobileShell>
       <p className="label-overline mb-1">Today</p>
       <h1 className="text-3xl font-display uppercase italic mb-4">Meal Plan</h1>
+      <FeatureTip
+        id="meals_macros"
+        icon={PieChart}
+        title="Calories, protein, carbs, fat"
+        body="These four numbers are your daily targets — protein preserves muscle, carbs fuel training, fat supports hormones. The meals below are portioned to hit them; tap the swap icon on any item for Pro alternatives."
+      />
       <div className="surface-card mb-5 p-5 grid grid-cols-2 gap-4">
         {macroRows.map((r) => (
           <div key={r.label}>

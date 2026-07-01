@@ -15,9 +15,11 @@ import {
   Pencil,
   Check,
   X,
+  Utensils,
 } from "lucide-react";
 import { PlanScreenSkeleton } from "@/components/app-ui";
 import { FoodEntrySheet } from "@/components/FoodEntrySheet";
+import { FeatureTip } from "@/components/FeatureTip";
 import { localDateKey, shiftDateKey } from "@/lib/date";
 
 export const Route = createFileRoute("/_app/food-diary")({
@@ -252,6 +254,14 @@ function FoodDiary() {
         <PlanScreenSkeleton />
       ) : (
         <>
+          {entries.length === 0 && (
+            <FeatureTip
+              id="food_diary_logging"
+              icon={Utensils}
+              title="Log what you actually eat"
+              body="Tap the + next to any meal to search the food catalog or add a custom entry — your calories, protein, carbs, and fat below update instantly, separate from your generated plan."
+            />
+          )}
           <div className="surface-card mb-5 p-5 grid grid-cols-2 gap-4">
             {(
               [

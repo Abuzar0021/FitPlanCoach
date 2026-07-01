@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { CheckCircle2, Flame, Dumbbell, Info, ChevronDown, Trophy } from "lucide-react";
 import { EmptyState, PlanScreenSkeleton } from "@/components/app-ui";
 import { ExerciseDetailSheet } from "@/components/ExerciseDetailSheet";
+import { FeatureTip } from "@/components/FeatureTip";
 
 export const Route = createFileRoute("/_app/workouts")({
   head: () => ({
@@ -172,6 +173,14 @@ function Workouts() {
     <MobileShell>
       <p className="label-overline mb-1">This week</p>
       <h1 className="text-3xl font-display uppercase italic mb-4">Train</h1>
+      {loggedSetCount === 0 && (
+        <FeatureTip
+          id="workouts_logging"
+          icon={Dumbbell}
+          title="Log your sets as you go"
+          body="Tap an exercise to expand it and enter reps/weight per set — that's what builds your personal records and streak. Training at home instead of the gym? Switch it under Profile → Edit fitness details and your next plan adapts the exercises automatically."
+        />
+      )}
       <div className="flex gap-2 overflow-x-auto pb-3 -mx-5 px-5 mb-5 no-scrollbar">
         {days.map((d, i) => {
           const active = activeDay === i;

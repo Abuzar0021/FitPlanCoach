@@ -33,6 +33,7 @@ import { generateFitnessPlan } from "@/lib/plan-generation.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { WelcomeChecklist } from "@/components/WelcomeChecklist";
+import { FeatureTip } from "@/components/FeatureTip";
 import { DashboardSkeleton } from "@/components/app-ui";
 import { DailyTip } from "@/components/DailyTip";
 import { WaterTracker } from "@/components/WaterTracker";
@@ -420,6 +421,15 @@ function Dashboard() {
             </Link>
           </div>
         </header>
+
+        {!mealPlan && (
+          <FeatureTip
+            id="dashboard_generate"
+            icon={Sparkles}
+            title="Start with your first plan"
+            body="Tap Generate My First Plan below and we'll build a full meal and workout plan matched to your goal, activity level, and equipment — free users get 3 generations, Pro is unlimited."
+          />
+        )}
 
         {/* Streak strip */}
         {(profile.streak_current ?? 0) > 0 && (
