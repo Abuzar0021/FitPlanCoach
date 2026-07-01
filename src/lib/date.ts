@@ -21,3 +21,10 @@ export function daysBetweenKeys(a: string, b: string): number {
   };
   return Math.round((toUTC(b) - toUTC(a)) / 86_400_000);
 }
+
+/** Add (or subtract) whole calendar days to a YYYY-MM-DD key, DST-safe. */
+export function shiftDateKey(key: string, deltaDays: number): string {
+  const [y, m, d] = key.split("-").map(Number);
+  const shifted = new Date(y, m - 1, d + deltaDays);
+  return localDateKey(shifted);
+}

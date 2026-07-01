@@ -49,6 +49,7 @@ import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppOnboardingRouteImport } from './routes/_app.onboarding'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMealsRouteImport } from './routes/_app.meals'
+import { Route as AppFoodDiaryRouteImport } from './routes/_app.food-diary'
 import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
@@ -259,6 +260,11 @@ const AppMealsRoute = AppMealsRouteImport.update({
   path: '/meals',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFoodDiaryRoute = AppFoodDiaryRouteImport.update({
+  id: '/food-diary',
+  path: '/food-diary',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFeedbackRoute = AppFeedbackRouteImport.update({
   id: '/feedback',
   path: '/feedback',
@@ -336,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/feedback': typeof AppFeedbackRoute
+  '/food-diary': typeof AppFoodDiaryRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -386,6 +393,7 @@ export interface FileRoutesByTo {
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/feedback': typeof AppFeedbackRoute
+  '/food-diary': typeof AppFoodDiaryRoute
   '/meals': typeof AppMealsRoute
   '/notifications': typeof AppNotificationsRoute
   '/onboarding': typeof AppOnboardingRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feedback': typeof AppFeedbackRoute
+  '/_app/food-diary': typeof AppFoodDiaryRoute
   '/_app/meals': typeof AppMealsRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/onboarding': typeof AppOnboardingRoute
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/dashboard'
     | '/feedback'
+    | '/food-diary'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/dashboard'
     | '/feedback'
+    | '/food-diary'
     | '/meals'
     | '/notifications'
     | '/onboarding'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/_app/billing'
     | '/_app/dashboard'
     | '/_app/feedback'
+    | '/_app/food-diary'
     | '/_app/meals'
     | '/_app/notifications'
     | '/_app/onboarding'
@@ -936,6 +948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMealsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/food-diary': {
+      id: '/_app/food-diary'
+      path: '/food-diary'
+      fullPath: '/food-diary'
+      preLoaderRoute: typeof AppFoodDiaryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/feedback': {
       id: '/_app/feedback'
       path: '/feedback'
@@ -1013,6 +1032,7 @@ interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeedbackRoute: typeof AppFeedbackRoute
+  AppFoodDiaryRoute: typeof AppFoodDiaryRoute
   AppMealsRoute: typeof AppMealsRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
@@ -1028,6 +1048,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppFeedbackRoute: AppFeedbackRoute,
+  AppFoodDiaryRoute: AppFoodDiaryRoute,
   AppMealsRoute: AppMealsRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOnboardingRoute: AppOnboardingRoute,

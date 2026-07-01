@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import {
   generateMealPlan,
   pickWorkoutTemplate,
@@ -149,6 +151,8 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
       user_id: userId,
       calories_target: mealPlan.calories_target,
       protein_target: mealPlan.protein_target,
+      carbs_target: mealPlan.carbs_target,
+      fat_target: mealPlan.fat_target,
       meals: mealPlan.meals as any,
     });
     if (workout && workoutSchedule) {
@@ -194,17 +198,77 @@ export const generateFitnessPlan = createServerFn({ method: "POST" })
 type MealCategory = "breakfast" | "lunch" | "dinner" | "snack";
 type MealsShape = Record<MealCategory, Array<{ food_id: string }>>;
 
-type SwapResult =
-  | { ok: true; item: ReturnType<typeof portionFood> }
+/** Shared setup for both alternatives-lookup and swap: entitlement + active plan + item lookup. */
+async function loadSwapContext(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  category: MealCategory,
+  index: number,
+) {
+  const [{ data: sub }, { data: profile }, { data: plan }] = await Promise.all([
+    supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
+    supabase.from("profiles").select("country,budget_level").eq("id", userId).maybeSingle(),
+    supabase
+      .from("meal_plans")
+      .select("id,calories_target,meals")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const planCtx = (sub ?? { plan_type: "free" }) as PlanContext;
+  if (!hasFeature(planCtx, "full_customization")) {
+    return {
+      ok: false as const,
+      reason: "needs_subscription" as const,
+      message: "Swapping meal items is a Pro feature.",
+    };
+  }
+  if (!profile || !plan) {
+    return {
+      ok: false as const,
+      reason: "not_found" as const,
+      message: "No active meal plan found.",
+    };
+  }
+
+  const meals = plan.meals as unknown as MealsShape;
+  const items = meals[category] ?? [];
+  const current = items[index];
+  if (!current) {
+    return {
+      ok: false as const,
+      reason: "not_found" as const,
+      message: "That meal item no longer exists.",
+    };
+  }
+
+  const { data: foods } = await supabase.from("foods").select("*").eq("enabled", true);
+  const pool = pickFoods(
+    (foods ?? []) as unknown as Food[],
+    category,
+    profile.country ?? "global",
+    (profile.budget_level ?? "medium") as "low" | "medium" | "high",
+  );
+  const usedIds = new Set(items.map((i) => i.food_id));
+  const alternatives = pool.filter((f) => !usedIds.has(f.id));
+
+  return { ok: true as const, plan, meals, items, alternatives };
+}
+
+type AlternativesResult =
+  | { ok: true; options: Array<ReturnType<typeof portionFood>> }
   | { ok: false; reason: "needs_subscription" | "no_alternatives" | "not_found"; message: string };
 
 /**
- * Pro-only: swap a single meal item for a different food from the same
- * category/country/budget pool. Real "full customization" — the entitlement
- * check happens here, server-side, not just in the UI, so it can't be
- * bypassed by a free user calling this directly.
+ * Pro-only: list up to 3 real alternative foods for a meal slot (same
+ * category/country/budget pool), each portioned to the same calorie target
+ * as the slot, so the user can compare and pick one instead of an opaque
+ * random swap.
  */
-export const swapMealItem = createServerFn({ method: "POST" })
+export const getMealAlternatives = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
@@ -214,70 +278,72 @@ export const swapMealItem = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ context, data }): Promise<SwapResult> => {
-    const { supabase, userId } = context;
-
-    const [{ data: sub }, { data: profile }, { data: plan }] = await Promise.all([
-      supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
-      supabase.from("profiles").select("country,budget_level").eq("id", userId).maybeSingle(),
-      supabase
-        .from("meal_plans")
-        .select("id,calories_target,meals")
-        .eq("user_id", userId)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-    const planCtx = (sub ?? { plan_type: "free" }) as PlanContext;
-    if (!hasFeature(planCtx, "full_customization")) {
-      return {
-        ok: false,
-        reason: "needs_subscription",
-        message: "Swapping meal items is a Pro feature.",
-      };
-    }
-    if (!profile || !plan) {
-      return { ok: false, reason: "not_found", message: "No active meal plan found." };
-    }
-
-    const meals = plan.meals as unknown as MealsShape;
-    const items = meals[data.category] ?? [];
-    const current = items[data.index];
-    if (!current) {
-      return { ok: false, reason: "not_found", message: "That meal item no longer exists." };
-    }
-
-    const { data: foods } = await supabase.from("foods").select("*").eq("enabled", true);
-    const pool = pickFoods(
-      (foods ?? []) as unknown as Food[],
-      data.category,
-      profile.country ?? "global",
-      (profile.budget_level ?? "medium") as "low" | "medium" | "high",
-    );
-    const usedIds = new Set(items.map((i) => i.food_id));
-    const alternatives = pool.filter((f) => !usedIds.has(f.id));
-    if (alternatives.length === 0) {
+  .handler(async ({ context, data }): Promise<AlternativesResult> => {
+    const ctx = await loadSwapContext(context.supabase, context.userId, data.category, data.index);
+    if (!ctx.ok) return ctx;
+    if (ctx.alternatives.length === 0) {
       return {
         ok: false,
         reason: "no_alternatives",
         message: "No other options available for this meal right now.",
       };
     }
+    const catCals = ctx.plan.calories_target * MEAL_CATEGORY_SPLIT[data.category];
+    const perItemCals = catCals / ctx.items.length;
+    // Stable, varied order (not just catalog order) without being random on
+    // every call — callers may re-request the same slot and expect the same
+    // three options back.
+    const sorted = [...ctx.alternatives].sort((a, b) => a.name.localeCompare(b.name));
+    const options = sorted.slice(0, 3).map((f) => portionFood(f, perItemCals));
+    return { ok: true, options };
+  });
 
-    const chosen = alternatives[Math.floor(Math.random() * alternatives.length)];
-    const catCals = plan.calories_target * MEAL_CATEGORY_SPLIT[data.category];
-    const perItemCals = catCals / items.length;
+type SwapResult =
+  | { ok: true; item: ReturnType<typeof portionFood> }
+  | { ok: false; reason: "needs_subscription" | "no_alternatives" | "not_found"; message: string };
+
+/**
+ * Pro-only: apply a chosen alternative (from getMealAlternatives) to a meal
+ * slot. Real "full customization" — the entitlement check happens here,
+ * server-side, not just in the UI, so it can't be bypassed by a free user
+ * calling this directly.
+ */
+export const swapMealItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        category: z.enum(["breakfast", "lunch", "dinner", "snack"]),
+        index: z.number().int().min(0).max(1),
+        food_id: z.string().uuid(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }): Promise<SwapResult> => {
+    const { supabase } = context;
+    const ctx = await loadSwapContext(context.supabase, context.userId, data.category, data.index);
+    if (!ctx.ok) return ctx;
+
+    const chosen = ctx.alternatives.find((f) => f.id === data.food_id);
+    if (!chosen) {
+      return {
+        ok: false,
+        reason: "not_found",
+        message: "That option is no longer available — pick another.",
+      };
+    }
+
+    const catCals = ctx.plan.calories_target * MEAL_CATEGORY_SPLIT[data.category];
+    const perItemCals = catCals / ctx.items.length;
     const newItem = portionFood(chosen, perItemCals);
 
-    const updatedMeals = { ...meals, [data.category]: [...items] };
+    const updatedMeals = { ...ctx.meals, [data.category]: [...ctx.items] };
     updatedMeals[data.category][data.index] = newItem;
 
     const { error } = await supabase
       .from("meal_plans")
       .update({ meals: updatedMeals as any })
-      .eq("id", plan.id);
+      .eq("id", ctx.plan.id);
     if (error) {
       return { ok: false, reason: "not_found", message: "Could not save the swap." };
     }

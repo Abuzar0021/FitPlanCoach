@@ -266,10 +266,13 @@ export type Database = {
         Row: {
           budget_level: Database["public"]["Enums"]["budget_level"];
           calories_per_100g: number;
+          carbs_per_100g: number;
           category: Database["public"]["Enums"]["meal_category"];
           country: string;
           created_at: string;
           enabled: boolean;
+          fat_per_100g: number;
+          fiber_per_100g: number;
           id: string;
           name: string;
           protein_per_100g: number;
@@ -278,10 +281,13 @@ export type Database = {
         Insert: {
           budget_level: Database["public"]["Enums"]["budget_level"];
           calories_per_100g: number;
+          carbs_per_100g?: number;
           category: Database["public"]["Enums"]["meal_category"];
           country?: string;
           created_at?: string;
           enabled?: boolean;
+          fat_per_100g?: number;
+          fiber_per_100g?: number;
           id?: string;
           name: string;
           protein_per_100g: number;
@@ -290,10 +296,13 @@ export type Database = {
         Update: {
           budget_level?: Database["public"]["Enums"]["budget_level"];
           calories_per_100g?: number;
+          carbs_per_100g?: number;
           category?: Database["public"]["Enums"]["meal_category"];
           country?: string;
           created_at?: string;
           enabled?: boolean;
+          fat_per_100g?: number;
+          fiber_per_100g?: number;
           id?: string;
           name?: string;
           protein_per_100g?: number;
@@ -301,10 +310,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      food_log_entries: {
+        Row: {
+          calories: number;
+          carbs: number;
+          created_at: string;
+          fat: number;
+          food_id: string | null;
+          grams: number;
+          id: string;
+          logged_date: string;
+          meal_category: Database["public"]["Enums"]["meal_category"];
+          name: string;
+          protein: number;
+          user_id: string;
+        };
+        Insert: {
+          calories: number;
+          carbs: number;
+          created_at?: string;
+          fat: number;
+          food_id?: string | null;
+          grams: number;
+          id?: string;
+          logged_date: string;
+          meal_category: Database["public"]["Enums"]["meal_category"];
+          name: string;
+          protein: number;
+          user_id: string;
+        };
+        Update: {
+          calories?: number;
+          carbs?: number;
+          created_at?: string;
+          fat?: number;
+          food_id?: string | null;
+          grams?: number;
+          id?: string;
+          logged_date?: string;
+          meal_category?: Database["public"]["Enums"]["meal_category"];
+          name?: string;
+          protein?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      food_favorites: {
+        Row: {
+          created_at: string;
+          food_id: string;
+          id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          food_id: string;
+          id?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          food_id?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       meal_plans: {
         Row: {
           calories_target: number;
+          carbs_target: number | null;
           created_at: string;
+          fat_target: number | null;
           id: string;
           is_active: boolean;
           meals: Json;
@@ -313,7 +390,9 @@ export type Database = {
         };
         Insert: {
           calories_target: number;
+          carbs_target?: number | null;
           created_at?: string;
+          fat_target?: number | null;
           id?: string;
           is_active?: boolean;
           meals: Json;
@@ -322,7 +401,9 @@ export type Database = {
         };
         Update: {
           calories_target?: number;
+          carbs_target?: number | null;
           created_at?: string;
+          fat_target?: number | null;
           id?: string;
           is_active?: boolean;
           meals?: Json;

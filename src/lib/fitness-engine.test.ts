@@ -71,6 +71,28 @@ test("calorieTargets — build_muscle adds a surplus over maintain", () => {
   assert.equal(gain - maintain, DEFAULT_RULES.goal_adjust.build_muscle);
 });
 
+test("calorieTargets — fat/carb targets roughly reconstruct total calories", () => {
+  const r = calorieTargets(male);
+  const reconstructed = r.protein * 4 + r.carbs * 4 + r.fat * 9;
+  // Allow rounding slop from three independently-rounded gram targets.
+  assert.ok(Math.abs(reconstructed - r.calories) <= 8, `got ${reconstructed} vs ${r.calories}`);
+  assert.ok(r.carbs > 0);
+  assert.ok(r.fat > 0);
+});
+
+test("calorieTargets — carbs never go negative on an aggressive cut", () => {
+  const heavyCut: UserStats = {
+    age: 25,
+    gender: "male",
+    height_cm: 175,
+    weight_kg: 150,
+    activity_level: "sedentary",
+    goal: "lose_fat",
+  };
+  const r = calorieTargets(heavyCut);
+  assert.ok(r.carbs >= 0);
+});
+
 const foods: Food[] = [
   {
     id: "b1",
@@ -78,6 +100,8 @@ const foods: Food[] = [
     country: "pk",
     calories_per_100g: 380,
     protein_per_100g: 13,
+    carbs_per_100g: 66,
+    fat_per_100g: 7,
     category: "breakfast",
     budget_level: "low",
   },
@@ -87,6 +111,8 @@ const foods: Food[] = [
     country: "pk",
     calories_per_100g: 155,
     protein_per_100g: 13,
+    carbs_per_100g: 1,
+    fat_per_100g: 11,
     category: "breakfast",
     budget_level: "low",
   },
@@ -96,6 +122,8 @@ const foods: Food[] = [
     country: "global",
     calories_per_100g: 130,
     protein_per_100g: 2.7,
+    carbs_per_100g: 28,
+    fat_per_100g: 0.3,
     category: "lunch",
     budget_level: "low",
   },
@@ -105,6 +133,8 @@ const foods: Food[] = [
     country: "global",
     calories_per_100g: 165,
     protein_per_100g: 31,
+    carbs_per_100g: 0,
+    fat_per_100g: 3.6,
     category: "lunch",
     budget_level: "low",
   },
@@ -114,6 +144,8 @@ const foods: Food[] = [
     country: "global",
     calories_per_100g: 206,
     protein_per_100g: 22,
+    carbs_per_100g: 0,
+    fat_per_100g: 13,
     category: "dinner",
     budget_level: "low",
   },
@@ -123,6 +155,8 @@ const foods: Food[] = [
     country: "global",
     calories_per_100g: 116,
     protein_per_100g: 9,
+    carbs_per_100g: 20,
+    fat_per_100g: 0.4,
     category: "dinner",
     budget_level: "low",
   },
@@ -132,6 +166,8 @@ const foods: Food[] = [
     country: "global",
     calories_per_100g: 59,
     protein_per_100g: 10,
+    carbs_per_100g: 3.6,
+    fat_per_100g: 0.4,
     category: "snack",
     budget_level: "low",
   },

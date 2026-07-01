@@ -19,6 +19,9 @@ type Food = {
   country: string;
   calories_per_100g: number;
   protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  fiber_per_100g: number;
   category: string;
   budget_level: string;
   enabled: boolean;
@@ -29,6 +32,9 @@ const empty = {
   country: "global",
   calories_per_100g: "",
   protein_per_100g: "",
+  carbs_per_100g: "",
+  fat_per_100g: "",
+  fiber_per_100g: "",
   category: "lunch",
   budget_level: "medium",
 };
@@ -53,6 +59,9 @@ function FoodsAdmin() {
       country: f.country,
       calories_per_100g: Number(f.calories_per_100g),
       protein_per_100g: Number(f.protein_per_100g),
+      carbs_per_100g: Number(f.carbs_per_100g) || 0,
+      fat_per_100g: Number(f.fat_per_100g) || 0,
+      fiber_per_100g: Number(f.fiber_per_100g) || 0,
       category: f.category as any,
       budget_level: f.budget_level as any,
     });
@@ -123,6 +132,30 @@ function FoodsAdmin() {
           />
         </div>
         <div>
+          <label className="text-xs">carbs/100g</label>
+          <Input
+            inputMode="decimal"
+            value={f.carbs_per_100g}
+            onChange={(e) => setF({ ...f, carbs_per_100g: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="text-xs">fat/100g</label>
+          <Input
+            inputMode="decimal"
+            value={f.fat_per_100g}
+            onChange={(e) => setF({ ...f, fat_per_100g: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="text-xs">fiber/100g</label>
+          <Input
+            inputMode="decimal"
+            value={f.fiber_per_100g}
+            onChange={(e) => setF({ ...f, fiber_per_100g: e.target.value })}
+          />
+        </div>
+        <div>
           <label className="text-xs">Category</label>
           <select
             className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
@@ -170,6 +203,8 @@ function FoodsAdmin() {
               <th className="text-left p-3">Country</th>
               <th className="text-right p-3">kcal</th>
               <th className="text-right p-3">protein</th>
+              <th className="text-right p-3">carbs</th>
+              <th className="text-right p-3">fat</th>
               <th className="text-left p-3">Cat</th>
               <th className="text-left p-3">Budget</th>
               <th className="text-center p-3">Active</th>
@@ -183,6 +218,8 @@ function FoodsAdmin() {
                 <td className="p-3">{x.country}</td>
                 <td className="p-3 text-right">{x.calories_per_100g}</td>
                 <td className="p-3 text-right">{x.protein_per_100g}</td>
+                <td className="p-3 text-right">{x.carbs_per_100g}</td>
+                <td className="p-3 text-right">{x.fat_per_100g}</td>
                 <td className="p-3 capitalize">{x.category}</td>
                 <td className="p-3 capitalize">{x.budget_level}</td>
                 <td className="p-3 text-center">

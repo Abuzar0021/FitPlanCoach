@@ -31,12 +31,19 @@ export function bmr({ age, gender, height_cm, weight_kg }: UserStats): number {
   return gender === "male" ? base + 5 : base - 161; // 'other' uses female formula for safety
 }
 
+// Fat gets a fixed share of total calories (a common, simple macro split);
+// whatever's left after protein and fat goes to carbs. Floored at 0 so an
+// aggressive cut with a high protein target can never request negative carbs.
+const FAT_SHARE_OF_CALORIES = 0.28;
+
 export function calorieTargets(s: UserStats, rules: CalorieRules = DEFAULT_RULES) {
   const b = bmr(s);
   const tdee = b * rules.tdee[s.activity_level];
   const target = Math.max(1200, Math.round(tdee + rules.goal_adjust[s.goal]));
   const protein = Math.round(rules.protein_per_kg * s.weight_kg);
-  return { bmr: Math.round(b), tdee: Math.round(tdee), calories: target, protein };
+  const fat = Math.round((target * FAT_SHARE_OF_CALORIES) / 9);
+  const carbs = Math.max(0, Math.round((target - protein * 4 - fat * 9) / 4));
+  return { bmr: Math.round(b), tdee: Math.round(tdee), calories: target, protein, carbs, fat };
 }
 
 // --- Meal plan generation ---
@@ -46,6 +53,8 @@ export interface Food {
   country: string;
   calories_per_100g: number;
   protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
   category: "breakfast" | "lunch" | "dinner" | "snack";
   budget_level: Budget;
 }
@@ -56,13 +65,17 @@ export interface MealItem {
   grams: number;
   calories: number;
   protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export interface MealPlan {
   calories_target: number;
   protein_target: number;
+  carbs_target: number;
+  fat_target: number;
   meals: Record<"breakfast" | "lunch" | "dinner" | "snack", MealItem[]>;
-  totals: { calories: number; protein: number };
+  totals: { calories: number; protein: number; carbs: number; fat: number };
 }
 
 const MEAL_SPLIT = { breakfast: 0.25, lunch: 0.35, dinner: 0.3, snack: 0.1 } as const;
@@ -89,7 +102,9 @@ export function portionFood(f: Food, targetCals: number): MealItem {
   const grams = Math.max(20, Math.round((targetCals / f.calories_per_100g) * 100));
   const calories = Math.round((grams * f.calories_per_100g) / 100);
   const protein = Math.round((grams * f.protein_per_100g) / 100);
-  return { food_id: f.id, name: f.name, grams, calories, protein };
+  const carbs = Math.round((grams * f.carbs_per_100g) / 100);
+  const fat = Math.round((grams * f.fat_per_100g) / 100);
+  return { food_id: f.id, name: f.name, grams, calories, protein, carbs, fat };
 }
 
 export const MEAL_CATEGORY_SPLIT = MEAL_SPLIT;
@@ -101,10 +116,12 @@ export function generateMealPlan(
   foods: Food[],
   rules: CalorieRules = DEFAULT_RULES,
 ): MealPlan {
-  const { calories, protein } = calorieTargets(stats, rules);
+  const { calories, protein, carbs, fat } = calorieTargets(stats, rules);
   const meals: MealPlan["meals"] = { breakfast: [], lunch: [], dinner: [], snack: [] };
   let totalCals = 0;
   let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
 
   for (const cat of Object.keys(MEAL_SPLIT) as Array<keyof typeof MEAL_SPLIT>) {
     const pool = pickFoods(foods, cat, country, budget);
@@ -118,14 +135,18 @@ export function generateMealPlan(
       meals[cat].push(item);
       totalCals += item.calories;
       totalProtein += item.protein;
+      totalCarbs += item.carbs;
+      totalFat += item.fat;
     }
   }
 
   return {
     calories_target: calories,
     protein_target: protein,
+    carbs_target: carbs,
+    fat_target: fat,
     meals,
-    totals: { calories: totalCals, protein: totalProtein },
+    totals: { calories: totalCals, protein: totalProtein, carbs: totalCarbs, fat: totalFat },
   };
 }
 
