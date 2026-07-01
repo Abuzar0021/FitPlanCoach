@@ -10,13 +10,11 @@ ALTER TABLE public.meal_plans
   ADD COLUMN IF NOT EXISTS carbs_target NUMERIC,
   ADD COLUMN IF NOT EXISTS fat_target NUMERIC;
 
--- These tables postdate the RESET block at the top of full_schema.sql, so
--- drop them explicitly here to keep this migration safely re-runnable on
--- its own (matching every other migration's paste-and-run guarantee).
-DROP TABLE IF EXISTS public.food_log_entries CASCADE;
-DROP TABLE IF EXISTS public.food_favorites CASCADE;
-
-CREATE TABLE public.food_log_entries (
+-- These tables postdate the RESET block at the top of full_schema.sql. They
+-- use CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting the
+-- accumulated full_schema.sql for a later round never wipes a user's
+-- already-logged food diary entries or favorites.
+CREATE TABLE IF NOT EXISTS public.food_log_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   logged_date date NOT NULL,
@@ -30,17 +28,18 @@ CREATE TABLE public.food_log_entries (
   fat numeric NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX food_log_entries_user_date_idx
+CREATE INDEX IF NOT EXISTS food_log_entries_user_date_idx
   ON public.food_log_entries (user_id, logged_date);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.food_log_entries TO authenticated;
 GRANT ALL ON public.food_log_entries TO service_role;
 ALTER TABLE public.food_log_entries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own food log entries" ON public.food_log_entries;
 CREATE POLICY "own food log entries" ON public.food_log_entries FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
   WITH CHECK (user_id = auth.uid());
 
-CREATE TABLE public.food_favorites (
+CREATE TABLE IF NOT EXISTS public.food_favorites (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   food_id uuid NOT NULL REFERENCES public.foods(id) ON DELETE CASCADE,
@@ -51,6 +50,7 @@ CREATE TABLE public.food_favorites (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.food_favorites TO authenticated;
 GRANT ALL ON public.food_favorites TO service_role;
 ALTER TABLE public.food_favorites ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own food favorites" ON public.food_favorites;
 CREATE POLICY "own food favorites" ON public.food_favorites FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
   WITH CHECK (user_id = auth.uid());

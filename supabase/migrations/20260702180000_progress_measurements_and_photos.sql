@@ -11,12 +11,11 @@ ALTER TABLE public.progress_entries
   ADD COLUMN IF NOT EXISTS neck_cm NUMERIC,
   ADD COLUMN IF NOT EXISTS shoulder_cm NUMERIC;
 
--- This table postdates the RESET block at the top of full_schema.sql, so
--- drop it explicitly here to keep this migration safely re-runnable on its
--- own (matching every other migration's paste-and-run guarantee).
-DROP TABLE IF EXISTS public.progress_photos CASCADE;
-
-CREATE TABLE public.progress_photos (
+-- This table postdates the RESET block at the top of full_schema.sql. It
+-- uses CREATE TABLE IF NOT EXISTS (not DROP + CREATE) so that re-pasting
+-- the accumulated full_schema.sql for a later round never wipes a user's
+-- already-uploaded progress photos.
+CREATE TABLE IF NOT EXISTS public.progress_photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   -- Storage object path (bucket is private), not a public URL — signed URLs
@@ -26,12 +25,13 @@ CREATE TABLE public.progress_photos (
   note text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX progress_photos_user_date_idx
+CREATE INDEX IF NOT EXISTS progress_photos_user_date_idx
   ON public.progress_photos (user_id, recorded_at DESC);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.progress_photos TO authenticated;
 GRANT ALL ON public.progress_photos TO service_role;
 ALTER TABLE public.progress_photos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own progress photos" ON public.progress_photos;
 CREATE POLICY "own progress photos" ON public.progress_photos FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role))
   WITH CHECK (user_id = auth.uid());
