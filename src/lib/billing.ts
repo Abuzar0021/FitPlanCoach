@@ -13,6 +13,16 @@
 // real Play Billing Library (no third-party purchase backend/account
 // required) — it only reports native purchase events; all entitlement
 // decisions still flow through our own server.
+//
+// Play Integrity (optional hardening): if VITE_GOOGLE_PLAY_CLOUD_PROJECT_NUMBER
+// is set, a fresh purchase attaches an integrity token the server can verify
+// this is a genuine, unmodified app install — see requestIntegrityTokenFor()
+// below and verifyPlayIntegrityToken() in billing.functions.ts. This is
+// strictly best-effort and non-blocking: if the token can't be obtained (not
+// configured, API unavailable, non-Play install), the purchase proceeds
+// exactly as it would without it. It is a defense-in-depth signal on top of
+// the purchase-token verification, never a replacement for it — that's the
+// one check that must never be skipped.
 
 import { verifyPlayPurchase } from "@/lib/billing.functions";
 
@@ -31,7 +41,7 @@ export type BillingResult =
   | { ok: true }
   | {
       ok: false;
-      reason: "unavailable_on_web" | "not_implemented" | "cancelled" | "error";
+      reason: "unavailable_on_web" | "cancelled" | "error";
       message?: string;
     };
 
@@ -45,14 +55,56 @@ export function isAndroidApp(): boolean {
 /**
  * Send a Play purchase token to the backend for server-side verification.
  * This is the only path that can unlock premium — the native purchase flow
- * calls it after a successful purchase or restore.
+ * calls it after a successful purchase or restore. `integrity` is optional
+ * best-effort hardening (see module header); omit it and verification still
+ * works exactly as before.
  */
 export async function verifyAndroidPurchase(
   purchaseToken: string,
   productId: string,
+  integrity?: { token: string; nonce: string },
 ): Promise<{ ok: boolean; reason?: string }> {
-  const res = await verifyPlayPurchase({ data: { purchaseToken, productId } });
+  const res = await verifyPlayPurchase({
+    data: {
+      purchaseToken,
+      productId,
+      integrityToken: integrity?.token,
+      integrityNonce: integrity?.nonce,
+    },
+  });
   return res.ok ? { ok: true } : { ok: false, reason: "reason" in res ? res.reason : "error" };
+}
+
+/** Base64url, unpadded — the exact nonce shape Play Integrity requires. */
+function randomNonce(): string {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Best-effort: request a Play Integrity token for this purchase attempt.
+ * Returns null (never throws) if unconfigured or unavailable — callers must
+ * proceed with the purchase either way. Returns the nonce alongside the
+ * token so the server can confirm the token wasn't replayed from elsewhere.
+ */
+async function requestIntegrityToken(): Promise<{ token: string; nonce: string } | null> {
+  const projectNumber = Number(import.meta.env.VITE_GOOGLE_PLAY_CLOUD_PROJECT_NUMBER ?? "");
+  if (!projectNumber) return null; // not configured — silently skip, purchase proceeds unaffected
+  try {
+    const { PlayIntegrity } = await import("@capacitor-community/play-integrity");
+    const nonce = randomNonce();
+    const { token } = await PlayIntegrity.requestIntegrityToken({
+      nonce,
+      googleCloudProjectNumber: projectNumber,
+    });
+    return token ? { token, nonce } : null;
+  } catch (e) {
+    console.warn("[billing] Play Integrity token unavailable, continuing without it:", e);
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -67,6 +119,8 @@ let initialized = false;
 
 /** Resolvers for an in-flight purchase, keyed by product id. */
 const pendingPurchases = new Map<string, (r: BillingResult) => void>();
+/** Play Integrity token+nonce captured just before `order()`, consumed by the `approved` handler for the same product. */
+const pendingIntegrityTokens = new Map<string, { token: string; nonce: string }>();
 
 async function getInitializedStore(): Promise<StoreModule> {
   if (!storeModulePromise) {
@@ -119,7 +173,11 @@ async function handleApprovedTransaction(
   const receipt = transaction.parentReceipt as { purchaseToken?: string } | undefined;
   const purchaseToken = receipt?.purchaseToken;
   const resolveWaiter = productId ? pendingPurchases.get(productId) : undefined;
-  if (productId) pendingPurchases.delete(productId);
+  const integrity = productId ? pendingIntegrityTokens.get(productId) : undefined;
+  if (productId) {
+    pendingPurchases.delete(productId);
+    pendingIntegrityTokens.delete(productId);
+  }
 
   if (!productId || !purchaseToken) {
     resolveWaiter?.({
@@ -130,7 +188,7 @@ async function handleApprovedTransaction(
     return;
   }
 
-  const verified = await verifyAndroidPurchase(purchaseToken, productId);
+  const verified = await verifyAndroidPurchase(purchaseToken, productId, integrity);
   if (verified.ok) {
     await transaction.finish();
     resolveWaiter?.({ ok: true });
@@ -163,6 +221,10 @@ export async function startProPurchase(interval: PlanInterval): Promise<BillingR
         message: "This plan isn't available right now — please try again shortly.",
       };
     }
+
+    // Best-effort — never blocks the purchase if unavailable (see module header).
+    const integrity = await requestIntegrityToken();
+    if (integrity) pendingIntegrityTokens.set(productId, integrity);
 
     return await new Promise<BillingResult>((resolve) => {
       pendingPurchases.set(productId, resolve);

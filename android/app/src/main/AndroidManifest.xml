@@ -22,6 +22,28 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!--
+              Android App Links: tapping any fitplancoach.com link (e.g. the
+              password-reset email link generated in forgot-password.tsx,
+              which redirects to https://fitplancoach.com/reset-password)
+              opens directly in this app instead of a browser tab. This is
+              coherent with how the app already works — server.url in
+              capacitor.config.ts loads the whole live site, so there isn't a
+              separate "app content" vs "web content" split to scope this
+              narrower. autoVerify requires the Digital Asset Links file at
+              https://fitplancoach.com/.well-known/assetlinks.json (served
+              statically from public/.well-known/assetlinks.json) to list
+              this app's signing certificate SHA-256 — see docs/PLAY_STORE.md
+              for the manual step to fill that in after your first Play
+              Console upload.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="fitplancoach.com" />
+            </intent-filter>
+
         </activity>
 
         <provider

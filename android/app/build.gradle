@@ -1,5 +1,23 @@
 apply plugin: 'com.android.application'
 
+// Release signing: reads from android/keystore.properties, which is
+// gitignored and NEVER committed — see keystore.properties.example for the
+// expected format. Google Play App Signing manages the actual production
+// signing key; this is only the local UPLOAD key you sign the AAB with
+// before uploading to Play Console (Play re-signs it with the real key).
+// If the file is absent (a fresh checkout, or CI without secrets), the
+// release buildType simply has no signingConfig — `./gradlew bundleRelease`
+// then produces an unsigned AAB rather than silently falling back to debug
+// signing. Android Studio's own "Build > Generate Signed App Bundle" wizard
+// doesn't need this file at all; it prompts for the keystore interactively
+// and is the simplest path for a one-off release build.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasKeystoreConfig = keystorePropertiesFile.exists()
+if (hasKeystoreConfig) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.fitplancoach.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +34,27 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (hasKeystoreConfig) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasKeystoreConfig) {
+                signingConfig signingConfigs.release
+            }
+            // Left off deliberately: this app is a thin Capacitor shell (2
+            // small plugins) whose real functionality is the remote web app
+            // loaded via server.url in capacitor.config.ts, not native code —
+            // there's very little native surface for R8/ProGuard to shrink,
+            // and enabling it here can't be verified against a real device in
+            // this environment. Revisit if the native surface grows.
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

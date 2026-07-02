@@ -60,6 +60,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicLemonsqueezyWebhookRouteImport } from './routes/api/public/lemonsqueezy/webhook'
+import { Route as ApiPublicGooglePlayRtdnRouteImport } from './routes/api/public/google-play/rtdn'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -319,6 +320,11 @@ const ApiPublicLemonsqueezyWebhookRoute =
     path: '/api/public/lemonsqueezy/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicGooglePlayRtdnRoute = ApiPublicGooglePlayRtdnRouteImport.update({
+  id: '/api/public/google-play/rtdn',
+  path: '/api/public/google-play/rtdn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -524,6 +533,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/lovable/email/suppression'
+    | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -575,6 +585,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin'
     | '/lovable/email/suppression'
+    | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/lovable/email/suppression'
+    | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -658,6 +670,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicGooglePlayRtdnRoute: typeof ApiPublicGooglePlayRtdnRoute
   ApiPublicLemonsqueezyWebhookRoute: typeof ApiPublicLemonsqueezyWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1025,6 +1038,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicLemonsqueezyWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/google-play/rtdn': {
+      id: '/api/public/google-play/rtdn'
+      path: '/api/public/google-play/rtdn'
+      fullPath: '/api/public/google-play/rtdn'
+      preLoaderRoute: typeof ApiPublicGooglePlayRtdnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1122,6 +1142,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicGooglePlayRtdnRoute: ApiPublicGooglePlayRtdnRoute,
   ApiPublicLemonsqueezyWebhookRoute: ApiPublicLemonsqueezyWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

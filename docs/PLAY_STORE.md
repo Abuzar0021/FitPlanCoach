@@ -1,15 +1,46 @@
-# FitPlanCoach — Google Play Publishing Guide (TWA)
+# FitPlanCoach — Google Play Publishing Guide (Capacitor)
 
-Publish the live PWA (`https://fitplancoach.com`) to Google Play as a Trusted Web
-Activity (TWA). The Android app is a thin wrapper around the website, so it
-auto-updates when you update the site.
+The Android app is a native Capacitor shell that loads the live site
+(`https://fitplancoach.com`, via `server.url` in `capacitor.config.ts`) in a
+WebView, with two native plugins for things a WebView can't do on its own:
+real Google Play Billing (`capacitor-plugin-cdv-purchase`) and, optionally,
+Play Integrity (`@capacitor-community/play-integrity`). It auto-updates web
+content when you update the site; only native changes (a new plugin, a
+permission, an SDK bump) need a new Play upload.
 
-- **Package name:** `com.fitplancoach.app` (must match `capacitor.config.ts`)
+- **Package name:** `com.fitplancoach.app` (`capacitor.config.ts`,
+  `android/app/build.gradle`)
 - **Prereqs:** a Google Play Developer account ($25 one-time), the live HTTPS
-  site (done), a PNG icon ≥512×512 (you have `public/icon-512.png`).
+  site (done), a PNG icon ≥512×512 (`public/icon-512.png`), Android Studio
+  (or the Android SDK + a JDK) to actually build the AAB — that step can't be
+  done from this sandbox, see "What's already done in code" below.
 
-There are two ways to build the Android app. **Path A (PWABuilder) is the
-easiest — no local tools.** Path B (Bubblewrap CLI) is for terminal users.
+---
+
+## What's already done in code
+
+- **`android/`** — the real native project (`npx cap add android` /
+  `npx cap sync android`), with both plugins registered and their Gradle
+  dependencies wired (confirmed in the generated Gradle files, not assumed):
+  `com.android.billingclient:billing:9.0.0` and
+  `com.google.android.play:integrity:1.6.0`.
+- **Google Play Billing** — real purchase flow (`src/lib/billing.ts`),
+  real server-side verification against the Play Developer API
+  (`src/lib/billing.functions.ts`), restore purchases, and a Real-Time
+  Developer Notifications webhook (`src/routes/api/public/google-play/rtdn.ts`)
+  that keeps entitlements in sync on renewal/cancellation without the user
+  needing to reopen the app. This is NOT a stub — see "Billing setup" below
+  for the manual Play Console side.
+- **Release signing config** (`android/app/build.gradle`) — reads a local
+  upload keystore from `android/keystore.properties` (gitignored; template at
+  `android/keystore.properties.example`). Play App Signing re-signs with the
+  key it manages after upload; you still sign the AAB with an upload key
+  first.
+- **Digital Asset Links** — `public/.well-known/assetlinks.json`, served
+  statically at `https://fitplancoach.com/.well-known/assetlinks.json`, plus
+  the `autoVerify` App Links `intent-filter` in `AndroidManifest.xml` for the
+  whole `fitplancoach.com` domain (so e.g. the password-reset email link
+  opens directly in the app).
 
 ---
 
@@ -22,129 +53,147 @@ easiest — no local tools.** Path B (Bubblewrap CLI) is for terminal users.
 
 ---
 
-## Phase 2 — Build the Android app (.aab)
+## Phase 2 — Build the signed AAB (Android Studio)
+This is the one step that genuinely requires a real machine with the Android
+SDK — it cannot be done from a sandboxed CLI environment.
 
-### Path A — PWABuilder (recommended, web-based)
-1. Go to **https://www.pwabuilder.com**.
-2. Enter `https://fitplancoach.com` → **Start**.
-3. It analyzes your manifest. Click **Package For Stores → Android**.
-4. Choose **"Google Play"** package type. Confirm:
-   - Package ID: `com.fitplancoach.app`
-   - App name: `FitPlanCoach`
-   - Launcher name: `FitPlanCoach`
-   - Signing key: **"Create new"** (PWABuilder generates one) — **download and
-     keep the signing key .zip safe**; you need it for every future update.
-5. Click **Generate** → download the `.zip`. It contains:
-   - `app-release-bundle.aab`  ← upload this to Play
-   - `assetlinks.json`         ← host this on your domain (Phase 3)
-   - `signing-key-info` (key + passwords) ← store securely (offline backup)
-
-### Path B — Bubblewrap (CLI, on your computer)
-```bash
-npm install -g @bubblewrap/cli
-bubblewrap init --manifest https://fitplancoach.com/manifest.webmanifest
-# accept package com.fitplancoach.app; it pulls name/icon/colors from the manifest.
-# It offers to install the JDK + Android SDK automatically — say yes.
-bubblewrap build
-# Produces app-release-signed.aab and tells you the SHA-256 fingerprint.
-bubblewrap fingerprint list   # prints the fingerprint for assetlinks.json
-```
+1. Open the `android/` folder in Android Studio (**File → Open**).
+2. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
+   minutes).
+3. Create your upload keystore, if you don't have one yet:
+   ```bash
+   keytool -genkeypair -v -keystore fitplancoach-upload.jks \
+     -alias fitplancoach -keyalg RSA -keysize 2048 -validity 9125
+   ```
+   Put it somewhere durable (not inside `android/`, though it can be — either
+   way it's gitignored) and back it up. Losing it means you can't sign
+   updates the same way again (Play App Signing's key-reset flow can recover
+   from this, but it's a hassle — keep a copy somewhere safe).
+4. Copy `android/keystore.properties.example` to `android/keystore.properties`
+   and fill in `storeFile` (path to the .jks above), `storePassword`,
+   `keyAlias`, `keyPassword`. This file is gitignored — never commit it.
+5. **Build → Generate Signed App Bundle / APK → Android App Bundle**, or from
+   the command line: `./gradlew bundleRelease` (uses the signing config from
+   step 4 automatically). The AAB lands in
+   `android/app/build/outputs/bundle/release/app-release.aab`.
 
 ---
 
 ## Phase 3 — Verify domain ownership (assetlinks.json)
-This removes the browser URL bar so it looks like a real app. You host a file at
-`https://fitplancoach.com/.well-known/assetlinks.json` containing your app's
-signing-key SHA-256 fingerprint.
-
-1. Get the fingerprint:
-   - **PWABuilder:** it's inside the generated `assetlinks.json`.
-   - **Play App Signing (after first upload):** Play Console → your app →
-     **Setup → App integrity → App signing** → copy the **SHA-256 certificate
-     fingerprint**. (Use THIS one if you enable Play App Signing — it differs
-     from your local key.)
-2. The file looks like:
-   ```json
-   [{
-     "relation": ["delegate_permission/common.handle_all_urls"],
-     "target": {
-       "namespace": "android_app",
-       "package_name": "com.fitplancoach.app",
-       "sha256_cert_fingerprints": ["AB:CD:...:EF"]
-     }
-   }]
-   ```
-3. Host it on the server. Easiest: add it to the repo and redeploy:
-   - put the file at `public/.well-known/assetlinks.json`
-   - `git pull` on the VPS → `docker compose --env-file .env.docker up -d --build`
-   - verify: `curl https://fitplancoach.com/.well-known/assetlinks.json`
-   (Ask Claude to add the file to the repo once you have the fingerprint.)
+Already scaffolded at `public/.well-known/assetlinks.json`:
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.fitplancoach.app",
+      "sha256_cert_fingerprints": ["REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT"]
+    }
+  }
+]
+```
+1. After your first upload with Play App Signing enabled (Phase 6), get the
+   real fingerprint: **Play Console → your app → Setup → App integrity → App
+   signing → SHA-256 certificate fingerprint**.
+2. Replace `REPLACE_WITH_YOUR_APP_SIGNING_SHA256_FINGERPRINT` in
+   `public/.well-known/assetlinks.json` with that value.
+3. Redeploy (`git pull` on the VPS → `docker compose --env-file .env.docker up -d --build`).
+4. Verify: `curl https://fitplancoach.com/.well-known/assetlinks.json`.
 
 ---
 
-## Phase 4 — Create the app in Play Console
+## Phase 4 — Billing setup (Play Console)
+The code is complete and already server-verifies every purchase against the
+real Play Developer API — these are the Play Console/Cloud steps needed to
+turn it on:
+
+1. **Create the two subscription products** — Play Console → your app →
+   Monetize → Products → Subscriptions → Create subscription, with exactly
+   these IDs (already hardcoded in `src/lib/billing.ts`):
+   - `fitplancoach_pro_monthly`
+   - `fitplancoach_pro_annual`
+2. **Service account for server-side verification** — Play Console → Setup →
+   API access → link/create a Google Cloud project → create a service
+   account with the **"Financial data, subscriptions, orders"** Play
+   Console permission. Download its JSON key and set
+   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (or the split `GOOGLE_PLAY_SA_EMAIL` +
+   `GOOGLE_PLAY_SA_PRIVATE_KEY`) in `.env.docker` on the VPS.
+3. **Real-Time Developer Notifications** (keeps renewals/cancellations in
+   sync without the user reopening the app):
+   - Create a Pub/Sub topic in the same Cloud project, grant Publish rights
+     to `google-play-developer-notifications@system.gserviceaccount.com`.
+   - Play Console → Monetize setup → Real-time developer notifications → set
+     that topic.
+   - Create a **push** subscription on the topic targeting
+     `https://fitplancoach.com/api/public/google-play/rtdn?token=<secret>`,
+     where `<secret>` is a random string you generate
+     (`openssl rand -hex 32`) — set the same value as
+     `GOOGLE_PLAY_RTDN_SECRET` in `.env.docker`. This is a webhook secret you
+     create yourself, not a Google credential.
+4. **(Optional) Play Integrity hardening** — Play Console → your app → App
+   integrity → note the Cloud project number, set
+   `VITE_GOOGLE_PLAY_CLOUD_PROJECT_NUMBER` in `.env.docker` (this is a
+   **build-time** var — requires `--build` to take effect). Purchases work
+   identically with or without this; it only adds an extra, non-blocking
+   verification signal.
+
+---
+
+## Phase 5 — Create the app in Play Console
 1. Play Console → **Create app**. Name `FitPlanCoach`, language, **App**, **Free**.
 2. Accept declarations → **Create app**.
 3. Complete **Dashboard → Set up your app**:
-   - **App access:** if login is required to see content, provide a test
-     login (create a demo Supabase user) so Google can review.
-   - **Ads:** declare whether the app shows ads (No, unless you add them).
-   - **Content rating:** fill the questionnaire (fitness app → likely Everyone).
-   - **Target audience:** 18+ (or 13+); **not** designed for children.
-   - **Data safety:** declare what you collect — email (account), app activity/
-     analytics, and that data is encrypted in transit. Privacy policy:
-     `https://fitplancoach.com/privacy`.
-   - **Government apps / Health:** answer No to government; for health, declare
-     it's a general fitness app (no medical claims).
-   - **Privacy policy:** `https://fitplancoach.com/privacy`
-   - **Account deletion:** provide `https://fitplancoach.com/delete-account`
-     (Google requires this for apps with accounts — you already have the page).
+   - **App access:** provide a test login (a demo Supabase user) so Google can review.
+   - **Ads:** No, unless you add them.
+   - **Content rating:** fitness app → likely Everyone.
+   - **Target audience:** 18+ (or 13+); not designed for children.
+   - **Data safety:** declare email (account), app activity/analytics,
+     encrypted in transit. Privacy policy: `https://fitplancoach.com/privacy`.
+   - **Government apps / Health:** No to government; general fitness app, no
+     medical claims.
+   - **Account deletion:** `https://fitplancoach.com/delete-account`.
 
 ---
 
-## Phase 5 — Store listing
-**Main store listing** (left menu):
+## Phase 6 — Store listing
 - **App name:** FitPlanCoach
 - **Short description** (≤80 chars): e.g. "Personalized meal plans, workouts &
   progress tracking — tuned to you."
 - **Full description** (≤4000 chars): what the app does.
-- **App icon:** 512×512 PNG (from `public/icon-512.png`).
-- **Feature graphic:** 1024×500 PNG (make one in Canva).
-- **Phone screenshots:** 2–8, min 320px side. Take them from the live app on a
-  phone (or Chrome DevTools device mode).
+- **App icon:** 512×512 PNG (`public/icon-512.png`).
+- **Feature graphic:** 1024×500 PNG.
+- **Phone screenshots:** 2–8, min 320px side, from the live app.
 - **Category:** Health & Fitness. **Contact email:** abuzarelahi01@gmail.com.
 
 ---
 
-## Phase 6 — Upload + test + release
+## Phase 7 — Upload + test + release
 1. **Testing → Internal testing → Create new release.**
-2. Upload the `.aab`. When prompted, **enable Google Play App Signing** (let
-   Google hold the key — recommended).
-3. Release name = version (e.g. `1 (1.0.0)`). Add release notes → **Save → Review
-   → Start rollout to Internal testing.**
-4. Add your own Google account as a tester → install via the opt-in link → verify
-   the app opens `fitplancoach.com` full-screen (no URL bar = assetlinks worked).
-   - If you see a URL bar, fix Phase 3 (the fingerprint must be the **Play App
-     Signing** one once App Signing is enabled), then re-host assetlinks.json.
-5. When happy: **Production → Create new release** → reuse the same AAB → roll
-   out. Google review typically takes a few hours to a few days.
+2. Upload the AAB from Phase 2. When prompted, **enable Google Play App
+   Signing** (recommended — Google holds the real distribution key, your
+   local keystore only signs the upload).
+3. Release name = version (e.g. `1 (1.0.0)`). Add release notes → **Save →
+   Review → Start rollout to Internal testing.**
+4. Add your own Google account as a tester → install via the opt-in link →
+   verify:
+   - The app opens `fitplancoach.com` full-screen (no URL bar).
+   - Generate/purchase a Pro subscription with a **license test account**
+     (Play Console → Setup → License testing) so you're not charged real
+     money, and confirm it unlocks Pro in the app and the `subscriptions`
+     row updates in Supabase.
+   - Tap **Restore purchases** on a fresh install/second device and confirm
+     it restores correctly.
+5. When happy: **Production → Create new release** → reuse the same AAB →
+   roll out. Google review typically takes a few hours to a few days.
 
 ---
 
-## Phase 7 — After it's published
+## Phase 8 — After it's published
 - Set `VITE_PLAY_STORE_URL` in `.env.docker` to your listing
   (`https://play.google.com/store/apps/details?id=com.fitplancoach.app`), then
   `git pull` + rebuild — the website's "Get it on Google Play" buttons go live.
-- Bump `ANDROID_VERSION_CODE` in `src/lib/app-config.ts` for each future Play
-  update (the website auto-updates inside the app without a new AAB, but native
-  changes need a version bump).
-
----
-
-## About paid subscriptions (important)
-Google requires **Play Billing** for in-app digital purchases. Your app does not
-complete purchases yet (the native trigger is a stub; the web pricing page is
-informational only), so **launch v1 as a free app** — that's compliant and gets
-you on the store fast. Adding real in-app Pro later requires Play Billing via the
-Digital Goods API (TWA) or a Capacitor Play Billing plugin; the **server-side
-verification is already built** (`src/lib/billing.functions.ts`).
+- Bump `versionCode`/`versionName` in `android/app/build.gradle` (and mirror
+  them in `src/lib/app-config.ts`'s `ANDROID_VERSION_CODE`/`APP_VERSION`,
+  which are display-only but should stay in sync) for each future native
+  update — Play rejects an upload whose versionCode was already used.

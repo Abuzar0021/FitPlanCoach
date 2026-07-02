@@ -13,6 +13,7 @@
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@capacitor-community/play-integrity": "^8.0.0",
     "@capacitor/core": "^8.4.1",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/email-js": "^0.0.4",
