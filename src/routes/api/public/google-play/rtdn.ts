@@ -13,7 +13,7 @@
 // whatever is CURRENTLY true — never trusting the notification payload
 // itself for anything except "go re-check this token".
 //
-// Setup (Play Console + Google Cloud Console — see PLAY_STORE_RELEASE.md):
+// Setup (Play Console + Google Cloud Console — see docs/PLAY_STORE.md):
 //   1. Create a Pub/Sub topic in the same GCP project as the Play Console
 //      app, and grant publish rights to google-play-developer-notifications@system.gserviceaccount.com.
 //   2. Play Console -> Monetization setup -> Real-time developer
