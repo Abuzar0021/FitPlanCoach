@@ -15,9 +15,11 @@ import {
   Pencil,
   Check,
   X,
+  Utensils,
 } from "lucide-react";
 import { PlanScreenSkeleton } from "@/components/app-ui";
 import { FoodEntrySheet } from "@/components/FoodEntrySheet";
+import { FeatureTip } from "@/components/FeatureTip";
 import { localDateKey, shiftDateKey } from "@/lib/date";
 
 export const Route = createFileRoute("/_app/food-diary")({
@@ -66,7 +68,20 @@ function FoodDiary() {
       .eq("user_id", user.id)
       .eq("logged_date", date)
       .order("created_at");
-    setEntries((data ?? []) as Entry[]);
+    // Postgres NUMERIC columns come back from PostgREST as STRINGS (to preserve
+    // precision), so grams/calories/macros must be coerced to real numbers.
+    // Without this, `total += entry.calories` string-concatenates ("0" + "300"
+    // → "0300") and every macro total and progress bar is garbage.
+    setEntries(
+      ((data ?? []) as any[]).map((e) => ({
+        ...e,
+        grams: Number(e.grams),
+        calories: Number(e.calories),
+        protein: Number(e.protein),
+        carbs: Number(e.carbs),
+        fat: Number(e.fat),
+      })) as Entry[],
+    );
   }
 
   useEffect(() => {
@@ -86,11 +101,13 @@ function FoodDiary() {
       .maybeSingle()
       .then(({ data }: any) => {
         if (data) {
+          // NUMERIC columns arrive as strings — coerce so the progress-bar
+          // math (total / target) is numeric division, not string coercion.
           setTargets({
-            calories: data.calories_target,
-            protein: data.protein_target,
-            carbs: data.carbs_target,
-            fat: data.fat_target,
+            calories: Number(data.calories_target),
+            protein: Number(data.protein_target),
+            carbs: data.carbs_target == null ? null : Number(data.carbs_target),
+            fat: data.fat_target == null ? null : Number(data.fat_target),
           });
         }
       });
@@ -237,6 +254,14 @@ function FoodDiary() {
         <PlanScreenSkeleton />
       ) : (
         <>
+          {entries.length === 0 && (
+            <FeatureTip
+              id="food_diary_logging"
+              icon={Utensils}
+              title="Log what you actually eat"
+              body="Tap the + next to any meal to search the food catalog or add a custom entry — your calories, protein, carbs, and fat below update instantly, separate from your generated plan."
+            />
+          )}
           <div className="surface-card mb-5 p-5 grid grid-cols-2 gap-4">
             {(
               [

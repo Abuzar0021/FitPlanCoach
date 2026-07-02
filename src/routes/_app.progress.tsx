@@ -18,12 +18,13 @@ import {
 } from "recharts";
 import { chartTooltipProps } from "@/lib/chart";
 import { toast } from "sonner";
-import { Flame, Ruler, ChevronDown } from "lucide-react";
+import { Flame, Ruler, ChevronDown, TrendingUp } from "lucide-react";
 import { PlanScreenSkeleton, LockedFeature, ProBadge } from "@/components/app-ui";
 import { usePlan } from "@/hooks/use-plan";
 import { localDateKey } from "@/lib/date";
 import { bmi, bmiCategory } from "@/lib/body-metrics";
 import { ProgressPhotoGallery } from "@/components/ProgressPhotoGallery";
+import { FeatureTip } from "@/components/FeatureTip";
 
 export const Route = createFileRoute("/_app/progress")({
   head: () => ({ meta: [{ title: "Progress — FitPlanCoach" }] }),
@@ -168,6 +169,14 @@ function Progress() {
     <MobileShell>
       <p className="label-overline mb-1">Track</p>
       <h1 className="text-3xl font-display uppercase italic mb-4">Progress</h1>
+      {entries.length === 0 && (
+        <FeatureTip
+          id="progress_tracking"
+          icon={TrendingUp}
+          title="Track more than the scale"
+          body="Log your weight below regularly to see your trend and BMI. Expand 'Body measurements' for chest/waist/hips/arms tracking, and scroll down to add progress photos — all kept private to your account."
+        />
+      )}
       {entries.length > 0 && (
         <div className={`grid ${currentBmi != null ? "grid-cols-2" : "grid-cols-3"} gap-3 mb-4`}>
           <div className="metric-card">

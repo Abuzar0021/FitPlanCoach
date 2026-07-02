@@ -33,6 +33,7 @@ import { generateFitnessPlan } from "@/lib/plan-generation.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { WelcomeChecklist } from "@/components/WelcomeChecklist";
+import { FeatureTip } from "@/components/FeatureTip";
 import { DashboardSkeleton } from "@/components/app-ui";
 import { DailyTip } from "@/components/DailyTip";
 import { WaterTracker } from "@/components/WaterTracker";
@@ -232,8 +233,11 @@ function Dashboard() {
         calories: number;
         protein: number;
       }>) {
-        byCat[row.meal_category].calories += row.calories;
-        byCat[row.meal_category].protein += row.protein;
+        // NUMERIC columns come back as strings from PostgREST — coerce, or
+        // `+=` string-concatenates and the "kcal left" ring / logged totals
+        // are wrong the moment anything is logged.
+        byCat[row.meal_category].calories += Number(row.calories);
+        byCat[row.meal_category].protein += Number(row.protein);
       }
       setLoggedToday(byCat);
       const sessionDates = new Set((weekSessions ?? []).map((s: any) => s.performed_on));
@@ -417,6 +421,15 @@ function Dashboard() {
             </Link>
           </div>
         </header>
+
+        {!mealPlan && (
+          <FeatureTip
+            id="dashboard_generate"
+            icon={Sparkles}
+            title="Start with your first plan"
+            body="Tap Generate My First Plan below and we'll build a full meal and workout plan matched to your goal, activity level, and equipment — free users get 3 generations, Pro is unlimited."
+          />
+        )}
 
         {/* Streak strip */}
         {(profile.streak_current ?? 0) > 0 && (

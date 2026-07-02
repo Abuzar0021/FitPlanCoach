@@ -7,6 +7,7 @@ import { PlanScreenSkeleton } from "@/components/app-ui";
 import { GooglePlayButton } from "@/components/GooglePlayButton";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, ExternalLink, RefreshCcw } from "lucide-react";
+import { FeatureTip } from "@/components/FeatureTip";
 import { toast } from "sonner";
 import { planLabel, isPro as isProPlan, type PlanContext } from "@/lib/access";
 import {
@@ -82,6 +83,9 @@ function Subscription() {
         await refresh();
       } else if (res.reason === "unavailable_on_web") {
         toast.info("Premium is purchased inside the Android app via Google Play.");
+      } else if (res.reason === "cancelled") {
+        // User backed out of the Google Play payment sheet — not an error,
+        // say nothing rather than showing a scary "failed" toast.
       } else {
         toast.error(res.message ?? "Purchase could not be completed.");
       }
@@ -125,6 +129,23 @@ function Subscription() {
     <MobileShell>
       <p className="label-overline mb-1">Account</p>
       <h1 className="text-3xl font-display uppercase italic mb-4">Subscription</h1>
+
+      {!pro && (
+        <FeatureTip
+          id="subscription_upgrade"
+          icon={Crown}
+          title="What Pro unlocks"
+          body="Free includes 3 AI-generated plans total. Pro adds unlimited plan generation, weekly auto-refreshes, full meal swapping, and advanced progress charts — billed securely through Google Play, cancel anytime."
+        />
+      )}
+      {pro && (
+        <FeatureTip
+          id="subscription_manage"
+          icon={RefreshCcw}
+          title="Manage your subscription"
+          body="Your billing, renewal date, and cancellation are all handled by Google Play, not FitPlanCoach directly — tap below to manage or cancel anytime from Play's own subscription settings."
+        />
+      )}
 
       {/* Current status */}
       <section className="surface-card p-5 mb-5">

@@ -2,15 +2,16 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 // Capacitor configuration for the FitPlanCoach Android app.
 //
-// NOTE: FitPlanCoach is a TanStack Start (SSR) PWA. Two delivery options:
-//   1. TWA / Bubblewrap (recommended for this PWA) — supports Google Play
-//      Billing via the Digital Goods API. See ANDROID release runbook.
-//   2. Capacitor (this file) — wraps the site in a native shell. Because the
-//      app is server-rendered, point `server.url` at the deployed site, or run
-//      a static client build into `webDir`. Add a Play Billing plugin for IAP.
+// This is the active packaging path: a native Capacitor shell (Kotlin +
+// WebView) that loads the deployed SSR site via `server.url` below. It ships
+// real Google Play Billing using the official Play Billing Library, bridged
+// via the `capacitor-plugin-cdv-purchase` native plugin (see src/lib/billing.ts)
+// — the TWA/Digital-Goods-API alternative previously noted here does NOT
+// support the native Play Billing Library the same way and was not used.
 //
-// To use Capacitor:
-//   npm i @capacitor/core @capacitor/cli @capacitor/android
+// @capacitor/core, @capacitor/cli, @capacitor/android, and
+// capacitor-plugin-cdv-purchase are already in package.json. To (re)generate
+// the native Android project from this config:
 //   npx cap add android && npx cap sync android
 const config: CapacitorConfig = {
   appId: "com.fitplancoach.app",
