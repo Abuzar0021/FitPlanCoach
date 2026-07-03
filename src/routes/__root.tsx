@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { usePageView } from "../lib/analytics";
 import { SiteScripts } from "../components/SiteScripts";
+import { ADSENSE_CLIENT_ID } from "../lib/adsense-config";
 
 function NotFoundComponent() {
   return (
@@ -129,6 +130,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&display=swap",
+      },
+    ],
+    // Google AdSense loader — registered once here on the root route (which
+    // is present in every page's route match), so it renders exactly once
+    // in <head> across the whole site rather than being copy-pasted into
+    // individual page components. No ad units are placed by this script
+    // alone; see src/components/ads for the actual ad placements, which
+    // stay inert until an ad unit id is configured.
+    scripts: [
+      {
+        async: true,
+        src: `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`,
+        crossOrigin: "anonymous",
       },
     ],
   }),

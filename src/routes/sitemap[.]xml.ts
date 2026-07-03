@@ -25,8 +25,9 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const lastmod = new Date().toISOString().slice(0, 10);
 
-        // Append every published blog post. Degrades gracefully to the static
-        // list if the blog table isn't available yet.
+        // Append every live blog post (published, or scheduled and now due)
+        // plus every category/tag/author page. Degrades gracefully to the
+        // static list if the blog tables aren't available yet.
         let postEntries: Array<{
           path: string;
           changefreq: string;
@@ -36,16 +37,43 @@ export const Route = createFileRoute("/sitemap.xml")({
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const db: any = supabaseAdmin;
-          const { data } = await db
-            .from("blog_posts")
-            .select("slug,updated_at")
-            .eq("status", "published");
-          postEntries = (data ?? []).map((p: any) => ({
-            path: `/blog/${p.slug}`,
-            changefreq: "monthly",
-            priority: "0.6",
-            lastmod: p.updated_at ? new Date(p.updated_at).toISOString().slice(0, 10) : lastmod,
-          }));
+          const now = new Date().toISOString();
+          const [{ data: posts }, { data: categories }, { data: tags }, { data: authors }] =
+            await Promise.all([
+              db
+                .from("blog_posts")
+                .select("slug,updated_at")
+                .or(`status.eq.published,and(status.eq.scheduled,scheduled_at.lte.${now})`),
+              db.from("blog_categories").select("slug"),
+              db.from("blog_tags").select("slug"),
+              db.from("blog_authors").select("slug"),
+            ]);
+          postEntries = [
+            ...(posts ?? []).map((p: any) => ({
+              path: `/blog/${p.slug}`,
+              changefreq: "monthly",
+              priority: "0.6",
+              lastmod: p.updated_at ? new Date(p.updated_at).toISOString().slice(0, 10) : lastmod,
+            })),
+            ...(categories ?? []).map((c: any) => ({
+              path: `/blog/category/${c.slug}`,
+              changefreq: "weekly",
+              priority: "0.5",
+              lastmod,
+            })),
+            ...(tags ?? []).map((t: any) => ({
+              path: `/blog/tag/${t.slug}`,
+              changefreq: "weekly",
+              priority: "0.4",
+              lastmod,
+            })),
+            ...(authors ?? []).map((a: any) => ({
+              path: `/blog/author/${a.slug}`,
+              changefreq: "monthly",
+              priority: "0.4",
+              lastmod,
+            })),
+          ];
         } catch {
           /* keep static sitemap */
         }

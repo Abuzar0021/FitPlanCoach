@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { z } from "zod";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
-import { listPublishedPosts } from "@/lib/blog.functions";
-import { formatPostDate } from "@/lib/blog";
-import { ArrowRight } from "lucide-react";
+import { PostGrid } from "@/components/blog/PostGrid";
+import { BlogPagination } from "@/components/blog/Pagination";
+import { listPublishedPosts, listCategories } from "@/lib/blog.functions";
+import { TopArticleAd, BottomArticleAd } from "@/components/ads";
+import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/blog")({
+  validateSearch: z.object({ page: z.number().int().min(1).catch(1) }),
   head: () => ({
     meta: [
       { title: "Blog — FitPlanCoach" },
@@ -18,62 +22,69 @@ export const Route = createFileRoute("/blog")({
       { property: "og:description", content: "Practical training and nutrition guides." },
       { property: "og:url", content: "https://fitplancoach.com/blog" },
     ],
-    links: [{ rel: "canonical", href: "https://fitplancoach.com/blog" }],
+    links: [
+      { rel: "canonical", href: "https://fitplancoach.com/blog" },
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "FitPlanCoach Blog",
+        href: "/blog/rss.xml",
+      },
+    ],
   }),
-  loader: async () => ({ posts: await listPublishedPosts() }),
+  loaderDeps: ({ search }) => ({ page: search.page }),
+  loader: async ({ deps }) => {
+    const [postsResult, categories] = await Promise.all([
+      listPublishedPosts({ data: { page: deps.page } }),
+      listCategories(),
+    ]);
+    return { ...postsResult, categories };
+  },
   component: BlogIndex,
 });
 
 function BlogIndex() {
-  const { posts } = Route.useLoaderData();
+  const { posts, page, hasMore, categories } = Route.useLoaderData();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
       <main id="main-content" tabIndex={-1} className="flex-1 w-full mx-auto max-w-5xl px-6 py-12">
-        <p className="label-overline">FitPlanCoach</p>
-        <h1 className="text-4xl font-display uppercase italic mb-2">The Blog</h1>
-        <p className="text-muted-foreground mb-8 max-w-xl">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
+          <div>
+            <p className="label-overline">FitPlanCoach</p>
+            <h1 className="text-4xl font-display uppercase italic">The Blog</h1>
+          </div>
+          <Link
+            to="/blog/search"
+            className="inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
+          >
+            <Search className="size-4" /> Search
+          </Link>
+        </div>
+        <p className="text-muted-foreground mb-6 max-w-xl">
           Practical training, nutrition, and habit guides — written to help you make real progress.
         </p>
 
-        {posts.length === 0 ? (
-          <div className="surface-card p-12 text-center text-muted-foreground">
-            No posts yet. Check back soon.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2">
-            {posts.map((p) => (
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {categories.map((c) => (
               <Link
-                key={p.id}
-                to="/blog/$slug"
-                params={{ slug: p.slug }}
-                className="surface-card overflow-hidden hover:border-border-strong transition group flex flex-col"
+                key={c.id}
+                to="/blog/category/$slug"
+                params={{ slug: c.slug }}
+                className="px-3 py-1.5 rounded-full border border-border bg-card text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
               >
-                {p.cover_image_url && (
-                  <div className="aspect-[16/9] overflow-hidden bg-muted">
-                    <img
-                      src={p.cover_image_url}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="size-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                <div className="p-5 flex flex-col flex-1">
-                  <p className="label-overline">{formatPostDate(p.published_at)}</p>
-                  <h2 className="text-lg font-semibold mt-1 leading-snug">{p.title}</h2>
-                  {p.excerpt && (
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{p.excerpt}</p>
-                  )}
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-primary">
-                    Read <ArrowRight className="size-3.5" />
-                  </span>
-                </div>
+                {c.name}
               </Link>
             ))}
           </div>
         )}
+
+        <TopArticleAd />
+        <PostGrid posts={posts} />
+        <BottomArticleAd />
+        <BlogPagination page={page} hasMore={hasMore} to="/blog" />
       </main>
       <PublicFooter />
     </div>

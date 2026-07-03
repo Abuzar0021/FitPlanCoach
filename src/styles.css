@@ -243,6 +243,14 @@
     margin: 2em 0 0.5em;
   }
   .prose h3 { font-size: 1.15rem; font-weight: 700; margin: 1.6em 0 0.4em; }
+  .prose h4, .prose h5, .prose h6 {
+    font-weight: 700;
+    margin: 1.4em 0 0.4em;
+    color: var(--color-foreground);
+  }
+  .prose h4 { font-size: 1.05rem; }
+  .prose h5 { font-size: 0.95rem; }
+  .prose h6 { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.04em; }
   .prose p, .prose ul, .prose ol { color: var(--color-muted-foreground); }
   .prose a {
     color: var(--color-primary);
@@ -252,6 +260,8 @@
   }
   .prose a:hover { text-decoration: none; }
   .prose strong { color: var(--color-foreground); font-weight: 600; }
+  .prose em { font-style: italic; }
+  .prose u { text-decoration: underline; }
   .prose ul { list-style: disc; padding-left: 1.4em; }
   .prose ol { list-style: decimal; padding-left: 1.4em; }
   .prose li { margin-top: 0.4em; }
@@ -268,6 +278,62 @@
     padding: 0.1em 0.4em;
     font-size: 0.85em;
   }
+  .prose pre {
+    background: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+  }
+  .prose pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    line-height: 1.6;
+  }
+  .prose img {
+    border-radius: 1rem;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+  }
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    display: block;
+    overflow-x: auto;
+  }
+  .prose th, .prose td {
+    border: 1px solid var(--color-border);
+    padding: 0.5em 0.75em;
+    text-align: left;
+  }
+  .prose th {
+    background: var(--color-muted);
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+  .prose iframe {
+    max-width: 100%;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+  .prose .callout {
+    border-radius: 0.9rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--color-border);
+    border-left-width: 4px;
+    background: var(--color-muted);
+  }
+  .prose .callout > * + * { margin-top: 0.6em; }
+  .prose .callout-info { border-left-color: var(--color-primary); }
+  .prose .callout-tip { border-left-color: #22c55e; }
+  .prose .callout-warning { border-left-color: #f59e0b; }
+  .prose .callout-success { border-left-color: #22c55e; }
 }
 
 /* ---- Motion: opt-in, accessible, zero-JS ---- */
