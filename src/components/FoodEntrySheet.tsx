@@ -75,6 +75,10 @@ export function FoodEntrySheet({
   const [customCarbs, setCustomCarbs] = useState("");
   const [customFat, setCustomFat] = useState("");
 
+  const [recentFoods, setRecentFoods] = useState<FoodRow[]>([]);
+
+  const FOOD_COLUMNS = "id,name,calories_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g";
+
   useEffect(() => {
     if (!open) return;
     setTab("search");
@@ -89,15 +93,74 @@ export function FoodEntrySheet({
     setCustomCarbs("");
     setCustomFat("");
     const db: any = supabase;
+
+    // Plain select + a separate lookup, not an embedded
+    // `foods(...)` select — embeds need PostgREST's schema cache to already
+    // know about the foreign key, which can lag after a schema re-paste (the
+    // exact failure mode that broke blog posts earlier — same fix here).
     db.from("food_favorites")
-      .select(
-        "food_id, foods(id,name,calories_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g)",
-      )
+      .select("food_id")
       .eq("user_id", userId)
-      .then(({ data }: any) => {
-        const rows = (data ?? []) as Array<{ food_id: string; foods: FoodRow | null }>;
-        setFavorites(new Set(rows.map((r) => r.food_id)));
-        setFavoriteFoods(rows.map((r) => r.foods).filter((f): f is FoodRow => f != null));
+      .then(async ({ data, error }: any) => {
+        if (error) {
+          console.error("[food-entry] failed to load favorites", error);
+          return;
+        }
+        const ids = ((data ?? []) as Array<{ food_id: string }>).map((r) => r.food_id);
+        setFavorites(new Set(ids));
+        if (ids.length === 0) {
+          setFavoriteFoods([]);
+          return;
+        }
+        const { data: foods, error: foodsErr } = await db
+          .from("foods")
+          .select(FOOD_COLUMNS)
+          .in("id", ids);
+        if (foodsErr) {
+          console.error("[food-entry] failed to load favorite foods", foodsErr);
+          return;
+        }
+        setFavoriteFoods((foods ?? []) as FoodRow[]);
+      });
+
+    // Recent foods: the last handful of DISTINCT foods actually logged,
+    // most-recent first — lets you re-log something you eat often in one
+    // tap without typing a search query every time.
+    db.from("food_log_entries")
+      .select("food_id")
+      .eq("user_id", userId)
+      .not("food_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(30)
+      .then(async ({ data, error }: any) => {
+        if (error) {
+          console.error("[food-entry] failed to load recent foods", error);
+          return;
+        }
+        const seen = new Set<string>();
+        const ids: string[] = [];
+        for (const row of (data ?? []) as Array<{ food_id: string | null }>) {
+          if (row.food_id && !seen.has(row.food_id)) {
+            seen.add(row.food_id);
+            ids.push(row.food_id);
+          }
+          if (ids.length >= 6) break;
+        }
+        if (ids.length === 0) {
+          setRecentFoods([]);
+          return;
+        }
+        const { data: foods, error: foodsErr } = await db
+          .from("foods")
+          .select(FOOD_COLUMNS)
+          .in("id", ids);
+        if (foodsErr) {
+          console.error("[food-entry] failed to load recent food details", foodsErr);
+          return;
+        }
+        // Preserve recency order — .in() doesn't guarantee result order.
+        const byId = new Map(((foods ?? []) as FoodRow[]).map((f) => [f.id, f]));
+        setRecentFoods(ids.map((id) => byId.get(id)).filter((f): f is FoodRow => f != null));
       });
   }, [open, userId]);
 
@@ -111,12 +174,20 @@ export function FoodEntrySheet({
     const db: any = supabase;
     const handle = setTimeout(() => {
       db.from("foods")
-        .select("id,name,calories_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g")
+        .select(FOOD_COLUMNS)
         .eq("enabled", true)
         .ilike("name", `%${q}%`)
         .order("name")
         .limit(20)
-        .then(({ data }: any) => setResults((data ?? []) as FoodRow[]));
+        .then(({ data, error }: any) => {
+          if (error) {
+            console.error("[food-entry] search failed", error);
+            toast.error(`Search failed: ${error.message}`);
+            setResults([]);
+            return;
+          }
+          setResults((data ?? []) as FoodRow[]);
+        });
     }, 250);
     return () => clearTimeout(handle);
   }, [query, open, tab]);
@@ -217,6 +288,7 @@ export function FoodEntrySheet({
     }
   }
 
+  const showRecent = tab === "search" && !query.trim() && recentFoods.length > 0;
   const showFavorites = tab === "search" && !query.trim() && favoriteFoods.length > 0;
 
   return (
@@ -262,6 +334,26 @@ export function FoodEntrySheet({
                 autoFocus
               />
             </div>
+
+            {showRecent && (
+              <div>
+                <p className="label-overline mb-1.5">Recent</p>
+                <div className="space-y-1.5">
+                  {recentFoods.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setSelected(f)}
+                      className="w-full surface-card p-3 flex items-center justify-between gap-3 text-left hover:border-primary/40 transition"
+                    >
+                      <span className="font-medium truncate">{f.name}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {f.calories_per_100g} kcal/100g
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {showFavorites && (
               <div>
@@ -329,6 +421,22 @@ export function FoodEntrySheet({
                 onChange={(e) => setGrams(e.target.value)}
                 autoFocus
               />
+              <div className="flex gap-1.5">
+                {[50, 100, 150, 200, 300].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGrams(String(g))}
+                    className={`flex-1 h-7 rounded-md text-xs font-semibold transition ${
+                      Number(grams) === g
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {g}g
+                  </button>
+                ))}
+              </div>
             </div>
             {Number(grams) > 0 && (
               <div className="grid grid-cols-4 gap-2 text-center">

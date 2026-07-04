@@ -62,12 +62,22 @@ function FoodDiary() {
   async function loadEntries() {
     if (!user) return;
     const db: any = supabase;
-    const { data } = await db
+    const { data, error } = await db
       .from("food_log_entries")
       .select("id,meal_category,food_id,name,grams,calories,protein,carbs,fat")
       .eq("user_id", user.id)
       .eq("logged_date", date)
       .order("created_at");
+    if (error) {
+      // This is the read that runs right after logging an item — if it
+      // silently failed, the food you just logged would look like it never
+      // saved even though the insert succeeded, which is exactly the
+      // "logging doesn't work" symptom. Surface it instead of hiding it.
+      console.error("[food-diary] failed to load entries", error);
+      toast.error(`Could not load today's log: ${error.message}`);
+      setEntries([]);
+      return;
+    }
     // Postgres NUMERIC columns come back from PostgREST as STRINGS (to preserve
     // precision), so grams/calories/macros must be coerced to real numbers.
     // Without this, `total += entry.calories` string-concatenates ("0" + "300"
@@ -99,7 +109,11 @@ function FoodDiary() {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
-      .then(({ data }: any) => {
+      .then(({ data, error }: any) => {
+        if (error) {
+          console.error("[food-diary] failed to load macro targets", error);
+          return;
+        }
         if (data) {
           // NUMERIC columns arrive as strings — coerce so the progress-bar
           // math (total / target) is numeric division, not string coercion.
