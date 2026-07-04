@@ -221,7 +221,16 @@ async function verifyAndApply(
   const { patch, productId, state } = buildSubscriptionPatch(purchase, purchaseToken);
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { error } = await supabaseAdmin.from("subscriptions").update(patch).eq("user_id", userId);
+  // Upsert, not update: this path knows the user id directly (unlike the RTDN
+  // handler below, which can only look an owner up via an *existing* row), so
+  // it's the one path that can recover a subscriptions row that's missing for
+  // any reason — a signup whose handle_new_user() insert raced this call, or
+  // an operator having reset/re-seeded the table. An update-only write would
+  // silently affect zero rows and leave the purchase verified with Google but
+  // never reflected as Pro in the app.
+  const { error } = await supabaseAdmin
+    .from("subscriptions")
+    .upsert({ user_id: userId, ...patch }, { onConflict: "user_id" });
   if (error) {
     console.error("[billing] failed to write subscription patch", error);
     return { ok: false, reason: "db_write_failed" };

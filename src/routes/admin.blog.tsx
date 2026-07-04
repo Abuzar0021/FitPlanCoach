@@ -61,7 +61,11 @@ function BlogAdmin() {
       body: p.body,
       cover_image_url: p.cover_image_url ?? "",
       seo_description: p.seo_description ?? "",
-      status: p.status,
+      // This simple editor only has a draft/published toggle — a post
+      // scheduled from the fuller /cms editor shows here as a draft until
+      // it goes live (it's still correctly live-or-not for public reads
+      // either way; this only affects what the checkbox shows).
+      status: p.status === "published" ? "published" : "draft",
     });
     setEditing(true);
     setSlugTouched(true);
