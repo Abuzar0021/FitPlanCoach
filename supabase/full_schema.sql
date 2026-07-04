@@ -38,77 +38,63 @@ drop function if exists
   public.update_updated_at_column
   cascade;
 
+-- Only the three catalog tables (foods / exercises / workout_templates) are
+-- ever dropped here. Every other table listed below used to be dropped on
+-- every re-paste too — which meant every real user's profile, subscription,
+-- workout/meal plans, progress history, support tickets, and blog posts
+-- were silently deleted each time this file was re-run against a live
+-- project, e.g. to apply a later migration bundled into the same paste.
+-- auth.users itself was never touched, so accounts could still log in, but
+-- everything else about them was gone. Fixed by dropping only the catalog
+-- (which the seed at the bottom of this file fully repopulates anyway) and
+-- switching every other CREATE TABLE/TYPE below to IF NOT EXISTS /
+-- duplicate_object-guarded, so a second paste is genuinely a no-op for
+-- anything that already exists instead of destroying it.
 drop table if exists
-  public.achievements,
-  public.analytics_events,
-  public.app_settings,
-  public.billing_history,
-  public.blog_authors,
-  public.blog_categories,
-  public.blog_post_tags,
-  public.blog_posts,
-  public.blog_tags,
-  public.email_send_log,
-  public.email_send_state,
-  public.email_unsubscribe_tokens,
   public.exercises,
-  public.feature_request_comments,
-  public.feature_request_votes,
-  public.feature_requests,
   public.foods,
-  public.meal_plans,
-  public.media_assets,
-  public.notifications,
-  public.payment_approvals,
-  public.payment_settings,
-  public.payment_submissions,
-  public.profiles,
-  public.progress_entries,
-  public.subscriptions,
-  public.support_ticket_messages,
-  public.support_tickets,
-  public.suppressed_emails,
-  public.user_achievements,
-  public.user_roles,
-  public.webhook_events,
-  public.workout_plans,
-  public.workout_sessions,
   public.workout_templates
   cascade;
 
+-- difficulty_level is used only by the two catalog tables above, which are
+-- fully reseeded every paste anyway, so it's safe to drop and recreate too.
 drop type if exists
-  public.activity_level,
-  public.app_role,
-  public.billing_interval_kind,
-  public.blog_status,
-  public.budget_level,
-  public.difficulty_level,
-  public.feature_category,
-  public.feature_status,
-  public.fitness_goal,
-  public.gender,
-  public.meal_category,
-  public.payment_method_kind,
-  public.payment_submission_status,
-  public.subscription_plan,
-  public.subscription_status,
-  public.ticket_status
+  public.difficulty_level
   cascade;
 
 -- =====================================================================
 -- 20260622150818_dadbdba9-a9c8-4a38-8258-a709110c2c3a.sql
 -- =====================================================================
 
--- Enums
-CREATE TYPE public.app_role AS ENUM ('admin', 'user');
-CREATE TYPE public.fitness_goal AS ENUM ('lose_fat', 'build_muscle', 'maintain');
-CREATE TYPE public.activity_level AS ENUM ('sedentary', 'light', 'moderate', 'active');
-CREATE TYPE public.budget_level AS ENUM ('low', 'medium', 'high');
-CREATE TYPE public.gender AS ENUM ('male', 'female', 'other');
+-- Enums. Guarded (not dropped above), since these belong to tables that
+-- hold real user data and must survive a re-paste — see the RESET block.
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'user');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.fitness_goal AS ENUM ('lose_fat', 'build_muscle', 'maintain');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.activity_level AS ENUM ('sedentary', 'light', 'moderate', 'active');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.budget_level AS ENUM ('low', 'medium', 'high');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.gender AS ENUM ('male', 'female', 'other');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+-- difficulty_level is dropped above (catalog-only), so this one stays a
+-- plain CREATE — it always runs right after a fresh DROP.
 CREATE TYPE public.difficulty_level AS ENUM ('beginner', 'intermediate', 'advanced');
-CREATE TYPE public.meal_category AS ENUM ('breakfast', 'lunch', 'dinner', 'snack');
-CREATE TYPE public.subscription_plan AS ENUM ('free', 'pro', 'premium', 'elite');
-CREATE TYPE public.subscription_status AS ENUM ('active', 'expired', 'cancelled', 'past_due');
+DO $$ BEGIN
+  CREATE TYPE public.meal_category AS ENUM ('breakfast', 'lunch', 'dinner', 'snack');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.subscription_plan AS ENUM ('free', 'pro', 'premium', 'elite');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.subscription_status AS ENUM ('active', 'expired', 'cancelled', 'past_due');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- updated_at helper
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
@@ -119,7 +105,7 @@ $$;
 -- =========================================================
 -- profiles
 -- =========================================================
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT,
   name TEXT,
@@ -139,13 +125,14 @@ CREATE TABLE public.profiles (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated;
 GRANT ALL ON public.profiles TO service_role;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
 CREATE TRIGGER trg_profiles_updated BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- =========================================================
 -- user_roles + has_role
 -- =========================================================
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role public.app_role NOT NULL,
@@ -161,17 +148,22 @@ RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS
   SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role)
 $$;
 
+DROP POLICY IF EXISTS "users read own roles" ON public.user_roles;
 CREATE POLICY "users read own roles" ON public.user_roles FOR SELECT TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'));
 
 -- profile policies (needs has_role)
+DROP POLICY IF EXISTS "users read own profile" ON public.profiles;
 CREATE POLICY "users read own profile" ON public.profiles FOR SELECT TO authenticated
   USING (id = auth.uid() OR public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "users insert own profile" ON public.profiles;
 CREATE POLICY "users insert own profile" ON public.profiles FOR INSERT TO authenticated
   WITH CHECK (id = auth.uid());
+DROP POLICY IF EXISTS "users update own profile" ON public.profiles;
 CREATE POLICY "users update own profile" ON public.profiles FOR UPDATE TO authenticated
   USING (id = auth.uid() OR public.has_role(auth.uid(), 'admin'))
   WITH CHECK (id = auth.uid() OR public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "admins delete profile" ON public.profiles;
 CREATE POLICY "admins delete profile" ON public.profiles FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
@@ -271,7 +263,7 @@ CREATE TRIGGER trg_wt_updated BEFORE UPDATE ON public.workout_templates
 -- =========================================================
 -- Generated plans
 -- =========================================================
-CREATE TABLE public.meal_plans (
+CREATE TABLE IF NOT EXISTS public.meal_plans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   calories_target NUMERIC NOT NULL,
@@ -283,11 +275,12 @@ CREATE TABLE public.meal_plans (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.meal_plans TO authenticated;
 GRANT ALL ON public.meal_plans TO service_role;
 ALTER TABLE public.meal_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own meal plans" ON public.meal_plans;
 CREATE POLICY "own meal plans" ON public.meal_plans FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'))
   WITH CHECK (user_id = auth.uid());
 
-CREATE TABLE public.workout_plans (
+CREATE TABLE IF NOT EXISTS public.workout_plans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   template_id UUID REFERENCES public.workout_templates(id) ON DELETE SET NULL,
@@ -298,6 +291,7 @@ CREATE TABLE public.workout_plans (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.workout_plans TO authenticated;
 GRANT ALL ON public.workout_plans TO service_role;
 ALTER TABLE public.workout_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own workout plans" ON public.workout_plans;
 CREATE POLICY "own workout plans" ON public.workout_plans FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'))
   WITH CHECK (user_id = auth.uid());
@@ -305,7 +299,7 @@ CREATE POLICY "own workout plans" ON public.workout_plans FOR ALL TO authenticat
 -- =========================================================
 -- progress
 -- =========================================================
-CREATE TABLE public.progress_entries (
+CREATE TABLE IF NOT EXISTS public.progress_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   weight_kg NUMERIC NOT NULL,
@@ -316,6 +310,7 @@ CREATE TABLE public.progress_entries (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.progress_entries TO authenticated;
 GRANT ALL ON public.progress_entries TO service_role;
 ALTER TABLE public.progress_entries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own progress" ON public.progress_entries;
 CREATE POLICY "own progress" ON public.progress_entries FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'))
   WITH CHECK (user_id = auth.uid());
@@ -323,7 +318,7 @@ CREATE POLICY "own progress" ON public.progress_entries FOR ALL TO authenticated
 -- =========================================================
 -- subscriptions
 -- =========================================================
-CREATE TABLE public.subscriptions (
+CREATE TABLE IF NOT EXISTS public.subscriptions (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   plan_type public.subscription_plan NOT NULL DEFAULT 'free',
   status public.subscription_status NOT NULL DEFAULT 'active',
@@ -336,13 +331,17 @@ CREATE TABLE public.subscriptions (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.subscriptions TO authenticated;
 GRANT ALL ON public.subscriptions TO service_role;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own sub read" ON public.subscriptions;
 CREATE POLICY "own sub read" ON public.subscriptions FOR SELECT TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'));
+DROP POLICY IF EXISTS "own sub upd self count" ON public.subscriptions;
 CREATE POLICY "own sub upd self count" ON public.subscriptions FOR UPDATE TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'))
   WITH CHECK (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'));
+DROP POLICY IF EXISTS "admin sub insert" ON public.subscriptions;
 CREATE POLICY "admin sub insert" ON public.subscriptions FOR INSERT TO authenticated
   WITH CHECK (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'));
+DROP TRIGGER IF EXISTS trg_sub_updated ON public.subscriptions;
 CREATE TRIGGER trg_sub_updated BEFORE UPDATE ON public.subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
@@ -355,7 +354,7 @@ CREATE TRIGGER on_auth_user_created
 -- =========================================================
 -- app_settings (singleton key-value)
 -- =========================================================
-CREATE TABLE public.app_settings (
+CREATE TABLE IF NOT EXISTS public.app_settings (
   key TEXT PRIMARY KEY,
   value JSONB NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -363,18 +362,22 @@ CREATE TABLE public.app_settings (
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.app_settings TO authenticated;
 GRANT ALL ON public.app_settings TO service_role;
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "read settings" ON public.app_settings;
 CREATE POLICY "read settings" ON public.app_settings FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "admin write settings" ON public.app_settings;
 CREATE POLICY "admin write settings" ON public.app_settings FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(),'admin'));
+DROP POLICY IF EXISTS "admin upd settings" ON public.app_settings;
 CREATE POLICY "admin upd settings" ON public.app_settings FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
+DROP POLICY IF EXISTS "admin del settings" ON public.app_settings;
 CREATE POLICY "admin del settings" ON public.app_settings FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(),'admin'));
 
 -- =========================================================
 -- analytics_events
 -- =========================================================
-CREATE TABLE public.analytics_events (
+CREATE TABLE IF NOT EXISTS public.analytics_events (
   id BIGSERIAL PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   event TEXT NOT NULL,
@@ -386,12 +389,14 @@ GRANT USAGE, SELECT ON SEQUENCE public.analytics_events_id_seq TO authenticated;
 GRANT ALL ON public.analytics_events TO service_role;
 GRANT SELECT ON public.analytics_events TO authenticated;
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "self insert events" ON public.analytics_events;
 CREATE POLICY "self insert events" ON public.analytics_events FOR INSERT TO authenticated
   WITH CHECK (user_id = auth.uid() OR user_id IS NULL);
+DROP POLICY IF EXISTS "admin read events" ON public.analytics_events;
 CREATE POLICY "admin read events" ON public.analytics_events FOR SELECT TO authenticated
   USING (public.has_role(auth.uid(),'admin'));
-CREATE INDEX analytics_created_idx ON public.analytics_events(created_at DESC);
-CREATE INDEX analytics_user_idx ON public.analytics_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS analytics_created_idx ON public.analytics_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS analytics_user_idx ON public.analytics_events(user_id, created_at DESC);
 
 
 -- =====================================================================
@@ -938,15 +943,18 @@ USING (user_id = auth.uid() OR public.is_owner(auth.uid()) OR public.has_role(au
 
 -- Only owners can change role rows, and they cannot target themselves
 -- (prevents an owner from accidentally locking themselves out, and blocks self-escalation).
+DROP POLICY IF EXISTS "user_roles_owner_insert" ON public.user_roles;
 CREATE POLICY "user_roles_owner_insert"
 ON public.user_roles FOR INSERT TO authenticated
 WITH CHECK (public.is_owner(auth.uid()) AND user_id <> auth.uid());
 
+DROP POLICY IF EXISTS "user_roles_owner_update" ON public.user_roles;
 CREATE POLICY "user_roles_owner_update"
 ON public.user_roles FOR UPDATE TO authenticated
 USING (public.is_owner(auth.uid()) AND user_id <> auth.uid())
 WITH CHECK (public.is_owner(auth.uid()) AND user_id <> auth.uid());
 
+DROP POLICY IF EXISTS "user_roles_owner_delete" ON public.user_roles;
 CREATE POLICY "user_roles_owner_delete"
 ON public.user_roles FOR DELETE TO authenticated
 USING (public.is_owner(auth.uid()) AND user_id <> auth.uid());
@@ -1014,10 +1022,12 @@ GRANT SELECT ON public.payment_settings TO authenticated;
 GRANT ALL ON public.payment_settings TO service_role;
 ALTER TABLE public.payment_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "payment_settings_read_auth" ON public.payment_settings;
 CREATE POLICY "payment_settings_read_auth"
 ON public.payment_settings FOR SELECT TO authenticated USING (true);
 -- writes locked to service role / server functions
 
+DROP TRIGGER IF EXISTS trg_payment_settings_updated ON public.payment_settings;
 CREATE TRIGGER trg_payment_settings_updated
 BEFORE UPDATE ON public.payment_settings
 FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -1070,6 +1080,7 @@ GRANT ALL ON public.payment_submissions TO service_role;
 ALTER TABLE public.payment_submissions ENABLE ROW LEVEL SECURITY;
 
 -- Users see their own submissions; admins/owners see all
+DROP POLICY IF EXISTS "ps_select_own_or_staff" ON public.payment_submissions;
 CREATE POLICY "ps_select_own_or_staff"
 ON public.payment_submissions FOR SELECT TO authenticated
 USING (
@@ -1079,6 +1090,7 @@ USING (
 );
 
 -- Users can create their own submissions only, always in 'pending' status
+DROP POLICY IF EXISTS "ps_insert_own_pending" ON public.payment_submissions;
 CREATE POLICY "ps_insert_own_pending"
 ON public.payment_submissions FOR INSERT TO authenticated
 WITH CHECK (
@@ -1091,6 +1103,7 @@ WITH CHECK (
 
 -- No client UPDATE/DELETE — only service role (server functions) can change status
 
+DROP TRIGGER IF EXISTS trg_payment_submissions_updated ON public.payment_submissions;
 CREATE TRIGGER trg_payment_submissions_updated
 BEFORE UPDATE ON public.payment_submissions
 FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -1115,6 +1128,7 @@ GRANT ALL ON public.payment_approvals TO service_role;
 ALTER TABLE public.payment_approvals ENABLE ROW LEVEL SECURITY;
 
 -- Read: the submitting user (their own audit), admins, owner
+DROP POLICY IF EXISTS "pa_select_own_or_staff" ON public.payment_approvals;
 CREATE POLICY "pa_select_own_or_staff"
 ON public.payment_approvals FOR SELECT TO authenticated
 USING (
@@ -1150,6 +1164,7 @@ GRANT SELECT ON public.billing_history TO authenticated;
 GRANT ALL ON public.billing_history TO service_role;
 ALTER TABLE public.billing_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "bh_select_own_or_staff" ON public.billing_history;
 CREATE POLICY "bh_select_own_or_staff"
 ON public.billing_history FOR SELECT TO authenticated
 USING (
@@ -1214,8 +1229,11 @@ CREATE INDEX IF NOT EXISTS notifications_user_created_idx ON public.notification
 GRANT SELECT, UPDATE, DELETE ON public.notifications TO authenticated;
 GRANT ALL ON public.notifications TO service_role;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own notifications read" ON public.notifications;
 CREATE POLICY "own notifications read" ON public.notifications FOR SELECT TO authenticated USING (user_id = auth.uid());
+DROP POLICY IF EXISTS "own notifications update" ON public.notifications;
 CREATE POLICY "own notifications update" ON public.notifications FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+DROP POLICY IF EXISTS "own notifications delete" ON public.notifications;
 CREATE POLICY "own notifications delete" ON public.notifications FOR DELETE TO authenticated USING (user_id = auth.uid());
 
 CREATE TABLE IF NOT EXISTS public.achievements (
@@ -1229,6 +1247,7 @@ CREATE TABLE IF NOT EXISTS public.achievements (
 GRANT SELECT ON public.achievements TO authenticated, anon;
 GRANT ALL ON public.achievements TO service_role;
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "achievements public read" ON public.achievements;
 CREATE POLICY "achievements public read" ON public.achievements FOR SELECT TO authenticated, anon USING (true);
 
 INSERT INTO public.achievements (id,title,description,icon,sort_order) VALUES
@@ -1253,6 +1272,7 @@ CREATE INDEX IF NOT EXISTS user_achievements_user_idx ON public.user_achievement
 GRANT SELECT ON public.user_achievements TO authenticated;
 GRANT ALL ON public.user_achievements TO service_role;
 ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own achievements read" ON public.user_achievements;
 CREATE POLICY "own achievements read" ON public.user_achievements FOR SELECT TO authenticated USING (user_id = auth.uid());
 
 CREATE TABLE IF NOT EXISTS public.workout_sessions (
@@ -1268,6 +1288,7 @@ CREATE INDEX IF NOT EXISTS workout_sessions_user_idx ON public.workout_sessions(
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.workout_sessions TO authenticated;
 GRANT ALL ON public.workout_sessions TO service_role;
 ALTER TABLE public.workout_sessions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own sessions" ON public.workout_sessions;
 CREATE POLICY "own sessions" ON public.workout_sessions FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 
 CREATE OR REPLACE FUNCTION public.notify_payment_status() RETURNS trigger
@@ -1309,9 +1330,11 @@ REVOKE EXECUTE ON FUNCTION public.move_to_dlq(text, text, bigint, jsonb) FROM PU
 -- 20260623233727_b38ede75-b824-46ed-ba71-d3bd7a424274.sql
 -- =====================================================================
 
-CREATE TYPE public.ticket_status AS ENUM ('open','in_progress','waiting_user','resolved','closed');
+DO $$ BEGIN
+  CREATE TYPE public.ticket_status AS ENUM ('open','in_progress','waiting_user','resolved','closed');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.support_tickets (
+CREATE TABLE IF NOT EXISTS public.support_tickets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   subject text NOT NULL,
@@ -1321,20 +1344,23 @@ CREATE TABLE public.support_tickets (
   last_activity_at timestamptz NOT NULL DEFAULT now(),
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX support_tickets_user_idx ON public.support_tickets(user_id, created_at DESC);
-CREATE INDEX support_tickets_status_idx ON public.support_tickets(status, last_activity_at DESC);
+CREATE INDEX IF NOT EXISTS support_tickets_user_idx ON public.support_tickets(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS support_tickets_status_idx ON public.support_tickets(status, last_activity_at DESC);
 GRANT SELECT, INSERT, UPDATE ON public.support_tickets TO authenticated;
 GRANT ALL ON public.support_tickets TO service_role;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own tickets select" ON public.support_tickets;
 CREATE POLICY "own tickets select" ON public.support_tickets FOR SELECT TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'owner'));
+DROP POLICY IF EXISTS "own tickets insert" ON public.support_tickets;
 CREATE POLICY "own tickets insert" ON public.support_tickets FOR INSERT TO authenticated
   WITH CHECK (user_id = auth.uid());
+DROP POLICY IF EXISTS "staff tickets update" ON public.support_tickets;
 CREATE POLICY "staff tickets update" ON public.support_tickets FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'owner'))
   WITH CHECK (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'owner'));
 
-CREATE TABLE public.support_ticket_messages (
+CREATE TABLE IF NOT EXISTS public.support_ticket_messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   ticket_id uuid NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
   author_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -1342,10 +1368,11 @@ CREATE TABLE public.support_ticket_messages (
   body text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX support_ticket_messages_ticket_idx ON public.support_ticket_messages(ticket_id, created_at);
+CREATE INDEX IF NOT EXISTS support_ticket_messages_ticket_idx ON public.support_ticket_messages(ticket_id, created_at);
 GRANT SELECT, INSERT ON public.support_ticket_messages TO authenticated;
 GRANT ALL ON public.support_ticket_messages TO service_role;
 ALTER TABLE public.support_ticket_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "ticket messages select" ON public.support_ticket_messages;
 CREATE POLICY "ticket messages select" ON public.support_ticket_messages FOR SELECT TO authenticated
   USING (
     EXISTS (SELECT 1 FROM public.support_tickets t
@@ -1353,6 +1380,7 @@ CREATE POLICY "ticket messages select" ON public.support_ticket_messages FOR SEL
         t.user_id = auth.uid() OR public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'owner')
       ))
   );
+DROP POLICY IF EXISTS "ticket messages insert" ON public.support_ticket_messages;
 CREATE POLICY "ticket messages insert" ON public.support_ticket_messages FOR INSERT TO authenticated
   WITH CHECK (
     author_id = auth.uid() AND EXISTS (SELECT 1 FROM public.support_tickets t
@@ -1377,6 +1405,7 @@ BEGIN
   RETURN NEW;
 END $$;
 REVOKE EXECUTE ON FUNCTION public.notify_ticket_reply() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS trg_notify_ticket_reply ON public.support_ticket_messages;
 CREATE TRIGGER trg_notify_ticket_reply
   AFTER INSERT ON public.support_ticket_messages
   FOR EACH ROW EXECUTE FUNCTION public.notify_ticket_reply();
@@ -1392,6 +1421,7 @@ BEGIN
   RETURN NEW;
 END $$;
 REVOKE EXECUTE ON FUNCTION public.notify_ticket_status() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS trg_notify_ticket_status ON public.support_tickets;
 CREATE TRIGGER trg_notify_ticket_status
   AFTER UPDATE ON public.support_tickets
   FOR EACH ROW EXECUTE FUNCTION public.notify_ticket_status();
@@ -1597,12 +1627,14 @@ CREATE POLICY "payment_assets_delete_staff" ON storage.objects
 -- =====================================================================
 -- Add owner-only read policy on webhook_events to clear "RLS enabled no policy" lint.
 -- Writes are restricted to service_role (no policy needed; writes happen via supabaseAdmin).
+DROP POLICY IF EXISTS "Owners can read webhook events" ON public.webhook_events;
 CREATE POLICY "Owners can read webhook events" ON public.webhook_events
   FOR SELECT TO authenticated USING (public.is_owner(auth.uid()));
 
 -- =====================================================================
 -- 20260624144729_c9194d9f-b486-4272-807a-8374cad51cb1.sql
 -- =====================================================================
+DROP POLICY IF EXISTS "payment_proofs_staff_delete" ON storage.objects;
 CREATE POLICY "payment_proofs_staff_delete"
 ON storage.objects
 FOR DELETE
@@ -1612,6 +1644,7 @@ USING (
   AND (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
 );
 
+DROP POLICY IF EXISTS "payment_proofs_staff_read" ON storage.objects;
 CREATE POLICY "payment_proofs_staff_read"
 ON storage.objects
 FOR SELECT
@@ -1629,10 +1662,14 @@ USING (
 -- moderate status. vote_count is kept in sync by a trigger so the board can be
 -- ordered by popularity cheaply.
 
-CREATE TYPE public.feature_status AS ENUM ('open', 'planned', 'in_progress', 'completed', 'rejected');
-CREATE TYPE public.feature_category AS ENUM ('feature', 'improvement', 'bug');
+DO $$ BEGIN
+  CREATE TYPE public.feature_status AS ENUM ('open', 'planned', 'in_progress', 'completed', 'rejected');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.feature_category AS ENUM ('feature', 'improvement', 'bug');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.feature_requests (
+CREATE TABLE IF NOT EXISTS public.feature_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 120),
@@ -1645,14 +1682,14 @@ CREATE TABLE public.feature_requests (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.feature_request_votes (
+CREATE TABLE IF NOT EXISTS public.feature_request_votes (
   feature_request_id uuid NOT NULL REFERENCES public.feature_requests(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (feature_request_id, user_id)
 );
 
-CREATE TABLE public.feature_request_comments (
+CREATE TABLE IF NOT EXISTS public.feature_request_comments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   feature_request_id uuid NOT NULL REFERENCES public.feature_requests(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -1660,9 +1697,9 @@ CREATE TABLE public.feature_request_comments (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_feature_requests_status ON public.feature_requests (status);
-CREATE INDEX idx_feature_requests_votes ON public.feature_requests (vote_count DESC);
-CREATE INDEX idx_feature_comments_req ON public.feature_request_comments (feature_request_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_feature_requests_status ON public.feature_requests (status);
+CREATE INDEX IF NOT EXISTS idx_feature_requests_votes ON public.feature_requests (vote_count DESC);
+CREATE INDEX IF NOT EXISTS idx_feature_comments_req ON public.feature_request_comments (feature_request_id, created_at);
 
 -- Keep vote_count in sync.
 CREATE OR REPLACE FUNCTION public.sync_feature_vote_count()
@@ -1680,10 +1717,12 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.sync_feature_vote_count() FROM PUBLIC, anon, authenticated;
 
+DROP TRIGGER IF EXISTS trg_feature_vote_count ON public.feature_request_votes;
 CREATE TRIGGER trg_feature_vote_count
   AFTER INSERT OR DELETE ON public.feature_request_votes
   FOR EACH ROW EXECUTE FUNCTION public.sync_feature_vote_count();
 
+DROP TRIGGER IF EXISTS trg_feature_requests_updated ON public.feature_requests;
 CREATE TRIGGER trg_feature_requests_updated
   BEFORE UPDATE ON public.feature_requests
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -1695,33 +1734,43 @@ ALTER TABLE public.feature_request_comments ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT, INSERT ON public.feature_requests TO authenticated;
 GRANT ALL ON public.feature_requests TO service_role;
+DROP POLICY IF EXISTS "fr read all" ON public.feature_requests;
 CREATE POLICY "fr read all" ON public.feature_requests
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "fr insert self" ON public.feature_requests;
 CREATE POLICY "fr insert self" ON public.feature_requests
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+DROP POLICY IF EXISTS "fr update staff" ON public.feature_requests;
 CREATE POLICY "fr update staff" ON public.feature_requests
   FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "fr delete owner or staff" ON public.feature_requests;
 CREATE POLICY "fr delete owner or staff" ON public.feature_requests
   FOR DELETE TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
 
 GRANT SELECT, INSERT, DELETE ON public.feature_request_votes TO authenticated;
 GRANT ALL ON public.feature_request_votes TO service_role;
+DROP POLICY IF EXISTS "frv read all" ON public.feature_request_votes;
 CREATE POLICY "frv read all" ON public.feature_request_votes
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "frv insert self" ON public.feature_request_votes;
 CREATE POLICY "frv insert self" ON public.feature_request_votes
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+DROP POLICY IF EXISTS "frv delete self" ON public.feature_request_votes;
 CREATE POLICY "frv delete self" ON public.feature_request_votes
   FOR DELETE TO authenticated USING (user_id = auth.uid());
 
 GRANT SELECT, INSERT, DELETE ON public.feature_request_comments TO authenticated;
 GRANT ALL ON public.feature_request_comments TO service_role;
+DROP POLICY IF EXISTS "frc read all" ON public.feature_request_comments;
 CREATE POLICY "frc read all" ON public.feature_request_comments
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "frc insert self" ON public.feature_request_comments;
 CREATE POLICY "frc insert self" ON public.feature_request_comments
   FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+DROP POLICY IF EXISTS "frc delete self or staff" ON public.feature_request_comments;
 CREATE POLICY "frc delete self or staff" ON public.feature_request_comments
   FOR DELETE TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
@@ -1733,9 +1782,11 @@ CREATE POLICY "frc delete self or staff" ON public.feature_request_comments
 -- Blog / content system. Staff author posts in the admin; published posts are
 -- public. Body is Markdown, rendered safely on the client (see src/lib/markdown).
 
-CREATE TYPE public.blog_status AS ENUM ('draft', 'published');
+DO $$ BEGIN
+  CREATE TYPE public.blog_status AS ENUM ('draft', 'published');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE public.blog_posts (
+CREATE TABLE IF NOT EXISTS public.blog_posts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   title text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 160),
@@ -1750,8 +1801,9 @@ CREATE TABLE public.blog_posts (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_blog_posts_published ON public.blog_posts (status, published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON public.blog_posts (status, published_at DESC);
 
+DROP TRIGGER IF EXISTS trg_blog_posts_updated ON public.blog_posts;
 CREATE TRIGGER trg_blog_posts_updated
   BEFORE UPDATE ON public.blog_posts
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -1763,8 +1815,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_posts TO authenticated;
 GRANT ALL ON public.blog_posts TO service_role;
 
 -- Anyone may read published posts; staff additionally see drafts.
+DROP POLICY IF EXISTS "blog anon read published" ON public.blog_posts;
 CREATE POLICY "blog anon read published" ON public.blog_posts
   FOR SELECT TO anon USING (status = 'published');
+DROP POLICY IF EXISTS "blog authed read" ON public.blog_posts;
 CREATE POLICY "blog authed read" ON public.blog_posts
   FOR SELECT TO authenticated
   USING (
@@ -1774,13 +1828,16 @@ CREATE POLICY "blog authed read" ON public.blog_posts
   );
 
 -- Only staff may write.
+DROP POLICY IF EXISTS "blog staff insert" ON public.blog_posts;
 CREATE POLICY "blog staff insert" ON public.blog_posts
   FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog staff update" ON public.blog_posts;
 CREATE POLICY "blog staff update" ON public.blog_posts
   FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog staff delete" ON public.blog_posts;
 CREATE POLICY "blog staff delete" ON public.blog_posts
   FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
@@ -1829,7 +1886,7 @@ CREATE POLICY "media_delete_staff" ON storage.objects
     AND (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   );
 
-CREATE TABLE public.media_assets (
+CREATE TABLE IF NOT EXISTS public.media_assets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   path text NOT NULL UNIQUE,
   url text NOT NULL,
@@ -1841,7 +1898,7 @@ CREATE TABLE public.media_assets (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_media_assets_created ON public.media_assets (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_media_assets_created ON public.media_assets (created_at DESC);
 
 ALTER TABLE public.media_assets ENABLE ROW LEVEL SECURITY;
 
@@ -1849,14 +1906,18 @@ GRANT SELECT ON public.media_assets TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.media_assets TO authenticated;
 GRANT ALL ON public.media_assets TO service_role;
 
+DROP POLICY IF EXISTS "media_assets read" ON public.media_assets;
 CREATE POLICY "media_assets read" ON public.media_assets FOR SELECT USING (true);
+DROP POLICY IF EXISTS "media_assets staff insert" ON public.media_assets;
 CREATE POLICY "media_assets staff insert" ON public.media_assets
   FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "media_assets staff update" ON public.media_assets;
 CREATE POLICY "media_assets staff update" ON public.media_assets
   FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "media_assets staff delete" ON public.media_assets;
 CREATE POLICY "media_assets staff delete" ON public.media_assets
   FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
@@ -2261,7 +2322,7 @@ DO $$ BEGIN
 END $$;
 
 -- 2. Categories, tags, authors
-CREATE TABLE public.blog_categories (
+CREATE TABLE IF NOT EXISTS public.blog_categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   name text NOT NULL CHECK (char_length(name) BETWEEN 1 AND 80),
@@ -2269,14 +2330,14 @@ CREATE TABLE public.blog_categories (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.blog_tags (
+CREATE TABLE IF NOT EXISTS public.blog_tags (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   name text NOT NULL CHECK (char_length(name) BETWEEN 1 AND 60),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.blog_authors (
+CREATE TABLE IF NOT EXISTS public.blog_authors (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   slug text NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   name text NOT NULL CHECK (char_length(name) BETWEEN 1 AND 100),
@@ -2285,12 +2346,12 @@ CREATE TABLE public.blog_authors (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.blog_post_tags (
+CREATE TABLE IF NOT EXISTS public.blog_post_tags (
   post_id uuid NOT NULL REFERENCES public.blog_posts(id) ON DELETE CASCADE,
   tag_id uuid NOT NULL REFERENCES public.blog_tags(id) ON DELETE CASCADE,
   PRIMARY KEY (post_id, tag_id)
 );
-CREATE INDEX idx_blog_post_tags_tag ON public.blog_post_tags (tag_id);
+CREATE INDEX IF NOT EXISTS idx_blog_post_tags_tag ON public.blog_post_tags (tag_id);
 
 -- 3. New per-article columns: category/author references + full SEO fields
 -- + scheduling. content_html holds sanitized rich-text output from the new
@@ -2308,9 +2369,9 @@ ALTER TABLE public.blog_posts
   ADD COLUMN IF NOT EXISTS featured_image_alt text,
   ADD COLUMN IF NOT EXISTS scheduled_at timestamptz;
 
-CREATE INDEX idx_blog_posts_category ON public.blog_posts (category_id);
-CREATE INDEX idx_blog_posts_author_ref ON public.blog_posts (author_ref_id);
-CREATE INDEX idx_blog_posts_scheduled ON public.blog_posts (status, scheduled_at) WHERE status = 'scheduled';
+CREATE INDEX IF NOT EXISTS idx_blog_posts_category ON public.blog_posts (category_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_author_ref ON public.blog_posts (author_ref_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_scheduled ON public.blog_posts (status, scheduled_at) WHERE status = 'scheduled';
 
 -- 4. RLS — identical staff-write / public-read shape already used by
 -- blog_posts and media_assets.
@@ -2323,36 +2384,51 @@ GRANT SELECT ON public.blog_categories, public.blog_tags, public.blog_authors, p
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.blog_categories, public.blog_tags, public.blog_authors, public.blog_post_tags TO authenticated;
 GRANT ALL ON public.blog_categories, public.blog_tags, public.blog_authors, public.blog_post_tags TO service_role;
 
+DROP POLICY IF EXISTS "blog_categories read" ON public.blog_categories;
 CREATE POLICY "blog_categories read" ON public.blog_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "blog_categories staff insert" ON public.blog_categories;
 CREATE POLICY "blog_categories staff insert" ON public.blog_categories FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_categories staff update" ON public.blog_categories;
 CREATE POLICY "blog_categories staff update" ON public.blog_categories FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_categories staff delete" ON public.blog_categories;
 CREATE POLICY "blog_categories staff delete" ON public.blog_categories FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
 
+DROP POLICY IF EXISTS "blog_tags read" ON public.blog_tags;
 CREATE POLICY "blog_tags read" ON public.blog_tags FOR SELECT USING (true);
+DROP POLICY IF EXISTS "blog_tags staff insert" ON public.blog_tags;
 CREATE POLICY "blog_tags staff insert" ON public.blog_tags FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_tags staff update" ON public.blog_tags;
 CREATE POLICY "blog_tags staff update" ON public.blog_tags FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_tags staff delete" ON public.blog_tags;
 CREATE POLICY "blog_tags staff delete" ON public.blog_tags FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
 
+DROP POLICY IF EXISTS "blog_authors read" ON public.blog_authors;
 CREATE POLICY "blog_authors read" ON public.blog_authors FOR SELECT USING (true);
+DROP POLICY IF EXISTS "blog_authors staff insert" ON public.blog_authors;
 CREATE POLICY "blog_authors staff insert" ON public.blog_authors FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_authors staff update" ON public.blog_authors;
 CREATE POLICY "blog_authors staff update" ON public.blog_authors FOR UPDATE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_authors staff delete" ON public.blog_authors;
 CREATE POLICY "blog_authors staff delete" ON public.blog_authors FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
 
+DROP POLICY IF EXISTS "blog_post_tags read" ON public.blog_post_tags;
 CREATE POLICY "blog_post_tags read" ON public.blog_post_tags FOR SELECT USING (true);
+DROP POLICY IF EXISTS "blog_post_tags staff insert" ON public.blog_post_tags;
 CREATE POLICY "blog_post_tags staff insert" ON public.blog_post_tags FOR INSERT TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "blog_post_tags staff delete" ON public.blog_post_tags;
 CREATE POLICY "blog_post_tags staff delete" ON public.blog_post_tags FOR DELETE TO authenticated
   USING (public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()));
 
