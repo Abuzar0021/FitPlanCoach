@@ -2729,3 +2729,28 @@ $$;
 
 REVOKE ALL ON FUNCTION public.consume_plan_generation_credit(UUID, BOOLEAN, INT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.consume_plan_generation_credit(UUID, BOOLEAN, INT) TO service_role;
+
+-- Owner/admin parity, part 2: per-user activity logs. These already worked
+-- fine for every user managing their OWN rows (WITH CHECK never depended on
+-- role), but an owner-without-a-separate-admin-role couldn't view another
+-- user's individual logs the same way an 'admin'-tagged account could —
+-- for consistency with every other admin-override clause in this file.
+DROP POLICY IF EXISTS "own set logs" ON public.workout_set_logs;
+CREATE POLICY "own set logs" ON public.workout_set_logs FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "own food favorites" ON public.food_favorites;
+CREATE POLICY "own food favorites" ON public.food_favorites FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "own progress photos" ON public.progress_photos;
+CREATE POLICY "own progress photos" ON public.progress_photos FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "own water logs" ON public.water_logs;
+CREATE POLICY "own water logs" ON public.water_logs FOR ALL TO authenticated
+  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
+  WITH CHECK (user_id = auth.uid());

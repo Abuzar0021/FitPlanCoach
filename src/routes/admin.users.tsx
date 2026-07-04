@@ -75,7 +75,11 @@ function UsersAdmin() {
   }, [user?.id]);
 
   async function ban(id: string, banned: boolean) {
-    await supabase.from("profiles").update({ banned: !banned }).eq("id", id);
+    const { error } = await supabase.from("profiles").update({ banned: !banned }).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     load();
     toast.success(!banned ? "User banned" : "Unbanned");
   }

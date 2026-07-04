@@ -110,7 +110,11 @@ function ExAdmin() {
 
   async function del(id: string) {
     if (!confirm("Delete?")) return;
-    await supabase.from("exercises").delete().eq("id", id);
+    const { error } = await supabase.from("exercises").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     if (editingId === id) reset();
     load();
   }

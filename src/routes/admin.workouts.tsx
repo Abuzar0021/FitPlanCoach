@@ -50,23 +50,32 @@ function WtAdmin() {
     }
   }
   async function save(id: string) {
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(draft);
-      const { error } = await supabase
-        .from("workout_templates")
-        .update({ schedule: parsed })
-        .eq("id", id);
-      if (error) throw error;
-      toast.success("Saved");
-      setEditing(null);
-      load();
-    } catch (e) {
+      parsed = JSON.parse(draft);
+    } catch {
       toast.error("Invalid JSON");
+      return;
     }
+    const { error } = await supabase
+      .from("workout_templates")
+      .update({ schedule: parsed as any })
+      .eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Saved");
+    setEditing(null);
+    load();
   }
   async function del(id: string) {
     if (!confirm("Delete?")) return;
-    await supabase.from("workout_templates").delete().eq("id", id);
+    const { error } = await supabase.from("workout_templates").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     load();
   }
 

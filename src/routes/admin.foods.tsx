@@ -80,7 +80,8 @@ function FoodsAdmin() {
     else load();
   }
   async function toggle(id: string, enabled: boolean) {
-    await supabase.from("foods").update({ enabled: !enabled }).eq("id", id);
+    const { error } = await supabase.from("foods").update({ enabled: !enabled }).eq("id", id);
+    if (error) toast.error(error.message);
     load();
   }
 
