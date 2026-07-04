@@ -56,7 +56,7 @@ android {
             // and enabling it here can't be verified against a real device in
             // this environment. Revisit if the native surface grows.
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

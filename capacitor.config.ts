@@ -10,9 +10,14 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // support the native Play Billing Library the same way and was not used.
 //
 // @capacitor/core, @capacitor/cli, @capacitor/android, and
-// capacitor-plugin-cdv-purchase are already in package.json. To (re)generate
-// the native Android project from this config:
-//   npx cap add android && npx cap sync android
+// capacitor-plugin-cdv-purchase are already in package.json. `webDir: dist`
+// below must exist before syncing — `cap sync` copies whatever's there into
+// android/app/src/main/assets/public even though the WebView actually
+// navigates to `server.url` at runtime, so a missing/stale `dist/` produces
+// an incomplete assets folder. Build first, every time:
+//   npm run build && npx cap sync android
+// (or just `npm run cap:sync`, which does both in the right order). To
+// (re)generate the native project from scratch: npx cap add android.
 const config: CapacitorConfig = {
   appId: "com.fitplancoach.app",
   appName: "FitPlanCoach",

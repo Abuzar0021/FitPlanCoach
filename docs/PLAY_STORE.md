@@ -57,10 +57,21 @@ permission, an SDK bump) need a new Play upload.
 This is the one step that genuinely requires a real machine with the Android
 SDK — it cannot be done from a sandboxed CLI environment.
 
-1. Open the `android/` folder in Android Studio (**File → Open**).
-2. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
+1. From the project root, **build the web app and sync Capacitor before
+   opening Android Studio**:
+   ```bash
+   npm install
+   npm run cap:sync   # runs `npm run build` then `npx cap sync android`
+   ```
+   Don't skip the build step — `cap sync` copies whatever's in `dist/` into
+   `android/app/src/main/assets/public`, so running it against a missing or
+   stale `dist/` produces an incomplete/missing assets folder (the WebView
+   still works at runtime since it navigates to `server.url`, but the sync
+   step itself needs real content there to succeed cleanly).
+2. Open the `android/` folder in Android Studio (**File → Open**).
+3. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
    minutes).
-3. Create your upload keystore, if you don't have one yet:
+4. Create your upload keystore, if you don't have one yet:
    ```bash
    keytool -genkeypair -v -keystore fitplancoach-upload.jks \
      -alias fitplancoach -keyalg RSA -keysize 2048 -validity 9125
@@ -69,10 +80,10 @@ SDK — it cannot be done from a sandboxed CLI environment.
    way it's gitignored) and back it up. Losing it means you can't sign
    updates the same way again (Play App Signing's key-reset flow can recover
    from this, but it's a hassle — keep a copy somewhere safe).
-4. Copy `android/keystore.properties.example` to `android/keystore.properties`
+5. Copy `android/keystore.properties.example` to `android/keystore.properties`
    and fill in `storeFile` (path to the .jks above), `storePassword`,
    `keyAlias`, `keyPassword`. This file is gitignored — never commit it.
-5. **Build → Generate Signed App Bundle / APK → Android App Bundle**, or from
+6. **Build → Generate Signed App Bundle / APK → Android App Bundle**, or from
    the command line: `./gradlew bundleRelease` (uses the signing config from
    step 4 automatically). The AAB lands in
    `android/app/build/outputs/bundle/release/app-release.aab`.
