@@ -69,6 +69,7 @@ import { Route as CmsArticlesIdRouteImport } from './routes/cms.articles.$id'
 import { Route as BlogTagSlugRouteImport } from './routes/blog.tag.$slug'
 import { Route as BlogCategorySlugRouteImport } from './routes/blog.category.$slug'
 import { Route as BlogAuthorSlugRouteImport } from './routes/blog.author.$slug'
+import { Route as AmpBlogSlugRouteImport } from './routes/amp.blog.$slug'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -376,6 +377,11 @@ const BlogAuthorSlugRoute = BlogAuthorSlugRouteImport.update({
   path: '/author/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AmpBlogSlugRoute = AmpBlogSlugRouteImport.update({
+  id: '/amp/blog/$slug',
+  path: '/amp/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -469,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/cms/': typeof CmsIndexRoute
+  '/amp/blog/$slug': typeof AmpBlogSlugRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
   '/blog/tag/$slug': typeof BlogTagSlugRoute
@@ -533,6 +540,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/cms': typeof CmsIndexRoute
+  '/amp/blog/$slug': typeof AmpBlogSlugRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
   '/blog/tag/$slug': typeof BlogTagSlugRoute
@@ -603,6 +611,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/cms/': typeof CmsIndexRoute
+  '/amp/blog/$slug': typeof AmpBlogSlugRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
   '/blog/tag/$slug': typeof BlogTagSlugRoute
@@ -673,6 +682,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/cms/'
+    | '/amp/blog/$slug'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
     | '/blog/tag/$slug'
@@ -737,6 +747,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/cms'
+    | '/amp/blog/$slug'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
     | '/blog/tag/$slug'
@@ -806,6 +817,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/cms/'
+    | '/amp/blog/$slug'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
     | '/blog/tag/$slug'
@@ -844,6 +856,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  AmpBlogSlugRoute: typeof AmpBlogSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicGooglePlayRtdnRoute: typeof ApiPublicGooglePlayRtdnRoute
   ApiPublicLemonsqueezyWebhookRoute: typeof ApiPublicLemonsqueezyWebhookRoute
@@ -1276,6 +1289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogAuthorSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/amp/blog/$slug': {
+      id: '/amp/blog/$slug'
+      path: '/amp/blog/$slug'
+      fullPath: '/amp/blog/$slug'
+      preLoaderRoute: typeof AmpBlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1468,6 +1488,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  AmpBlogSlugRoute: AmpBlogSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicGooglePlayRtdnRoute: ApiPublicGooglePlayRtdnRoute,
   ApiPublicLemonsqueezyWebhookRoute: ApiPublicLemonsqueezyWebhookRoute,

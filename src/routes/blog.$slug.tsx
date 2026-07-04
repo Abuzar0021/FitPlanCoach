@@ -62,7 +62,10 @@ export const Route = createFileRoute("/blog/$slug")({
         ...(post.category ? [{ property: "article:section", content: post.category.name }] : []),
         ...post.tags.map((t) => ({ property: "article:tag", content: t.name })),
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: [
+        { rel: "canonical", href: url },
+        { rel: "amphtml", href: `${BASE_URL}/amp/blog/${post.slug}` },
+      ],
       scripts: [
         {
           type: "application/ld+json",
