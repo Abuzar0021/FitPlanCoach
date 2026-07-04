@@ -19,12 +19,13 @@ export const Route = createFileRoute("/blog/rss.xml")({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db: any = supabaseAdmin;
         const now = new Date().toISOString();
-        const { data } = await db
+        const { data, error } = await db
           .from("blog_posts")
           .select("slug,title,excerpt,seo_description,published_at,scheduled_at,updated_at,status")
           .or(`status.eq.published,and(status.eq.scheduled,scheduled_at.lte.${now})`)
           .order("published_at", { ascending: false, nullsFirst: false })
           .limit(50);
+        if (error) console.error("[blog] failed to build RSS feed", error);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const posts = (data ?? []) as any[];

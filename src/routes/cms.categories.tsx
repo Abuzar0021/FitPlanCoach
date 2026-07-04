@@ -26,7 +26,11 @@ function CategoriesAdmin() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const { data } = await db.from("blog_categories").select("*").order("name");
+    const { data, error } = await db.from("blog_categories").select("*").order("name");
+    if (error) {
+      console.error("[cms] failed to load categories", error);
+      toast.error(`Could not load categories: ${error.message}`);
+    }
     setItems((data ?? []) as BlogCategory[]);
   }
   useEffect(() => {

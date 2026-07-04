@@ -45,6 +45,15 @@ function CmsDashboard() {
         db.from("media_assets").select("id", { count: "exact", head: true }),
         db.from("blog_posts").select("*").order("created_at", { ascending: false }).limit(5),
       ]);
+      for (const [label, result] of [
+        ["posts", posts],
+        ["categories", categories],
+        ["tags", tags],
+        ["media", media],
+        ["recent posts", recentPosts],
+      ] as const) {
+        if (result.error) console.error(`[cms] dashboard failed to load ${label}`, result.error);
+      }
       const rows: { status: string }[] = posts.data ?? [];
       setCounts({
         total: rows.length,

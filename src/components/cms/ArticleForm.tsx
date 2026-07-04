@@ -94,11 +94,21 @@ export function ArticleForm({ postId }: { postId?: string }) {
 
   useEffect(() => {
     (async () => {
-      const [{ data: cats }, { data: tagRows }, { data: authorRows }] = await Promise.all([
+      const [
+        { data: cats, error: catsErr },
+        { data: tagRows, error: tagsErr },
+        { data: authorRows, error: authorsErr },
+      ] = await Promise.all([
         db.from("blog_categories").select("*").order("name"),
         db.from("blog_tags").select("*").order("name"),
         db.from("blog_authors").select("*").order("name"),
       ]);
+      if (catsErr) console.error("[cms] failed to load categories", catsErr);
+      if (tagsErr) console.error("[cms] failed to load tags", tagsErr);
+      if (authorsErr) console.error("[cms] failed to load authors", authorsErr);
+      if (catsErr || tagsErr || authorsErr) {
+        toast.error("Some editor data failed to load — check the console for details.");
+      }
       setCategories((cats ?? []) as BlogCategory[]);
       setTags((tagRows ?? []) as BlogTag[]);
       setAuthors((authorRows ?? []) as BlogAuthor[]);

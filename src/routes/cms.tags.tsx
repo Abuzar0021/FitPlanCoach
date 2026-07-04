@@ -22,7 +22,11 @@ function TagsAdmin() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const { data } = await db.from("blog_tags").select("*").order("name");
+    const { data, error } = await db.from("blog_tags").select("*").order("name");
+    if (error) {
+      console.error("[cms] failed to load tags", error);
+      toast.error(`Could not load tags: ${error.message}`);
+    }
     setItems((data ?? []) as BlogTag[]);
   }
   useEffect(() => {
