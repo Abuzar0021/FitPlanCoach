@@ -30,6 +30,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CmsIndexRouteImport } from './routes/cms.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CmsTagsRouteImport } from './routes/cms.tags'
@@ -61,6 +62,7 @@ import { Route as AppFoodDiaryRouteImport } from './routes/_app.food-diary'
 import { Route as AppFeedbackRouteImport } from './routes/_app.feedback'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
+import { Route as CmsArticlesIndexRouteImport } from './routes/cms.articles.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as CmsArticlesNewRouteImport } from './routes/cms.articles.new'
 import { Route as CmsArticlesIdRouteImport } from './routes/cms.articles.$id'
@@ -178,6 +180,11 @@ const CmsIndexRoute = CmsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CmsRoute,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -334,6 +341,11 @@ const AppBillingRoute = AppBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
+const CmsArticlesIndexRoute = CmsArticlesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CmsArticlesRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -455,6 +467,7 @@ export interface FileRoutesByFullPath {
   '/cms/tags': typeof CmsTagsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/cms/': typeof CmsIndexRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
@@ -462,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/cms/articles/$id': typeof CmsArticlesIdRoute
   '/cms/articles/new': typeof CmsArticlesNewRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/cms/articles/': typeof CmsArticlesIndexRoute
   '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -474,7 +488,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
-  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/delete-account': typeof DeleteAccountRoute
   '/download': typeof DownloadRoute
@@ -513,12 +526,12 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/blog/search': typeof BlogSearchRoute
-  '/cms/articles': typeof CmsArticlesRouteWithChildren
   '/cms/categories': typeof CmsCategoriesRoute
   '/cms/media': typeof CmsMediaRoute
   '/cms/tags': typeof CmsTagsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/cms': typeof CmsIndexRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
@@ -526,6 +539,7 @@ export interface FileRoutesByTo {
   '/cms/articles/$id': typeof CmsArticlesIdRoute
   '/cms/articles/new': typeof CmsArticlesNewRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/cms/articles': typeof CmsArticlesIndexRoute
   '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -587,6 +601,7 @@ export interface FileRoutesById {
   '/cms/tags': typeof CmsTagsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/cms/': typeof CmsIndexRoute
   '/blog/author/$slug': typeof BlogAuthorSlugRoute
   '/blog/category/$slug': typeof BlogCategorySlugRoute
@@ -594,6 +609,7 @@ export interface FileRoutesById {
   '/cms/articles/$id': typeof CmsArticlesIdRoute
   '/cms/articles/new': typeof CmsArticlesNewRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/cms/articles/': typeof CmsArticlesIndexRoute
   '/api/public/google-play/rtdn': typeof ApiPublicGooglePlayRtdnRoute
   '/api/public/lemonsqueezy/webhook': typeof ApiPublicLemonsqueezyWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -655,6 +671,7 @@ export interface FileRouteTypes {
     | '/cms/tags'
     | '/email/unsubscribe'
     | '/admin/'
+    | '/blog/'
     | '/cms/'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
@@ -662,6 +679,7 @@ export interface FileRouteTypes {
     | '/cms/articles/$id'
     | '/cms/articles/new'
     | '/lovable/email/suppression'
+    | '/cms/articles/'
     | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
@@ -674,7 +692,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/auth'
-    | '/blog'
     | '/contact'
     | '/delete-account'
     | '/download'
@@ -713,12 +730,12 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/blog/rss.xml'
     | '/blog/search'
-    | '/cms/articles'
     | '/cms/categories'
     | '/cms/media'
     | '/cms/tags'
     | '/email/unsubscribe'
     | '/admin'
+    | '/blog'
     | '/cms'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
@@ -726,6 +743,7 @@ export interface FileRouteTypes {
     | '/cms/articles/$id'
     | '/cms/articles/new'
     | '/lovable/email/suppression'
+    | '/cms/articles'
     | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
@@ -786,6 +804,7 @@ export interface FileRouteTypes {
     | '/cms/tags'
     | '/email/unsubscribe'
     | '/admin/'
+    | '/blog/'
     | '/cms/'
     | '/blog/author/$slug'
     | '/blog/category/$slug'
@@ -793,6 +812,7 @@ export interface FileRouteTypes {
     | '/cms/articles/$id'
     | '/cms/articles/new'
     | '/lovable/email/suppression'
+    | '/cms/articles/'
     | '/api/public/google-play/rtdn'
     | '/api/public/lemonsqueezy/webhook'
     | '/lovable/email/auth/preview'
@@ -982,6 +1002,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/cms/'
       preLoaderRoute: typeof CmsIndexRouteImport
       parentRoute: typeof CmsRoute
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -1200,6 +1227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/cms/articles/': {
+      id: '/cms/articles/'
+      path: '/'
+      fullPath: '/cms/articles/'
+      preLoaderRoute: typeof CmsArticlesIndexRouteImport
+      parentRoute: typeof CmsArticlesRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1360,6 +1394,7 @@ interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
   BlogSearchRoute: typeof BlogSearchRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   BlogAuthorSlugRoute: typeof BlogAuthorSlugRoute
   BlogCategorySlugRoute: typeof BlogCategorySlugRoute
   BlogTagSlugRoute: typeof BlogTagSlugRoute
@@ -1369,6 +1404,7 @@ const BlogRouteChildren: BlogRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   BlogRssDotxmlRoute: BlogRssDotxmlRoute,
   BlogSearchRoute: BlogSearchRoute,
+  BlogIndexRoute: BlogIndexRoute,
   BlogAuthorSlugRoute: BlogAuthorSlugRoute,
   BlogCategorySlugRoute: BlogCategorySlugRoute,
   BlogTagSlugRoute: BlogTagSlugRoute,
@@ -1379,11 +1415,13 @@ const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 interface CmsArticlesRouteChildren {
   CmsArticlesIdRoute: typeof CmsArticlesIdRoute
   CmsArticlesNewRoute: typeof CmsArticlesNewRoute
+  CmsArticlesIndexRoute: typeof CmsArticlesIndexRoute
 }
 
 const CmsArticlesRouteChildren: CmsArticlesRouteChildren = {
   CmsArticlesIdRoute: CmsArticlesIdRoute,
   CmsArticlesNewRoute: CmsArticlesNewRoute,
+  CmsArticlesIndexRoute: CmsArticlesIndexRoute,
 }
 
 const CmsArticlesRouteWithChildren = CmsArticlesRoute._addFileChildren(
