@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { usePageView } from "../lib/analytics";
 import { SiteScripts } from "../components/SiteScripts";
 import { ADSENSE_CLIENT_ID } from "../lib/adsense-config";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -174,6 +175,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <SiteScripts />
+      <Toaster />
     </QueryClientProvider>
   );
 }
