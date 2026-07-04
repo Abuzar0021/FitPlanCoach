@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "postinstall": "patch-package",
-    "cap:sync": "npm run build && npx cap sync android"
+    "cap:sync": "npm run build && node scripts/prepare-cap-webdir.mjs && npx cap sync android"
   },
   "dependencies": {
     "@capacitor-community/play-integrity": "^8.0.0",

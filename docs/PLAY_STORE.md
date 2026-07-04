@@ -61,13 +61,21 @@ SDK — it cannot be done from a sandboxed CLI environment.
    opening Android Studio**:
    ```bash
    npm install
-   npm run cap:sync   # runs `npm run build` then `npx cap sync android`
+   npm run cap:sync   # build -> ensure dist/ exists -> npx cap sync android
    ```
-   Don't skip the build step — `cap sync` copies whatever's in `dist/` into
-   `android/app/src/main/assets/public`, so running it against a missing or
-   stale `dist/` produces an incomplete/missing assets folder (the WebView
-   still works at runtime since it navigates to `server.url`, but the sync
-   step itself needs real content there to succeed cleanly).
+   Always use `npm run cap:sync`, never a bare `npx cap sync android`. Here's
+   why: `npm run build` (vite/Nitro) does **not** produce a `dist/` folder on
+   a normal machine — it builds to `.output/` instead (Cloudflare-module
+   format by default, or node-server format when `NITRO_PRESET=node-server`,
+   as the VPS Dockerfile sets). Only inside Lovable's cloud sandbox does the
+   build get redirected into `dist/`. Since `cap sync` requires `webDir`
+   (`dist/`) to merely *exist* — its contents are irrelevant, because the
+   WebView always navigates to `server.url` at runtime, never local files —
+   `npm run cap:sync` runs `scripts/prepare-cap-webdir.mjs` after the build to
+   create a trivial placeholder `dist/index.html` if one isn't already
+   there. Skipping this (e.g. running `vite build` then `npx cap sync
+   android` directly) fails with "Web asset directory specified by webDir
+   does not exist".
 2. Open the `android/` folder in Android Studio (**File → Open**).
 3. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
    minutes).
