@@ -3,16 +3,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { getPublishedPost } from "@/lib/blog.functions";
 import { formatPostDate, effectivePublishDate, readingTimeForPost } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
-import { sanitizeArticleHtml } from "@/lib/sanitize-html";
 import { toAmpHtml, usesAmpYoutube, escapeHtml } from "@/lib/amp-html";
 import { ADSENSE_CLIENT_ID } from "@/lib/adsense-config";
 
 // The AMP counterpart to /blog/$slug, for Google's AMP Auto Ads. This is a
 // fully separate, hand-built HTML document — not the React app — because
 // valid AMP HTML forbids custom JavaScript entirely, which the React SPA
-// obviously depends on. It reuses the same data layer (getPublishedPost) and
-// content sanitizer as the real page so the two can never drift out of sync
-// on what counts as a "live" post.
+// obviously depends on. It reuses the same data layer (getPublishedPost) as
+// the real page so the two can never drift out of sync on what counts as a
+// "live" post. content_html itself is used as-is: it's already sanitized
+// once, in the real browser DOM, at CMS save time (ArticleForm.tsx /
+// RichTextEditor.tsx) — sanitizing it again here would need jsdom, which
+// can't actually run in this app's self-contained SSR bundle (see
+// blog.$slug.tsx for why).
 const BASE_URL = "https://fitplancoach.com";
 
 const AMP_BOILERPLATE =
@@ -49,7 +52,13 @@ export const Route = createFileRoute("/amp/blog/$slug")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const post = await getPublishedPost({ data: { slug: params.slug } });
+        let post;
+        try {
+          post = await getPublishedPost({ data: { slug: params.slug } });
+        } catch (error) {
+          console.error(`[amp] failed to load post "${params.slug}"`, error);
+          return new Response("Internal error", { status: 500 });
+        }
         if (!post) {
           return new Response("Not found", { status: 404 });
         }
@@ -61,7 +70,7 @@ export const Route = createFileRoute("/amp/blog/$slug")({
         const readingTime = readingTimeForPost(post);
 
         const articleHtml = post.content_html
-          ? toAmpHtml(sanitizeArticleHtml(post.content_html))
+          ? toAmpHtml(post.content_html)
           : renderToStaticMarkup(renderMarkdown(post.body));
 
         const extensionScripts = [

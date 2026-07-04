@@ -9,7 +9,6 @@ import {
   annotateHeadingsForToc,
 } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
-import { sanitizeArticleHtml } from "@/lib/sanitize-html";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { TopArticleAd, InContentAd, BottomArticleAd } from "@/components/ads";
 import {
@@ -116,8 +115,17 @@ function BlogPostPage() {
   const readingTime = readingTimeForPost(post);
   const dateLabel = formatPostDate(effectivePublishDate(post) ?? post.created_at);
 
+  // content_html is already sanitized once, in the real browser DOM (not a
+  // server-side jsdom emulation), at CMS save time — see ArticleForm.tsx and
+  // RichTextEditor.tsx, which call the exact same sanitizeArticleHtml. Only
+  // staff (admin/owner role, gated by /cms's auth check + RLS) can write
+  // this column at all, so re-sanitizing again here would be redundant, and
+  // jsdom (sanitizeArticleHtml's server-side DOM implementation) can't
+  // actually run in this app's self-contained SSR bundle — it needs to read
+  // real on-disk resource files (e.g. its default stylesheet) that never
+  // get copied into the bundled `.output` build, crashing every request.
   const { html: contentHtml, toc } = post.content_html
-    ? annotateHeadingsForToc(sanitizeArticleHtml(post.content_html))
+    ? annotateHeadingsForToc(post.content_html)
     : { html: "", toc: [] as { id: string; text: string; level: 2 | 3 }[] };
 
   return (
