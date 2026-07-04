@@ -104,13 +104,20 @@ export function ArticleForm({ postId }: { postId?: string }) {
       setAuthors((authorRows ?? []) as BlogAuthor[]);
 
       if (postId) {
-        const { data: post, error } = await db
-          .from("blog_posts")
-          .select("*, post_tags:blog_post_tags(tag_id)")
-          .eq("id", postId)
-          .maybeSingle();
+        // Two plain queries instead of an embedded `post_tags:blog_post_tags(...)`
+        // select — embeds need PostgREST's schema cache to already know about
+        // the foreign key, which can lag right after adding one via the SQL
+        // editor ("Could not find a relationship..."). A plain select + a
+        // second lookup only needs each table to exist, which is far less
+        // fragile for tables this new.
+        const [{ data: post, error }, { data: tagLinks, error: tagLinkErr }] = await Promise.all([
+          db.from("blog_posts").select("*").eq("id", postId).maybeSingle(),
+          db.from("blog_post_tags").select("tag_id").eq("post_id", postId),
+        ]);
+        if (error) console.error("[cms] failed to load article", error);
+        if (tagLinkErr) console.error("[cms] failed to load article tags", tagLinkErr);
         if (error || !post) {
-          toast.error("Article not found");
+          toast.error(error ? `Could not load article: ${error.message}` : "Article not found");
           navigate({ to: "/cms/articles" });
           return;
         }
@@ -124,7 +131,7 @@ export function ArticleForm({ postId }: { postId?: string }) {
           featuredImageAlt: post.featured_image_alt ?? "",
           categoryId: post.category_id ?? "",
           authorRefId: post.author_ref_id ?? authorRows?.[0]?.id ?? "",
-          tagIds: (post.post_tags ?? []).map((t: any) => t.tag_id),
+          tagIds: (tagLinks ?? []).map((t: any) => t.tag_id),
           seoTitle: post.seo_title ?? "",
           seoDescription: post.seo_description ?? "",
           canonicalUrl: post.canonical_url ?? "",

@@ -29,15 +29,42 @@ function ArticlesList() {
 
   async function load() {
     setRows(null);
+    // Plain select + a separate batched category lookup, not an embedded
+    // `category:blog_categories(...)` — embeds need PostgREST's schema
+    // cache to already know about the foreign key, which can lag right
+    // after adding one via the SQL editor.
     let query = db
       .from("blog_posts")
-      .select("*, category:blog_categories(id,slug,name,description)", { count: "exact" })
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
     if (status !== "all") query = query.eq("status", status);
     if (q.trim()) query = query.ilike("title", `%${q.trim()}%`);
     const from = (page - 1) * PAGE_SIZE;
-    const { data, count } = await query.range(from, from + PAGE_SIZE - 1);
-    setRows((data ?? []) as Row[]);
+    const { data, count, error } = await query.range(from, from + PAGE_SIZE - 1);
+    if (error) {
+      console.error("[cms] failed to load articles", error);
+      toast.error(`Could not load articles: ${error.message}`);
+      setRows([]);
+      setTotal(0);
+      return;
+    }
+    const categoryIds = [...new Set((data ?? []).map((p: any) => p.category_id).filter(Boolean))];
+    let categories: BlogCategory[] = [];
+    if (categoryIds.length > 0) {
+      const { data: catRows, error: catErr } = await db
+        .from("blog_categories")
+        .select("id,slug,name,description")
+        .in("id", categoryIds);
+      if (catErr) console.error("[cms] failed to load categories", catErr);
+      categories = (catRows ?? []) as BlogCategory[];
+    }
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+    setRows(
+      (data ?? []).map((p: any) => ({
+        ...p,
+        category: categoryMap.get(p.category_id) ?? null,
+      })) as Row[],
+    );
     setTotal(count ?? 0);
   }
 
