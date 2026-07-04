@@ -2591,3 +2591,141 @@ insert into public.exercises (name, muscle_group, equipment, difficulty, instruc
   ('Plank Shoulder Tap', 'Shoulders', 'None', 'beginner', ARRAY['Start in a high plank position, hands under shoulders.','Lift one hand to tap the opposite shoulder, keeping hips as still as possible.','Return the hand to the floor and repeat on the other side.']::text[], ARRAY['Letting the hips rock side to side with each tap.','Rushing the taps instead of controlling the movement.']::text[], 'Breathe steadily throughout — don''t hold your breath.', 'Widen your feet stance for more stability if your hips are rocking too much.'),
   ('Prone Y-Raise', 'Shoulders', 'None', 'beginner', ARRAY['Lie face down, arms extended overhead in a Y shape, thumbs up.','Lift your arms and chest slightly off the floor, squeezing your shoulder blades.','Lower with control and repeat.']::text[], ARRAY['Using the lower back to jerk the body up instead of the shoulders.','Lifting the arms too high, straining the neck.']::text[], 'Exhale as you lift, inhale as you lower.', 'Keep the range of motion small and controlled — this is a light activation exercise.'),
   ('Towel Curl', 'Biceps', 'None', 'beginner', ARRAY['Hold a rolled towel with both hands, one end in each fist.','Curl one arm up while resisting with the other, creating tension through the towel.','Reverse direction slowly and repeat, alternating sides.']::text[], ARRAY['Not applying enough resistance to create real tension.','Moving too fast to actually load the biceps.']::text[], 'Breathe steadily throughout — exhale on the curling arm''s effort.', 'This is a light isometric-style substitute — don''t expect gym-level loading from it.');
+
+-- =====================================================================
+-- Owner/admin parity fix
+-- =====================================================================
+-- Every admin-gated write path in this schema is meant to also accept the
+-- site owner (public.is_owner — the account granted the 'owner' role above,
+-- see "Promote designated owner"), matching the convention already used by
+-- most of the tables here (support_tickets, payment_settings, subscriptions'
+-- user_roles policies, etc.). A handful of policies were written before
+-- is_owner() existed and were never updated, so an owner account without a
+-- *separate* literal 'admin' role row is silently rejected by RLS on these
+-- specific writes — e.g. "Save all settings" in /admin/settings does
+-- nothing (no error surfaced beyond a toast), and the owner can't manage the
+-- foods/exercises/workout template catalog or other users' profiles either.
+-- This section must stay at the end of the file: is_owner() and the
+-- 'owner' enum value are only defined earlier in THIS file, and (like
+-- every guarded DROP POLICY/CREATE POLICY pair elsewhere here) is a no-op
+-- to re-run on a database that already has it applied.
+
+-- app_settings
+DROP POLICY IF EXISTS "admin write settings" ON public.app_settings;
+CREATE POLICY "admin write settings" ON public.app_settings FOR INSERT TO authenticated
+  WITH CHECK (public.has_role(auth.uid(),'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin upd settings" ON public.app_settings;
+CREATE POLICY "admin upd settings" ON public.app_settings FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(),'admin') OR public.is_owner(auth.uid()))
+  WITH CHECK (public.has_role(auth.uid(),'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin del settings" ON public.app_settings;
+CREATE POLICY "admin del settings" ON public.app_settings FOR DELETE TO authenticated
+  USING (public.has_role(auth.uid(),'admin') OR public.is_owner(auth.uid()));
+
+-- profiles
+DROP POLICY IF EXISTS "users read own profile" ON public.profiles;
+CREATE POLICY "users read own profile" ON public.profiles FOR SELECT TO authenticated
+  USING (id = auth.uid() OR public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "users update own profile" ON public.profiles;
+CREATE POLICY "users update own profile" ON public.profiles FOR UPDATE TO authenticated
+  USING (id = auth.uid() OR public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()))
+  WITH CHECK (id = auth.uid() OR public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admins delete profile" ON public.profiles;
+CREATE POLICY "admins delete profile" ON public.profiles FOR DELETE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+
+-- foods
+DROP POLICY IF EXISTS "admin write foods" ON public.foods;
+CREATE POLICY "admin write foods" ON public.foods FOR INSERT TO authenticated
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin update foods" ON public.foods;
+CREATE POLICY "admin update foods" ON public.foods FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()))
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin delete foods" ON public.foods;
+CREATE POLICY "admin delete foods" ON public.foods FOR DELETE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+
+-- exercises
+DROP POLICY IF EXISTS "admin insert exercises" ON public.exercises;
+CREATE POLICY "admin insert exercises" ON public.exercises FOR INSERT TO authenticated
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin update exercises" ON public.exercises;
+CREATE POLICY "admin update exercises" ON public.exercises FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()))
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin delete exercises" ON public.exercises;
+CREATE POLICY "admin delete exercises" ON public.exercises FOR DELETE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+
+-- workout_templates
+DROP POLICY IF EXISTS "admin ins wt" ON public.workout_templates;
+CREATE POLICY "admin ins wt" ON public.workout_templates FOR INSERT TO authenticated
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin upd wt" ON public.workout_templates;
+CREATE POLICY "admin upd wt" ON public.workout_templates FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()))
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+DROP POLICY IF EXISTS "admin del wt" ON public.workout_templates;
+CREATE POLICY "admin del wt" ON public.workout_templates FOR DELETE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.is_owner(auth.uid()));
+
+-- analytics_events
+DROP POLICY IF EXISTS "admin read events" ON public.analytics_events;
+CREATE POLICY "admin read events" ON public.analytics_events FOR SELECT TO authenticated
+  USING (public.has_role(auth.uid(),'admin') OR public.is_owner(auth.uid()));
+
+-- =====================================================================
+-- consume_plan_generation_credit: self-heal a missing subscriptions row
+-- =====================================================================
+-- handle_new_user() creates a subscriptions row for every new signup, but an
+-- account whose row was lost for any reason (e.g. an existing account whose
+-- data predates the fix earlier in this file that stopped full_schema.sql
+-- from wiping non-catalog tables on re-paste) previously got permanently
+-- blocked from ever generating a free plan: the UPDATE below matched zero
+-- rows, v_count stayed NULL, and the function returned allowed=false —
+-- indistinguishable from "limit reached" even though the user has never
+-- generated a single plan. Fixed by creating the row first if it's missing.
+CREATE OR REPLACE FUNCTION public.consume_plan_generation_credit(
+  p_user_id UUID,
+  p_unlimited BOOLEAN,
+  p_free_limit INT
+)
+RETURNS TABLE(allowed BOOLEAN, plan_count_used INT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+#variable_conflict use_column
+DECLARE
+  v_count INT;
+BEGIN
+  INSERT INTO public.subscriptions (user_id, plan_type, status)
+    VALUES (p_user_id, 'free', 'active')
+    ON CONFLICT (user_id) DO NOTHING;
+
+  IF p_unlimited THEN
+    UPDATE public.subscriptions
+      SET plan_count_used = plan_count_used + 1
+      WHERE user_id = p_user_id
+      RETURNING subscriptions.plan_count_used INTO v_count;
+    RETURN QUERY SELECT TRUE, COALESCE(v_count, 0);
+    RETURN;
+  END IF;
+
+  UPDATE public.subscriptions
+    SET plan_count_used = plan_count_used + 1
+    WHERE user_id = p_user_id AND plan_count_used < p_free_limit
+    RETURNING subscriptions.plan_count_used INTO v_count;
+
+  IF v_count IS NULL THEN
+    SELECT s.plan_count_used INTO v_count FROM public.subscriptions s WHERE s.user_id = p_user_id;
+    RETURN QUERY SELECT FALSE, COALESCE(v_count, 0);
+  ELSE
+    RETURN QUERY SELECT TRUE, v_count;
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.consume_plan_generation_credit(UUID, BOOLEAN, INT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_plan_generation_credit(UUID, BOOLEAN, INT) TO service_role;
