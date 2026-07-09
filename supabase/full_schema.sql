@@ -2754,3 +2754,59 @@ DROP POLICY IF EXISTS "own water logs" ON public.water_logs;
 CREATE POLICY "own water logs" ON public.water_logs FOR ALL TO authenticated
   USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin'::public.app_role) OR public.is_owner(auth.uid()))
   WITH CHECK (user_id = auth.uid());
+
+-- =====================================================================
+-- Self-heal column drift on tables that predate the CREATE TABLE IF NOT
+-- EXISTS conversion
+-- =====================================================================
+-- CREATE TABLE IF NOT EXISTS only creates a table when it's fully missing —
+-- it does NOT add new columns to a table that already exists. If a column
+-- was added to one of these definitions after a real account's database was
+-- first set up, every read/write touching that column has failed with
+-- "column ... does not exist" ever since, because no later re-paste of this
+-- file was ever able to fix it (the CREATE TABLE line is a no-op once the
+-- table exists at all). Confirmed live: a real account hit exactly "column
+-- food_log_entries.meal_category does not exist" on both opening the food
+-- diary and logging any food — its table predates that column.
+ALTER TABLE public.food_log_entries
+  ADD COLUMN IF NOT EXISTS logged_date date,
+  ADD COLUMN IF NOT EXISTS meal_category public.meal_category,
+  ADD COLUMN IF NOT EXISTS food_id uuid REFERENCES public.foods(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS name text,
+  ADD COLUMN IF NOT EXISTS grams numeric,
+  ADD COLUMN IF NOT EXISTS calories numeric,
+  ADD COLUMN IF NOT EXISTS protein numeric,
+  ADD COLUMN IF NOT EXISTS carbs numeric,
+  ADD COLUMN IF NOT EXISTS fat numeric;
+
+-- Backfill any row left NULL by the ADD COLUMN above (only possible on an
+-- old table that already had rows before these columns existed) before
+-- re-asserting NOT NULL — a bare SET NOT NULL would fail if any row is NULL.
+UPDATE public.food_log_entries SET logged_date = created_at::date WHERE logged_date IS NULL;
+UPDATE public.food_log_entries SET meal_category = 'snack' WHERE meal_category IS NULL;
+UPDATE public.food_log_entries SET name = 'Unknown' WHERE name IS NULL;
+UPDATE public.food_log_entries SET grams = 0 WHERE grams IS NULL;
+UPDATE public.food_log_entries SET calories = 0 WHERE calories IS NULL;
+UPDATE public.food_log_entries SET protein = 0 WHERE protein IS NULL;
+UPDATE public.food_log_entries SET carbs = 0 WHERE carbs IS NULL;
+UPDATE public.food_log_entries SET fat = 0 WHERE fat IS NULL;
+
+ALTER TABLE public.food_log_entries
+  ALTER COLUMN logged_date SET NOT NULL,
+  ALTER COLUMN meal_category SET NOT NULL,
+  ALTER COLUMN name SET NOT NULL,
+  ALTER COLUMN grams SET NOT NULL,
+  ALTER COLUMN calories SET NOT NULL,
+  ALTER COLUMN protein SET NOT NULL,
+  ALTER COLUMN carbs SET NOT NULL,
+  ALTER COLUMN fat SET NOT NULL;
+
+-- Same drift class, cheap and safe to guard even without a confirmed report
+-- (all nullable, so no backfill/NOT NULL step is needed).
+ALTER TABLE public.workout_set_logs
+  ADD COLUMN IF NOT EXISTS reps int,
+  ADD COLUMN IF NOT EXISTS weight_kg numeric,
+  ADD COLUMN IF NOT EXISTS notes text;
+
+ALTER TABLE public.progress_photos
+  ADD COLUMN IF NOT EXISTS note text;

@@ -57,10 +57,29 @@ permission, an SDK bump) need a new Play upload.
 This is the one step that genuinely requires a real machine with the Android
 SDK — it cannot be done from a sandboxed CLI environment.
 
-1. Open the `android/` folder in Android Studio (**File → Open**).
-2. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
+1. From the project root, **build the web app and sync Capacitor before
+   opening Android Studio**:
+   ```bash
+   npm install
+   npm run cap:sync   # build -> ensure dist/ exists -> npx cap sync android
+   ```
+   Always use `npm run cap:sync`, never a bare `npx cap sync android`. Here's
+   why: `npm run build` (vite/Nitro) does **not** produce a `dist/` folder on
+   a normal machine — it builds to `.output/` instead (Cloudflare-module
+   format by default, or node-server format when `NITRO_PRESET=node-server`,
+   as the VPS Dockerfile sets). Only inside Lovable's cloud sandbox does the
+   build get redirected into `dist/`. Since `cap sync` requires `webDir`
+   (`dist/`) to merely *exist* — its contents are irrelevant, because the
+   WebView always navigates to `server.url` at runtime, never local files —
+   `npm run cap:sync` runs `scripts/prepare-cap-webdir.mjs` after the build to
+   create a trivial placeholder `dist/index.html` if one isn't already
+   there. Skipping this (e.g. running `vite build` then `npx cap sync
+   android` directly) fails with "Web asset directory specified by webDir
+   does not exist".
+2. Open the `android/` folder in Android Studio (**File → Open**).
+3. Let it finish Gradle sync (first run downloads the SDK/AGP — takes a few
    minutes).
-3. Create your upload keystore, if you don't have one yet:
+4. Create your upload keystore, if you don't have one yet:
    ```bash
    keytool -genkeypair -v -keystore fitplancoach-upload.jks \
      -alias fitplancoach -keyalg RSA -keysize 2048 -validity 9125
@@ -69,10 +88,10 @@ SDK — it cannot be done from a sandboxed CLI environment.
    way it's gitignored) and back it up. Losing it means you can't sign
    updates the same way again (Play App Signing's key-reset flow can recover
    from this, but it's a hassle — keep a copy somewhere safe).
-4. Copy `android/keystore.properties.example` to `android/keystore.properties`
+5. Copy `android/keystore.properties.example` to `android/keystore.properties`
    and fill in `storeFile` (path to the .jks above), `storePassword`,
    `keyAlias`, `keyPassword`. This file is gitignored — never commit it.
-5. **Build → Generate Signed App Bundle / APK → Android App Bundle**, or from
+6. **Build → Generate Signed App Bundle / APK → Android App Bundle**, or from
    the command line: `./gradlew bundleRelease` (uses the signing config from
    step 4 automatically). The AAB lands in
    `android/app/build/outputs/bundle/release/app-release.aab`.
