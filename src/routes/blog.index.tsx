@@ -9,7 +9,14 @@ import { TopArticleAd, BottomArticleAd } from "@/components/ads";
 import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/blog/")({
-  validateSearch: z.object({ page: z.number().int().min(1).catch(1) }),
+  // `.optional()` (not `.catch(1)`) so a bare `/blog` with no `page` param is
+  // itself a valid parsed search state — `.catch()` treats "absent" as an
+  // error to recover from, which makes TanStack Start 307-redirect every
+  // request to `/blog?page=1` to "canonicalize" the URL. That redirect then
+  // fights the page's own `rel=canonical` (which points at the clean `/blog`
+  // URL), so neither URL ever gets indexed. Defaulting inside loaderDeps
+  // instead avoids the redirect entirely.
+  validateSearch: z.object({ page: z.number().int().min(1).optional() }),
   head: () => ({
     meta: [
       { title: "Blog — FitPlanCoach" },
@@ -32,7 +39,7 @@ export const Route = createFileRoute("/blog/")({
       },
     ],
   }),
-  loaderDeps: ({ search }) => ({ page: search.page }),
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: async ({ deps }) => {
     const [postsResult, categories] = await Promise.all([
       listPublishedPosts({ data: { page: deps.page } }),

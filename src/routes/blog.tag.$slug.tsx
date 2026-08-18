@@ -10,8 +10,11 @@ import { listPostsByTag } from "@/lib/blog.functions";
 const BASE_URL = "https://fitplancoach.com";
 
 export const Route = createFileRoute("/blog/tag/$slug")({
-  validateSearch: z.object({ page: z.number().int().min(1).catch(1) }),
-  loaderDeps: ({ search }) => ({ page: search.page }),
+  // See blog.index.tsx for why this is `.optional()` and not `.catch(1)` —
+  // `.catch()` makes TanStack Start 307-redirect a bare URL to `?page=1`,
+  // which then fights this page's own self-referencing canonical.
+  validateSearch: z.object({ page: z.number().int().min(1).optional() }),
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: async ({ params, deps }) => {
     const result = await listPostsByTag({ data: { slug: params.slug, page: deps.page } });
     if (!result.tag) throw notFound();
