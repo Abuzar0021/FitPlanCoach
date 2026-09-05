@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { MobileShell } from "@/components/MobileShell";
 
 import { Button } from "@/components/ui/button";
-import { ProgressRing, StatBar } from "@/components/ProgressRing";
 import {
   Beef,
   Flame,
@@ -489,63 +488,88 @@ function Dashboard() {
 
         <DailyTip context={{ goal: profile.goal }} className="mb-4" />
 
-        {/* Hero stats card */}
-        <section className="surface-card p-5 mb-4 relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 size-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-          <div className="relative flex items-center gap-5">
-            <ProgressRing
-              value={calProgress}
-              size={120}
-              stroke={9}
-              trackClassName="text-muted"
-              progressClassName="text-primary"
-            >
-              <span className="text-2xl font-display tabular-nums">
+        {/* THE PRINT — today developing in the tray. Emergence, not a score:
+            the image resolves as far as the day has actually been logged and
+            stays latent beyond it. Replaces the progress-ring hero. */}
+        <section className="tray p-5 mb-4 animate-emerge">
+          <div className="flex items-start gap-4">
+            {/* The print itself. --emerged is the day's real completion. */}
+            <div
+              className="print h-[132px] w-[104px] shrink-0"
+              style={{ ["--emerged" as string]: String(Math.min(1, Math.max(0, calProgress / 100))) }}
+              role="img"
+              aria-label={`Today is ${Math.round(calProgress)} percent developed`}
+            />
+
+            <div className="flex-1 min-w-0">
+              {/* Grease-pencil margin notes, the way a printer annotates. */}
+              <p className="grease text-[10px] mb-1.5">
+                {hasLoggedAnything ? "Remaining" : "Target"}
+              </p>
+              <p className="timer struck text-[3.25rem] leading-[0.86] font-display tabular-nums">
                 {hasLoggedAnything
                   ? remainingCals.toLocaleString()
                   : targets.calories.toLocaleString()}
-              </span>
-              <span className="label-overline mt-0.5">
-                {hasLoggedAnything ? "kcal left" : "kcal target"}
-              </span>
-            </ProgressRing>
-            <div className="flex-1 min-w-0 space-y-3.5">
-              <StatBar
-                label="Protein"
-                value={consumedProtein}
-                max={targets.protein}
-                unit="g"
-                className="bg-primary"
-              />
-              <StatBar
-                label="Weight"
-                value={profile.weight_kg ?? 0}
-                max={Math.max(profile.weight_kg ?? 70, 100)}
-                unit=" kg"
-                className="bg-accent"
-              />
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
-                <span className="label-overline">BMR</span>
-                <span className="text-foreground tabular-nums">{targets.bmr}</span>
-                <span className="text-muted-foreground">·</span>
-                <span className="label-overline">Target</span>
-                <span className="text-foreground tabular-nums">
-                  {targets.calories.toLocaleString()}
-                </span>
-              </div>
+              </p>
+              <p className="grease text-[10px] mt-1.5">kcal</p>
+
+              <dl className="mt-4 space-y-1.5 text-[11px] tabular-nums">
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="grease text-[10px]">Protein</dt>
+                  <dd>
+                    <span className={consumedProtein > 0 ? "" : "ghost"}>
+                      {Math.round(consumedProtein)}
+                    </span>
+                    <span className="ghost"> / {targets.protein} g</span>
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="grease text-[10px]">BMR</dt>
+                  <dd className="text-[var(--print-mid)]">{targets.bmr}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <dt className="grease text-[10px]">Weight</dt>
+                  <dd className="text-[var(--print-mid)]">
+                    {profile.weight_kg ? `${profile.weight_kg} kg` : <span className="ghost">—</span>}
+                  </dd>
+                </div>
+              </dl>
             </div>
           </div>
+
+          {/* Test strip: the day in stepped exposures, one band per quarter. */}
+          <div className="mt-5">
+            <div
+              className="test-strip h-2 w-full"
+              style={{
+                clipPath: `inset(0 ${100 - Math.min(100, Math.max(0, calProgress))}% 0 0)`,
+              }}
+              aria-hidden
+            />
+            <div
+              aria-hidden
+              className="h-2 w-full -mt-2"
+              style={{
+                background: "var(--print-latent)",
+                clipPath: `inset(0 0 0 ${Math.min(100, Math.max(0, calProgress))}%)`,
+              }}
+            />
+            <p className="grease text-[10px] mt-2">
+              {Math.round(calProgress)}% developed
+            </p>
+          </div>
+
           {weeklyRefreshReady && (
-            <div className="mt-5 rounded-xl bg-primary/10 border border-primary/30 px-4 py-3 flex items-center justify-between gap-3">
+            <div className="mt-5 border-t border-[var(--border-strong)] pt-4 flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                <p className="struck text-xs font-bold uppercase tracking-widest">
                   Weekly refresh ready
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   It's been {planAgeDays} days — a Pro perk, refresh your plan for the week ahead.
                 </p>
               </div>
-              <Crown className="size-5 text-primary shrink-0" />
+              <Crown className="size-5 shrink-0" style={{ color: "var(--safelight)" }} />
             </div>
           )}
           {canGenerate ? (
@@ -553,10 +577,10 @@ function Dashboard() {
               <Button
                 onClick={generate}
                 disabled={busy}
-                className="w-full mt-5 h-12 font-bold uppercase tracking-wider rounded-xl"
+                className="w-full mt-5 h-12 font-bold uppercase tracking-[0.14em] rounded-sm"
               >
                 {busy
-                  ? "Generating…"
+                  ? "Developing…"
                   : weeklyRefreshReady
                     ? "Refresh My Plan For This Week"
                     : mealPlan
@@ -572,18 +596,18 @@ function Dashboard() {
             </>
           ) : (
             <Link to="/subscription" className="block mt-5">
-              <div className="w-full rounded-2xl bg-gradient-to-r from-primary to-accent p-4 text-primary-foreground shadow-[var(--shadow-lime)]">
+              <div className="w-full border border-[var(--border-strong)] bg-[var(--card-elevated)] p-4 rounded-sm">
                 <div className="flex items-center gap-2 mb-1">
-                  <Crown className="size-4" />
-                  <span className="text-xs font-bold uppercase tracking-widest">
+                  <Crown className="size-4" style={{ color: "var(--safelight)" }} />
+                  <span className="struck text-xs font-bold uppercase tracking-widest">
                     Free generations used up
                   </span>
                 </div>
-                <p className="text-sm font-semibold">
+                <p className="text-sm">
                   You've used all {freeLimit} free AI plans. Go Pro for unlimited generations,
                   weekly refreshes, and full customization.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest bg-background/20 rounded-full px-3 py-1.5">
+                <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest border border-[var(--border-strong)] px-3 py-1.5 rounded-sm">
                   Upgrade to Pro <ChevronRight className="size-3.5" />
                 </div>
               </div>

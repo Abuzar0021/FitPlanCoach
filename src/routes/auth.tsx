@@ -128,7 +128,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] bg-background">
+    <div className="darkroom darkroom-bay min-h-screen flex items-center justify-center px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <div className="w-full max-w-md">
         <div className="text-center mb-7">
           <Logo size="lg" />

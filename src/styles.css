@@ -375,3 +375,257 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DARKROOM SAFELIGHT BAY — the authed app's visual world (seed 49df2192).
+   Scoped to .darkroom so the public marketing site keeps its own palette.
+   The day is a print developing in a tray: latent and pale at dawn, deepening
+   as the user logs, fixed by night. Amber safelight is the only light source.
+   ───────────────────────────────────────────────────────────────────────── */
+.darkroom {
+  --background: oklch(0.104 0.018 52);
+  --foreground: oklch(0.905 0.008 70);
+  --card: oklch(0.138 0.020 50);
+  --card-elevated: oklch(0.172 0.022 48);
+  --card-foreground: oklch(0.905 0.008 70);
+  --popover: oklch(0.155 0.021 50);
+  --popover-foreground: oklch(0.905 0.008 70);
+
+  --primary: oklch(0.722 0.165 62);
+  --primary-foreground: oklch(0.128 0.020 50);
+  --secondary: oklch(0.185 0.020 50);
+  --secondary-foreground: oklch(0.905 0.008 70);
+  --muted: oklch(0.160 0.016 50);
+  /* Secondary text is tinted from the safelight hue, never gray. */
+  --muted-foreground: oklch(0.660 0.028 62);
+  --accent: oklch(0.780 0.014 250);
+  --accent-foreground: oklch(0.128 0.020 50);
+  --success: oklch(0.700 0.120 95);
+  --success-foreground: oklch(0.128 0.020 50);
+  --warning: oklch(0.760 0.150 70);
+  --warning-foreground: oklch(0.128 0.020 50);
+  --destructive: oklch(0.605 0.190 30);
+  --destructive-foreground: oklch(0.970 0.005 60);
+  --border: oklch(0.722 0.165 62 / 15%);
+  --border-strong: oklch(0.722 0.165 62 / 30%);
+  --input: oklch(0.722 0.165 62 / 18%);
+  --ring: oklch(0.722 0.165 62);
+
+  /* World-specific roles. The emergence scale is the product's core signal. */
+  --safelight: oklch(0.722 0.165 62);
+  --tray: oklch(0.128 0.020 48);
+  --enamel: oklch(0.940 0.006 80);
+  --grease: oklch(0.800 0.030 72);
+  --print-latent: oklch(0.255 0.006 60);
+  --print-emerging: oklch(0.480 0.005 250);
+  --print-mid: oklch(0.640 0.005 250);
+  --print-fixed: oklch(0.880 0.006 250);
+
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* The bay itself: a single safelight source above, falling off into the dark.
+   One wash, not a decorative gradient — it is the room's only lamp. */
+.darkroom-bay {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      120% 68% at 50% -12%,
+      oklch(0.722 0.165 62 / 0.18) 0%,
+      oklch(0.722 0.165 62 / 0.07) 38%,
+      transparent 72%
+    ),
+    var(--background);
+}
+/* Dither the wash so a large graded field cannot band on cheap panels. */
+.darkroom-bay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: repeating-conic-gradient(
+    oklch(1 0 0 / 0.014) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 3px 3px;
+}
+
+/* An enamel developer tray: white lip, dark well, wet shadow inside. */
+.tray {
+  position: relative;
+  background: var(--tray);
+  border: 1px solid oklch(0.940 0.006 80 / 0.22);
+  border-radius: 0.375rem;
+  box-shadow:
+    inset 0 1px 0 oklch(0.940 0.006 80 / 0.16),
+    inset 0 14px 28px oklch(0 0 0 / 0.55),
+    0 10px 24px -14px oklch(0 0 0 / 0.9);
+}
+
+/* The print. --emerged (0–1) is how much of today is actually logged; the
+   image resolves to that line and stays latent beyond it. */
+.print {
+  --emerged: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.125rem;
+  background: linear-gradient(
+    to bottom,
+    var(--print-fixed) 0%,
+    var(--print-mid) calc(var(--emerged) * 62%),
+    var(--print-emerging) calc(var(--emerged) * 88%),
+    var(--print-latent) calc(var(--emerged) * 100% + 12%),
+    var(--print-latent) 100%
+  );
+  transition: background 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Silver grain in the wet emulsion. */
+.print::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: repeating-linear-gradient(
+      52deg,
+      oklch(1 0 0 / 0.10) 0 1px,
+      transparent 1px 2px
+    ),
+    repeating-linear-gradient(
+      -37deg,
+      oklch(0 0 0 / 0.12) 0 1px,
+      transparent 1px 3px
+    );
+}
+
+/* Stepped test strip: each band is one exposure step, i.e. one logged item. */
+.test-strip {
+  background: repeating-linear-gradient(
+    to right,
+    var(--print-fixed) 0 12.5%,
+    var(--print-mid) 12.5% 25%,
+    var(--print-emerging) 25% 37.5%,
+    var(--print-latent) 37.5% 50%
+  );
+}
+
+/* Grease-pencil annotation: what the printer writes on the margin. */
+.grease {
+  color: var(--grease);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Printed timer digits — measurement, not decoration. */
+.timer {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--safelight);
+}
+
+/* The safelight's own glow on whatever is currently live. */
+.struck {
+  color: var(--safelight);
+  text-shadow:
+    0 0 1px oklch(0.722 0.165 62 / 0.5),
+    0 0 14px oklch(0.722 0.165 62 / 0.35),
+    0 0 38px oklch(0.722 0.165 62 / 0.16);
+}
+
+/* Absence is designed: an unmet target keeps its place as an unlit ghost
+   rather than collapsing to empty space. (Raise from Seven-Segment.) */
+.ghost {
+  color: var(--print-latent);
+  opacity: 0.85;
+}
+
+/* The one authored moment: the print emerging when the day's status lands. */
+@keyframes emerge {
+  from {
+    opacity: 0;
+    filter: blur(14px) contrast(0.55);
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0) contrast(1);
+    transform: none;
+  }
+}
+.animate-emerge {
+  animation: emerge 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Safelight settling on an item as it becomes current. */
+@keyframes strike {
+  0% { opacity: 0.25; filter: brightness(0.6); }
+  55% { opacity: 1; filter: brightness(1.45); }
+  100% { opacity: 1; filter: brightness(1); }
+}
+.animate-strike { animation: strike 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.darkroom ::selection {
+  background: oklch(0.722 0.165 62 / 0.32);
+  color: var(--enamel);
+}
+.darkroom ::-webkit-scrollbar { width: 6px; height: 6px; }
+.darkroom ::-webkit-scrollbar-thumb {
+  background: oklch(0.722 0.165 62 / 0.28);
+  border-radius: 3px;
+}
+.darkroom { scrollbar-color: oklch(0.722 0.165 62 / 0.28) transparent; }
+.darkroom :focus-visible { outline-color: var(--safelight); }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-emerge,
+  .animate-strike { animation: none; }
+  .print { transition: none; }
+}
+
+/* Every existing app surface re-expressed as darkroom equipment, so all six
+   screens inherit the world instead of each being rewritten. Cards stop being
+   floating rounded containers and become trays: square-ish, enamel-lipped,
+   wet-shadowed. */
+.darkroom .surface-card,
+.darkroom .metric-card {
+  background: var(--tray);
+  border: 1px solid oklch(0.940 0.006 80 / 0.18);
+  border-radius: 0.375rem;
+  box-shadow:
+    inset 0 1px 0 oklch(0.940 0.006 80 / 0.12),
+    inset 0 12px 24px oklch(0 0 0 / 0.5),
+    0 8px 20px -14px oklch(0 0 0 / 0.85);
+}
+.darkroom .glass {
+  background: color-mix(in oklch, var(--tray) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid oklch(0.940 0.006 80 / 0.18);
+  border-radius: 0.375rem;
+}
+/* Margin annotation, not a UI eyebrow. */
+.darkroom .label-overline {
+  color: var(--grease);
+  letter-spacing: 0.16em;
+}
+/* Numbers are measurements here — always tabular. */
+.darkroom .tabular-nums,
+.darkroom .timer,
+.darkroom dd,
+.darkroom [class*="font-display"] {
+  font-variant-numeric: tabular-nums;
+}
+/* The world has one lamp; nothing else glows. Neutralise the lime-era
+   gradients and halos that the marketing palette ships. */
+.darkroom .primary-gradient,
+.darkroom .accent-gradient {
+  background: var(--card-elevated);
+  color: var(--foreground);
+}
+.darkroom .hero-gradient { background: transparent; }
+.darkroom .bg-grid { background-image: none; }

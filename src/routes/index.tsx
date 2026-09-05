@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { isAndroidApp } from "@/lib/billing";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
@@ -211,8 +211,14 @@ const FAQ_TEASER = [
   },
 ];
 
+// Runs before paint on the client; falls back to useEffect during SSR, where
+// layout effects do not apply.
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 function Landing() {
   const navigate = useNavigate();
+  const [leaving, setLeaving] = useState(false);
 
   // The Android shell loads this site at "/" (server.url in capacitor.config.ts),
   // so launching the app dropped users on the marketing page and made them scroll
@@ -220,9 +226,20 @@ function Landing() {
   // to /auth when there is no session, so this one hop covers both a signed-in
   // launch (straight to the dashboard) and a signed-out one (straight to login).
   // Web visitors are untouched — isAndroidApp() is only true inside Capacitor.
-  useEffect(() => {
-    if (isAndroidApp()) navigate({ to: "/dashboard", replace: true });
+  //
+  // A layout effect, not a plain one: a plain effect let the marketing hero
+  // paint for a frame on every cold launch, and that flash of website was a
+  // large part of why the app did not feel like an app.
+  useIsomorphicLayoutEffect(() => {
+    if (!isAndroidApp()) return;
+    setLeaving(true);
+    navigate({ to: "/dashboard", replace: true });
   }, [navigate]);
+
+  // Hand the app an empty bay rather than a marketing page it is leaving.
+  if (leaving) {
+    return <div className="darkroom darkroom-bay min-h-screen" aria-hidden />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

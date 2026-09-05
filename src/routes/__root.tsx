@@ -160,6 +160,28 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <div
+          dangerouslySetInnerHTML={{
+            __html: `<!--
+THESIS: The day is a print developing in a tray, not a scoreboard. It starts
+latent and pale, deepens as you log, and is fixed by night. Refuses the
+ring-and-stat-card arrangement every fitness app ships.
+OWN-WORLD: Amber safelight (#E8801F) washing a near-black bay (#140B05);
+wet silver-print greys (#B9BCC0) as the image; enamel-white (#F2EFE9) only at
+tray edges. Grease-pencil annotation, printed timer digits, stepped test-strip
+bands. No cards, no rings, no neon.
+STORY: The user sees how far today has come before reading a number, learns
+what is still unfixed, and logs the next thing.
+FIRST VIEWPORT: Today's print centred in the developer tray, emerged to its
+true completion and pale beyond it; grease-pencil kcal and cost at its edge;
+test-strip bands down the right as the day's meals; tab bar as the tray lip.
+FORM: Darkroom Safelight Bay, candidate 1 of the bolder hand, seed 49df2192.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the
+finish review, the verdict, DESIGN.md, and every shipping raster carrying its
+provenance.
+-->`,
+          }}
+        />
         {children}
         <Scripts />
       </body>
