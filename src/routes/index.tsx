@@ -117,7 +117,7 @@ const SOLUTIONS = [
   "A plan calculated from your body, goals, and weekly availability",
   "One clear path: today's workout, today's meals, today's targets",
   "Streaks, trends, and gentle reminders that keep you showing up",
-  "Premium coaching-style structure starting free, Pro from $5/mo",
+  "Premium coaching-style structure starting free, Pro from $2/mo",
 ];
 
 const HOW_IT_WORKS = [
@@ -195,7 +195,7 @@ const TESTIMONIALS = [
 const FAQ_TEASER = [
   {
     q: "Is it really free to start?",
-    a: "Yes. Download the app, complete onboarding, and get a personalized plan with basic tracking at no cost. Pro unlocks unlimited regeneration and full tracking from $5/month, and you can upgrade whenever you're ready.",
+    a: "Yes. Download the app, complete onboarding, and get a personalized plan with basic tracking at no cost. Pro unlocks unlimited regeneration and full tracking from $2/month, and you can upgrade whenever you're ready.",
   },
   {
     q: "Will it guarantee weight loss or muscle gain?",
@@ -533,14 +533,14 @@ function Landing() {
                 },
                 {
                   name: "Pro Monthly",
-                  price: "$5",
+                  price: "$2",
                   per: "/mo",
                   note: "Unlimited plans, weekly refresh, and full progress tracking.",
                   featured: true,
                 },
                 {
                   name: "Pro Annual",
-                  price: "$50",
+                  price: "$20",
                   per: "/yr",
                   note: "Everything in Pro with two months free vs. monthly.",
                 },

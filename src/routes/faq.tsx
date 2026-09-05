@@ -25,7 +25,7 @@ export const FAQS = [
   },
   {
     q: "What is included in a subscription?",
-    a: "Free includes one starter plan and basic tracking, yours to keep. Pro unlocks unlimited plan regeneration, a weekly meal and workout refresh, and full progress tracking — for $5/month or $50/year (two months free), purchased inside the Android app.",
+    a: "Free includes one starter plan and basic tracking, yours to keep. Pro unlocks unlimited plan regeneration, a weekly meal and workout refresh, and full progress tracking — for $2/month or $20/year (two months free), purchased inside the Android app.",
   },
   {
     q: "How does billing work?",

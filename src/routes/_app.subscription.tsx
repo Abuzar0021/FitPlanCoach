@@ -208,7 +208,7 @@ function Subscription() {
                 disabled={busy !== null}
                 onClick={() => upgrade("monthly")}
               >
-                {busy === "monthly" ? "Opening Google Play…" : "Go Pro — $5 / month"}
+                {busy === "monthly" ? "Opening Google Play…" : "Go Pro — $2 / month"}
               </Button>
               <Button
                 variant="outline"
@@ -218,7 +218,7 @@ function Subscription() {
               >
                 {busy === "annual"
                   ? "Opening Google Play…"
-                  : "Go Pro Annual — $50 / year (2 months free)"}
+                  : "Go Pro Annual — $20 / year (2 months free)"}
               </Button>
               <p className="text-[11px] text-muted-foreground text-center mt-1">
                 Billed securely through Google Play. Cancel anytime.

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "FitPlanCoach Pricing — Free, Pro Monthly, Pro Annual" },
       {
         property: "og:description",
-        content: "Pro from $5/mo, billed securely through Google Play. Cancel anytime.",
+        content: "Pro from $2/mo, billed securely through Google Play. Cancel anytime.",
       },
       { property: "og:url", content: "https://fitplancoach.com/pricing" },
     ],
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/pricing")({
             {
               "@type": "Offer",
               name: "Pro Monthly",
-              price: "5",
+              price: "2",
               priceCurrency: "USD",
               url: "https://fitplancoach.com/pricing",
               availability: "https://schema.org/InStock",
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/pricing")({
             {
               "@type": "Offer",
               name: "Pro Annual",
-              price: "50",
+              price: "20",
               priceCurrency: "USD",
               url: "https://fitplancoach.com/pricing",
               availability: "https://schema.org/InStock",
@@ -133,7 +133,7 @@ function PricingPage() {
             <h2 className="text-xl font-display uppercase italic">Pro Monthly</h2>
             <p className="text-sm text-muted-foreground mt-1">Flexibility, paid monthly</p>
             <div className="mt-4 flex items-baseline gap-1.5">
-              <span className="text-4xl font-display tabular-nums">$5</span>
+              <span className="text-4xl font-display tabular-nums">$2</span>
               <span className="text-sm text-muted-foreground">/ month</span>
             </div>
             <ul className="mt-6 space-y-2.5 text-sm flex-1">
@@ -154,10 +154,10 @@ function PricingPage() {
             <h2 className="text-xl font-display uppercase italic">Pro Annual</h2>
             <p className="text-sm text-muted-foreground mt-1">Best value · save 17%</p>
             <div className="mt-4 flex items-baseline gap-1.5">
-              <span className="text-4xl font-display tabular-nums">$50</span>
+              <span className="text-4xl font-display tabular-nums">$20</span>
               <span className="text-sm text-muted-foreground">/ year</span>
             </div>
-            <p className="text-[11px] text-primary font-semibold mt-1">≈ $4.17 / month</p>
+            <p className="text-[11px] text-primary font-semibold mt-1">≈ $1.67 / month</p>
             <ul className="mt-6 space-y-2.5 text-sm flex-1">
               {PRO_PERKS.map((p) => (
                 <li key={p} className="flex items-start gap-2">
