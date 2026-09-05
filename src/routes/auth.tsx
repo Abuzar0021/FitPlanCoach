@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { signUpUser, confirmUserByEmail } from "@/lib/auth.functions";
+import { isAndroidApp } from "@/lib/billing";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,11 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  // Inside the Android shell there is no marketing site to go "back" to —
+  // "/" redirects straight back here. Detected after mount so the server
+  // render and the first client render agree (no hydration mismatch).
+  const [inApp, setInApp] = useState(false);
+  useEffect(() => setInApp(isAndroidApp()), []);
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
   const redirectTo = redirect ?? "/dashboard";
@@ -122,7 +128,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+    <div className="min-h-screen flex items-center justify-center px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] bg-background">
       <div className="w-full max-w-md">
         <div className="text-center mb-7">
           <Logo size="lg" />
@@ -257,11 +263,13 @@ function AuthPage() {
             )}
           </form>
         </div>
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:text-foreground">
-            ← Back
-          </Link>
-        </p>
+        {!inApp && (
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            <Link to="/" className="hover:text-foreground">
+              ← Back
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

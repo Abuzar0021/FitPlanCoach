@@ -14,9 +14,11 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const { location } = useRouterState();
   return (
     <div className="min-h-screen bg-background flex flex-col mx-auto max-w-md w-full relative">
-      <main className="flex-1 pb-28 px-5 pt-5">{children}</main>
+      <main className="flex-1 px-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-[calc(7rem+env(safe-area-inset-bottom))]">
+        {children}
+      </main>
       <nav aria-label="Primary" className="fixed bottom-0 inset-x-0 z-50 pointer-events-none">
-        <div className="mx-auto max-w-md px-3 pb-3 pointer-events-auto">
+        <div className="mx-auto max-w-md px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pointer-events-auto">
           <div className="glass rounded-2xl flex items-center justify-between px-2 py-2 shadow-[var(--shadow-card-lg)]">
             {TABS.map(({ to, label, icon: Icon }) => {
               const active = location.pathname === to || location.pathname.startsWith(to + "/");
