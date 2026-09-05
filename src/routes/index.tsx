@@ -213,8 +213,7 @@ const FAQ_TEASER = [
 
 // Runs before paint on the client; falls back to useEffect during SSR, where
 // layout effects do not apply.
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function Landing() {
   const navigate = useNavigate();

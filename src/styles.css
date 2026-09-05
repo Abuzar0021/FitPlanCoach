@@ -416,7 +416,7 @@
   --tray: oklch(0.128 0.020 48);
   --enamel: oklch(0.940 0.006 80);
   --grease: oklch(0.800 0.030 72);
-  --print-latent: oklch(0.255 0.006 60);
+  --print-latent: oklch(0.315 0.008 62);
   --print-emerging: oklch(0.480 0.005 250);
   --print-mid: oklch(0.640 0.005 250);
   --print-fixed: oklch(0.880 0.006 250);
@@ -473,6 +473,14 @@
   position: relative;
   overflow: hidden;
   border-radius: 0.125rem;
+  /* A sheet is an object before it is an image. Without these, a day with
+     nothing logged renders as flat --print-latent on the tray and reads as
+     an empty hole rather than an unexposed print waiting to be developed. */
+  border: 1px solid oklch(0.94 0.006 80 / 0.28);
+  box-shadow:
+    inset 0 1px 0 oklch(0.94 0.006 80 / 0.22),
+    inset 0 -10px 18px oklch(0 0 0 / 0.45),
+    0 2px 10px -4px oklch(0 0 0 / 0.7);
   background: linear-gradient(
     to bottom,
     var(--print-fixed) 0%,

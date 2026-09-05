@@ -24,10 +24,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <nav
-        aria-label="Primary"
-        className="fixed bottom-0 inset-x-0 z-50 mx-auto max-w-md"
-      >
+      <nav aria-label="Primary" className="fixed bottom-0 inset-x-0 z-50 mx-auto max-w-md">
         {/* The tray lip: one enamel hairline catching the safelight. */}
         <div
           aria-hidden
@@ -46,8 +43,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           }}
         >
           {TABS.map(({ to, label, icon: Icon }) => {
-            const active =
-              location.pathname === to || location.pathname.startsWith(to + "/");
+            const active = location.pathname === to || location.pathname.startsWith(to + "/");
             return (
               <Link
                 key={to}
@@ -64,8 +60,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                   style={
                     active
                       ? {
-                          filter:
-                            "drop-shadow(0 0 10px oklch(0.722 0.165 62 / 0.55))",
+                          filter: "drop-shadow(0 0 10px oklch(0.722 0.165 62 / 0.55))",
                         }
                       : undefined
                   }
@@ -78,9 +73,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                   style={{
                     background: "var(--safelight)",
                     opacity: active ? 1 : 0,
-                    boxShadow: active
-                      ? "0 0 8px oklch(0.722 0.165 62 / 0.8)"
-                      : undefined,
+                    boxShadow: active ? "0 0 8px oklch(0.722 0.165 62 / 0.8)" : undefined,
                   }}
                 />
               </Link>

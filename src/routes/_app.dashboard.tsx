@@ -214,8 +214,7 @@ function Dashboard() {
         (weights?.[0] as { recorded_at: string } | undefined)?.recorded_at ?? null,
       );
       const cr = settings?.find((s) => s.key === "calorie_rules")?.value as
-        | CalorieRules
-        | undefined;
+        CalorieRules | undefined;
       const fl = settings?.find((s) => s.key === "free_plan_limit")?.value as number | undefined;
       if (cr) setRules(cr);
       if (typeof fl === "number") setFreeLimit(fl);
@@ -496,7 +495,9 @@ function Dashboard() {
             {/* The print itself. --emerged is the day's real completion. */}
             <div
               className="print h-[132px] w-[104px] shrink-0"
-              style={{ ["--emerged" as string]: String(Math.min(1, Math.max(0, calProgress / 100))) }}
+              style={{
+                ["--emerged" as string]: String(Math.min(1, Math.max(0, calProgress / 100))),
+              }}
               role="img"
               aria-label={`Today is ${Math.round(calProgress)} percent developed`}
             />
@@ -530,7 +531,11 @@ function Dashboard() {
                 <div className="flex items-baseline justify-between gap-2">
                   <dt className="grease text-[10px]">Weight</dt>
                   <dd className="text-[var(--print-mid)]">
-                    {profile.weight_kg ? `${profile.weight_kg} kg` : <span className="ghost">—</span>}
+                    {profile.weight_kg ? (
+                      `${profile.weight_kg} kg`
+                    ) : (
+                      <span className="ghost">—</span>
+                    )}
                   </dd>
                 </div>
               </dl>
@@ -554,9 +559,7 @@ function Dashboard() {
                 clipPath: `inset(0 0 0 ${Math.min(100, Math.max(0, calProgress))}%)`,
               }}
             />
-            <p className="grease text-[10px] mt-2">
-              {Math.round(calProgress)}% developed
-            </p>
+            <p className="grease text-[10px] mt-2">{Math.round(calProgress)}% developed</p>
           </div>
 
           {weeklyRefreshReady && (
