@@ -1,0 +1,98 @@
+# Builds and signs the release AAB in CI.
+#
+# Why this exists: the upload keystore used for versionCode 2 was lost with a
+# laptop reset, and neither the VPS nor the dev machine has a JDK or the
+# Android SDK. Building here means the signing key lives in repository secrets
+# rather than on one machine, so losing a machine can never again cost the
+# ability to ship an update.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   ANDROID_KEYSTORE_BASE64   base64 of your upload .jks
+#   ANDROID_KEYSTORE_PASSWORD store password
+#   ANDROID_KEY_ALIAS         key alias
+#   ANDROID_KEY_PASSWORD      key password
+#
+# Without those the job still runs and produces an UNSIGNED aab, clearly named,
+# because android/app/build.gradle skips signing when keystore.properties is
+# absent. An unsigned bundle cannot be uploaded to Play — the job says so
+# rather than letting you discover it at the upload screen.
+
+name: Android release AAB
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  bundle:
+    name: Build signed AAB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci --include=dev --no-audit --no-fund
+
+      # Builds the web app, creates the placeholder webDir, and copies the
+      # native project into place. No secrets are needed: the WebView loads
+      # server.url at runtime, so the bundled assets are a placeholder and the
+      # VITE_* values never reach the AAB.
+      - name: Sync Capacitor
+        run: npm run cap:sync
+
+      - name: Write signing config
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "No ANDROID_KEYSTORE_BASE64 secret — building unsigned."
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > android/upload.jks
+          # storeFile is resolved relative to android/, per keystore.properties.example.
+          {
+            echo "storeFile=upload.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/keystore.properties
+
+      - name: Build release bundle
+        working-directory: android
+        run: ./gradlew --no-daemon bundleRelease
+
+      - name: Report signing status
+        run: |
+          if [ -f android/keystore.properties ]; then
+            echo "::notice::AAB is signed with the upload key and ready to upload to Play."
+          else
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret set — this AAB is UNSIGNED and Play will reject it."
+          fi
+
+      # Never leave the key on the runner's filesystem after the build.
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/upload.jks android/keystore.properties
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fitplancoach-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 14
