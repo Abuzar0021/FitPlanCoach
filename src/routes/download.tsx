@@ -196,12 +196,6 @@ function DownloadPage() {
                   </Button>
                 </Link>
               </div>
-              {!isPlayStoreLive && (
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Launching soon on Google Play. Start free in your browser today — your progress
-                  carries over to the app.
-                </p>
-              )}
               <div className="mt-8 flex items-center justify-center lg:justify-start gap-5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5">
                   <Check className="size-3 text-primary" /> Free to start
