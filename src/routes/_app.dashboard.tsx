@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { ProgressRing } from "@/components/ProgressRing";
 import { MobileShell } from "@/components/MobileShell";
 
 import { Button } from "@/components/ui/button";
@@ -492,26 +493,45 @@ function Dashboard() {
             stays latent beyond it. Replaces the progress-ring hero. */}
         <section className="tray p-5 mb-4 animate-emerge">
           <div className="flex items-start gap-4">
-            {/* The print itself. --emerged is the day's real completion. */}
-            <div
-              className="print h-[132px] w-[104px] shrink-0"
-              style={{
-                ["--emerged" as string]: String(Math.min(1, Math.max(0, calProgress / 100))),
-              }}
-              role="img"
-              aria-label={
-                hasLoggedAnything
-                  ? `Today is ${Math.round(calProgress)} percent developed`
-                  : "Nothing logged yet today — the print is still unexposed"
-              }
-            >
-              {/* Without this the empty state is an unlabelled grey rectangle
-                  and reads as a broken image rather than a blank sheet. */}
-              <span className="print-caption">
-                {hasLoggedAnything
-                  ? `${Math.round(calProgress)}% developed`
-                  : "Unexposed"}
-              </span>
+            {/* The timer dial. A darkroom timer IS a dial, so the ring the
+                user asked to keep belongs in this world — rendered in
+                safelight amber against a latent track, with the print's
+                emergence carried by the disc inside it.
+                calProgress is a 0..1 FRACTION (see its definition above), not
+                a percentage: dividing it by 100 here is what kept the print
+                permanently blank. */}
+            <div className="shrink-0 relative">
+              <ProgressRing
+                value={calProgress}
+                size={128}
+                stroke={7}
+                trackClassName="text-[var(--print-latent)]"
+                progressClassName="text-[var(--safelight)]"
+              >
+                <span className="timer struck font-display text-[1.9rem] leading-none tabular-nums">
+                  {hasLoggedAnything
+                    ? remainingCals.toLocaleString()
+                    : targets.calories.toLocaleString()}
+                </span>
+                <span className="grease text-[9px] mt-1">
+                  {hasLoggedAnything ? "kcal left" : "kcal target"}
+                </span>
+              </ProgressRing>
+              {/* The emerging print, held inside the dial. */}
+              <div
+                className="print absolute inset-[18px] rounded-full -z-10"
+                style={{
+                  ["--emerged" as string]: String(
+                    Math.min(1, Math.max(0, calProgress)),
+                  ),
+                }}
+                role="img"
+                aria-label={
+                  hasLoggedAnything
+                    ? `Today is ${Math.round(calProgress * 100)} percent developed`
+                    : "Nothing logged yet today — the print is still unexposed"
+                }
+              />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -559,7 +579,7 @@ function Dashboard() {
             <div
               className="test-strip h-2 w-full"
               style={{
-                clipPath: `inset(0 ${100 - Math.min(100, Math.max(0, calProgress))}% 0 0)`,
+                clipPath: `inset(0 ${100 - Math.min(100, Math.max(0, calProgress * 100))}% 0 0)`,
               }}
               aria-hidden
             />
@@ -568,10 +588,14 @@ function Dashboard() {
               className="h-2 w-full -mt-2"
               style={{
                 background: "var(--print-latent)",
-                clipPath: `inset(0 0 0 ${Math.min(100, Math.max(0, calProgress))}%)`,
+                clipPath: `inset(0 0 0 ${Math.min(100, Math.max(0, calProgress * 100))}%)`,
               }}
             />
-            <p className="grease text-[10px] mt-2">{Math.round(calProgress)}% developed</p>
+            <p className="grease text-[10px] mt-2">
+              {hasLoggedAnything
+                ? `${Math.round(calProgress * 100)}% developed`
+                : "Unexposed — nothing logged yet today"}
+            </p>
           </div>
 
           {weeklyRefreshReady && (
