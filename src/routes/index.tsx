@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { isAndroidApp } from "@/lib/billing";
 import { PublicHeader } from "@/components/PublicHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 import { GooglePlayButton } from "@/components/GooglePlayButton";
@@ -210,6 +212,18 @@ const FAQ_TEASER = [
 ];
 
 function Landing() {
+  const navigate = useNavigate();
+
+  // The Android shell loads this site at "/" (server.url in capacitor.config.ts),
+  // so launching the app dropped users on the marketing page and made them scroll
+  // to find sign-in. Send them into the app instead. /_app's beforeLoad redirects
+  // to /auth when there is no session, so this one hop covers both a signed-in
+  // launch (straight to the dashboard) and a signed-out one (straight to login).
+  // Web visitors are untouched — isAndroidApp() is only true inside Capacitor.
+  useEffect(() => {
+    if (isAndroidApp()) navigate({ to: "/dashboard", replace: true });
+  }, [navigate]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
