@@ -209,9 +209,10 @@ turn it on:
 ---
 
 ## Phase 8 — After it's published
-- Set `VITE_PLAY_STORE_URL` in `.env.docker` to your listing
-  (`https://play.google.com/store/apps/details?id=com.fitplancoach.app`), then
-  `git pull` + rebuild — the website's "Get it on Google Play" buttons go live.
+- The website's "Get it on Google Play" buttons are already live: the listing
+  URL is the built-in default in `src/lib/app-config.ts`, derived from
+  `ANDROID_PACKAGE_ID`. `VITE_PLAY_STORE_URL` only overrides it, for a preview
+  build pointed at a different listing.
 - Bump `versionCode`/`versionName` in `android/app/build.gradle` (and mirror
   them in `src/lib/app-config.ts`'s `ANDROID_VERSION_CODE`/`APP_VERSION`,
   which are display-only but should stay in sync) for each future native

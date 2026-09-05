@@ -40,8 +40,8 @@ ufw status
 ## 4. Clone repo + environment
 
 ```bash
-git clone -b claude/fitplancoach-platform-strategy-cpk0kr \
-  https://github.com/Abuzar0021/FitPlanCoach.git
+# Production deploys from main, the repository's default branch.
+git clone https://github.com/Abuzar0021/FitPlanCoach.git
 cd FitPlanCoach
 
 cp .env.docker.example .env.docker
