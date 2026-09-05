@@ -49,9 +49,11 @@ const DIMS: Record<
 
 /**
  * "Get it on Google Play" badge.
- * - Live (VITE_PLAY_STORE_URL set): links to the Play Store listing.
- * - Not live: shows a "Coming soon" badge. By default it links to /download so
- *   it is never a dead end; pass `staticBadge` (used on /download itself) to
+ * - Live (the default, since the app is published — see app-config.ts): links
+ *   to the Play Store listing.
+ * - Not live: shows a "Coming soon" badge. Only reachable if VITE_PLAY_STORE_URL
+ *   is explicitly overridden to an empty value. By default it links to /download
+ *   so it is never a dead end; pass `staticBadge` (used on /download itself) to
  *   render a non-interactive badge instead.
  */
 export function GooglePlayButton({
