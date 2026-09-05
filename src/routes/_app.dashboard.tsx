@@ -499,8 +499,20 @@ function Dashboard() {
                 ["--emerged" as string]: String(Math.min(1, Math.max(0, calProgress / 100))),
               }}
               role="img"
-              aria-label={`Today is ${Math.round(calProgress)} percent developed`}
-            />
+              aria-label={
+                hasLoggedAnything
+                  ? `Today is ${Math.round(calProgress)} percent developed`
+                  : "Nothing logged yet today — the print is still unexposed"
+              }
+            >
+              {/* Without this the empty state is an unlabelled grey rectangle
+                  and reads as a broken image rather than a blank sheet. */}
+              <span className="print-caption">
+                {hasLoggedAnything
+                  ? `${Math.round(calProgress)}% developed`
+                  : "Unexposed"}
+              </span>
+            </div>
 
             <div className="flex-1 min-w-0">
               {/* Grease-pencil margin notes, the way a printer annotates. */}

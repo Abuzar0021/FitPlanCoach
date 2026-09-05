@@ -637,3 +637,78 @@
 }
 .darkroom .hero-gradient { background: transparent; }
 .darkroom .bg-grid { background-image: none; }
+
+/* ── App boot splash ──────────────────────────────────────────────────────
+   Set by the inline head script in __root.tsx the instant Capacitor is
+   detected, i.e. before the server-rendered marketing page can paint. The
+   WebView loads a remote URL, so there is real network time between the
+   native splash disappearing and the app being usable; without this the user
+   watches the website load. Drawn with no markup so it needs nothing from
+   React, and removed the moment a real app screen mounts.
+   ───────────────────────────────────────────────────────────────────────── */
+html.in-app-boot body {
+  visibility: hidden;
+}
+html.in-app-boot::after {
+  content: "FITPLANCOACH";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(
+      120% 68% at 50% 34%,
+      oklch(0.722 0.165 62 / 0.20) 0%,
+      oklch(0.722 0.165 62 / 0.06) 42%,
+      transparent 74%
+    ),
+    oklch(0.104 0.018 52);
+  color: oklch(0.722 0.165 62);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  text-shadow:
+    0 0 14px oklch(0.722 0.165 62 / 0.45),
+    0 0 40px oklch(0.722 0.165 62 / 0.2);
+  animation: boot-pulse 1.9s ease-in-out infinite;
+}
+@keyframes boot-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.in-app-boot::after {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* The print says what it is. A day with nothing logged is a blank sheet, and
+   a blank sheet with no label is indistinguishable from a failed image. */
+.print-caption {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 0.3rem 0.25rem 0.35rem;
+  text-align: center;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: oklch(0.17 0.012 60);
+  background: linear-gradient(
+    to top,
+    oklch(0.94 0.006 80 / 0.78),
+    oklch(0.94 0.006 80 / 0.45) 62%,
+    transparent
+  );
+}

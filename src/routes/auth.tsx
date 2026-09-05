@@ -55,7 +55,10 @@ function AuthPage() {
   // "/" redirects straight back here. Detected after mount so the server
   // render and the first client render agree (no hydration mismatch).
   const [inApp, setInApp] = useState(false);
-  useEffect(() => setInApp(isAndroidApp()), []);
+  useEffect(() => {
+    setInApp(isAndroidApp());
+    document.documentElement.classList.remove("in-app-boot");
+  }, []);
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
   const redirectTo = redirect ?? "/dashboard";

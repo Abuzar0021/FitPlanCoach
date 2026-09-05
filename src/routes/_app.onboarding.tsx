@@ -473,7 +473,10 @@ function Onboarding() {
   const isLast = step === steps.length - 1;
 
   return (
-    <div className="darkroom darkroom-bay min-h-screen flex flex-col mx-auto max-w-md w-full px-5 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]">
+    <div
+      className="darkroom darkroom-bay min-h-screen flex flex-col mx-auto max-w-md w-full px-5 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]"
+      ref={() => document.documentElement.classList.remove("in-app-boot")}
+    >
       <div className="mb-6 flex items-center justify-between">
         <Logo />
         <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">

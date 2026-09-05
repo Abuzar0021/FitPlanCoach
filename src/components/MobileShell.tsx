@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Utensils, Dumbbell, LineChart, User } from "lucide-react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 
 const TABS = [
@@ -18,6 +19,11 @@ const TABS = [
  */
 export function MobileShell({ children }: { children: ReactNode }) {
   const { location } = useRouterState();
+
+  // A real app screen is on the glass — drop the pre-paint boot splash.
+  useEffect(() => {
+    document.documentElement.classList.remove("in-app-boot");
+  }, []);
   return (
     <div className="darkroom darkroom-bay min-h-screen flex flex-col mx-auto max-w-md w-full relative">
       <main className="flex-1 px-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-[calc(7.5rem+env(safe-area-inset-bottom))]">

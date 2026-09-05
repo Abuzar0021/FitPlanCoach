@@ -157,6 +157,22 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/*
+          Runs before the body paints. The Android shell loads the marketing
+          site at "/", and that HTML is server-rendered, so the browser paints
+          the full landing page seconds before React hydrates — no client
+          effect can be early enough to stop it. Capacitor injects its bridge
+          before page scripts, so this flags the document immediately and CSS
+          (loaded in head, render-blocking) covers the page with the app's own
+          splash until the real screen is ready. The timeout is a safety net:
+          if hydration never removes the flag, the page must not stay hidden.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var c=window.Capacitor;if(c&&c.isNativePlatform&&c.isNativePlatform()){var d=document.documentElement;d.classList.add('in-app-boot');setTimeout(function(){d.classList.remove('in-app-boot')},6000)}}catch(e){}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
